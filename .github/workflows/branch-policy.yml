@@ -1,0 +1,32 @@
+name: Branch Policy
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  enforce-branch-naming:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name
+        run: |
+          ref="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
+
+          # Allow main and tags (handled outside)
+          if [ "$ref" = "main" ]; then
+            echo "Branch 'main' allowed."
+            exit 0
+          fi
+
+          pattern='^(feature|fix|chore|refactor|docs|release)/[a-z0-9._-]+$'
+
+          if echo "$ref" | grep -Eq "$pattern"; then
+            echo "Branch '$ref' matches policy."
+            exit 0
+          fi
+
+          echo "::error ::Branch '$ref' does not match naming policy."
+          echo "Use one of: feature/<slug>, fix/<slug>, chore/<slug>, refactor/<slug>, docs/<slug>, release/<version>"
+          exit 1

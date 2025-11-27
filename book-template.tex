@@ -1,0 +1,287 @@
+\documentclass[12pt,a4paper,twoside,openright]{book}
+
+% ===== PACKAGES =====
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tocloft}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{amsmath,amssymb}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{microtype}
+\usepackage{setspace}
+
+% ===== CONFIGURATION GÉOMÉTRIE =====
+\geometry{
+    top=2.5cm,
+    bottom=2.5cm,
+    left=3cm,
+    right=2.5cm,
+    headheight=15pt,
+    headsep=1cm,
+    footskip=1cm
+}
+
+% ===== COULEURS =====
+\definecolor{primarycolor}{RGB}{0,102,204}
+\definecolor{secondarycolor}{RGB}{102,102,102}
+\definecolor{accentcolor}{RGB}{255,102,0}
+
+% ===== CONFIGURATION HYPERREF =====
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primarycolor,
+    filecolor=primarycolor,
+    urlcolor=primarycolor,
+    citecolor=primarycolor,
+    pdftitle={Titre du Livre},
+    pdfauthor={Nom de l'Auteur},
+    pdfsubject={Sujet du livre},
+    pdfkeywords={mots-clés},
+    bookmarksnumbered=true,
+    bookmarksopen=true
+}
+
+% ===== STYLE DES TITRES =====
+\titleformat{\chapter}[display]
+{\normalfont\huge\bfseries\color{primarycolor}}
+{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+
+\titleformat{\section}
+{\normalfont\Large\bfseries\color{primarycolor}}
+{\thesection}{1em}{}
+
+\titleformat{\subsection}
+{\normalfont\large\bfseries\color{secondarycolor}}
+{\thesubsection}{1em}{}
+
+% ===== EN-TÊTES ET PIEDS DE PAGE =====
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\leftmark}
+\fancyhead[RO]{\rightmark}
+\fancyfoot[LE,RO]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Style pour les pages de début de chapitre
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyfoot[C]{\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+}
+
+% ===== CONFIGURATION LISTINGS (CODE) =====
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    rulecolor=\color{gray!30},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{primarycolor}\bfseries,
+    commentstyle=\color{secondarycolor}\itshape,
+    stringstyle=\color{accentcolor},
+    breaklines=true,
+    breakatwhitespace=true,
+    tabsize=4,
+    showspaces=false,
+    showstringspaces=false
+}
+
+% ===== ESPACEMENT =====
+\onehalfspacing
+
+% ===== INFORMATIONS DU LIVRE =====
+\title{{\Huge\textbf{TITRE DU LIVRE}}\\[0.5cm]
+       {\Large Sous-titre si nécessaire}}
+\author{{\Large Nom de l'Auteur}\\[0.3cm]
+        {\normalsize Titre/Affiliation}}
+\date{\today}
+
+% ===== DÉBUT DU DOCUMENT =====
+\begin{document}
+
+% ===== PAGE DE TITRE =====
+\frontmatter
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\Huge\textbf{\textcolor{primarycolor}{TITRE DU LIVRE}}\par}
+    \vspace{1cm}
+    {\Large Sous-titre explicatif\par}
+    \vspace{2cm}
+    
+    {\Large\textbf{Nom de l'Auteur}\par}
+    \vspace{0.5cm}
+    {\normalsize Titre ou Affiliation\par}
+    
+    \vfill
+    
+    % Logo ou image si nécessaire
+    % \includegraphics[width=0.3\textwidth]{logo.png}
+    
+    \vfill
+    
+    {\large Édition \today\par}
+\end{titlepage}
+
+% ===== PAGE DE COPYRIGHT =====
+\newpage
+\thispagestyle{empty}
+\vspace*{\fill}
+\begin{center}
+    \textcopyright\ \the\year\ Nom de l'Auteur\\[0.5cm]
+    Tous droits réservés. Aucune partie de cette publication ne peut être reproduite,\\
+    stockée dans un système de récupération, ou transmise sous quelque forme\\
+    ou par quelque moyen que ce soit, électronique, mécanique, photocopie,\\
+    enregistrement ou autre, sans l'autorisation écrite préalable de l'auteur.\\[1cm]
+    
+    ISBN: 000-0-00-000000-0\\[0.5cm]
+    
+    Première édition: \today\\[1cm]
+    
+    Imprimé en France
+\end{center}
+\vspace*{\fill}
+
+% ===== DÉDICACE (OPTIONNEL) =====
+\newpage
+\thispagestyle{empty}
+\vspace*{\fill}
+\begin{center}
+    \textit{À mes proches,\\
+    pour leur soutien inconditionnel.}
+\end{center}
+\vspace*{\fill}
+
+% ===== PRÉFACE =====
+\chapter*{Préface}
+\addcontentsline{toc}{chapter}{Préface}
+
+Voici la préface de votre livre. Expliquez le contexte, les motivations qui vous ont poussé à écrire ce livre, et ce que le lecteur peut en attendre.
+
+% ===== REMERCIEMENTS =====
+\chapter*{Remerciements}
+\addcontentsline{toc}{chapter}{Remerciements}
+
+Je tiens à remercier toutes les personnes qui ont contribué à la réalisation de ce livre...
+
+% ===== TABLE DES MATIÈRES =====
+\tableofcontents
+
+% ===== LISTE DES FIGURES (OPTIONNEL) =====
+\listoffigures
+
+% ===== LISTE DES TABLEAUX (OPTIONNEL) =====
+\listoftables
+
+% ===== CORPS PRINCIPAL =====
+\mainmatter
+
+\chapter{Introduction}
+
+Voici le premier chapitre de votre livre. Vous pouvez structurer votre contenu avec des sections et sous-sections.
+
+\section{Contexte}
+
+Décrivez le contexte de votre sujet.
+
+\subsection{Problématique}
+
+Présentez la problématique abordée.
+
+\section{Objectifs}
+
+Énumérez les objectifs de votre livre :
+
+\begin{enumerate}
+    \item Premier objectif
+    \item Deuxième objectif
+    \item Troisième objectif
+\end{enumerate}
+
+\chapter{Développement}
+
+\section{Première partie}
+
+Développez votre contenu ici.
+
+\subsection{Exemple de figure}
+
+Vous pouvez insérer des figures comme ceci :
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{image.png}
+    \caption{Légende de votre figure}
+    \label{fig:exemple}
+\end{figure}
+
+\subsection{Exemple de tableau}
+
+Et des tableaux comme ceci :
+
+\begin{table}[H]
+    \centering
+    \caption{Exemple de tableau}
+    \label{tab:exemple}
+    \begin{tabular}{@{}lcc@{}}
+        \toprule
+        Élément & Valeur 1 & Valeur 2 \\
+        \midrule
+        A & 10 & 20 \\
+        B & 15 & 25 \\
+        C & 20 & 30 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Exemple de code}
+
+Pour du code :
+
+\begin{lstlisting}[language=Python, caption=Exemple de code Python]
+def hello_world():
+    print("Hello, World!")
+    return True
+
+if __name__ == "__main__":
+    hello_world()
+\end{lstlisting}
+
+\chapter{Conclusion}
+
+Concluez votre livre en résumant les points clés et en ouvrant sur des perspectives.
+
+% ===== ANNEXES =====
+\appendix
+
+\chapter{Annexe A : Ressources supplémentaires}
+
+Ajoutez ici des ressources supplémentaires, des références, etc.
+
+% ===== BIBLIOGRAPHIE =====
+\backmatter
+
+\begin{thebibliography}{99}
+    \bibitem{ref1} Auteur, A. (2023). \textit{Titre du livre}. Éditeur.
+    \bibitem{ref2} Auteur, B. (2022). Article de journal. \textit{Nom du Journal}, 15(3), 123-145.
+\end{thebibliography}
+
+% ===== INDEX (OPTIONNEL) =====
+% \printindex
+
+\end{document}

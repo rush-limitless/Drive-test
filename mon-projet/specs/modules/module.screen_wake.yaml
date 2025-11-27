@@ -1,0 +1,10 @@
+id: screen_wake
+name: "Wake Screen"
+entry_point: "modules.device_actions:wake_screen"
+timeout_sec: 20
+inputs: {}
+outputs:
+  - key: success
+    type: boolean
+version: "1.0.0"
+

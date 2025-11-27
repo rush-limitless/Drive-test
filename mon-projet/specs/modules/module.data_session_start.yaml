@@ -1,0 +1,11 @@
+id: data_session_start
+name: "Start Data Session"
+entry_point: "modules.device_actions:start_data_session"
+timeout_sec: 60
+inputs:
+  url: {type: string, required: false, default: "http://www.google.com"}
+outputs:
+  - key: url
+    type: string
+version: "1.0.0"
+

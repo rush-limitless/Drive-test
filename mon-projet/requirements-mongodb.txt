@@ -1,0 +1,5 @@
+# MongoDB dependencies for workflow management
+motor==3.3.2
+pymongo==4.6.1
+pydantic==2.5.2
+bson==0.5.10

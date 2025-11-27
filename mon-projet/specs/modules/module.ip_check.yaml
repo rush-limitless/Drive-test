@@ -1,0 +1,13 @@
+id: ip_check
+name: "Check IP and Network Config"
+entry_point: "modules.device_actions:check_ip_info"
+timeout_sec: 20
+inputs:
+  iface:
+    type: string
+    required: false
+outputs:
+  - key: interfaces
+    type: object
+version: "1.0.0"
+

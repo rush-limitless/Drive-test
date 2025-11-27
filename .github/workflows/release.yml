@@ -1,0 +1,136 @@
+name: Build and Release MOBIQ
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on version tags like v2.2.0, v2.3.0, etc.
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    name: Build Windows Installer
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: mon-projet/src/frontend/package-lock.json
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      
+      - name: Install frontend dependencies
+        working-directory: mon-projet/src/frontend
+        run: npm ci
+      
+      - name: Build frontend
+        working-directory: mon-projet/src/frontend
+        run: npm run build
+      
+      - name: Install backend dependencies
+        working-directory: mon-projet
+        run: |
+          python -m venv .venv-build
+          .\.venv-build\Scripts\activate
+          pip install -r src/backend/requirements.txt
+          pip install pyinstaller
+      
+      - name: Build backend with PyInstaller
+        working-directory: mon-projet
+        run: |
+          .\.venv-build\Scripts\activate
+          pyinstaller build/simple-server.spec
+      
+      - name: Setup Electron resources
+        working-directory: mon-projet
+        run: |
+          Remove-Item -Recurse -Force "src\electron\resources\backend" -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory "src\electron\resources\backend\server" -Force
+          Copy-Item -Recurse -Force "dist\TelcoADBServer\*" "src\electron\resources\backend\server\"
+          Remove-Item -Recurse -Force "src\electron\resources\frontend" -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory "src\electron\resources\frontend\build" -Force
+          Copy-Item -Recurse -Force "src\frontend\build\*" "src\electron\resources\frontend\build\"
+      
+      - name: Install Electron dependencies
+        working-directory: mon-projet/src/electron
+        run: npm install
+      
+      - name: Build Electron app
+        working-directory: mon-projet/src/electron
+        run: |
+          npm run build
+          npx electron-builder --win nsis
+      
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: mon-projet/build/electron/*.exe
+          retention-days: 7
+
+  create-release:
+    name: Create GitHub Release
+    needs: [build-windows]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      
+      - name: Extract version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: MOBIQ v${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## MOBIQ Telco Automation v${{ steps.get_version.outputs.VERSION }}
+            
+            ### 📦 Downloads
+            - **Windows**: MOBIQ-Setup-${{ steps.get_version.outputs.VERSION }}.exe
+            
+            ### 🚀 Installation
+            1. Download the Windows installer
+            2. Run the .exe file as Administrator
+            3. Follow the installation wizard
+            4. Launch MOBIQ from desktop shortcut
+            
+            ### ✨ Features
+            - 29 Telco test modules (Call, SMS, Data, Network)
+            - Multi-device ADB automation (5-20 devices)
+            - Real-time dashboard and monitoring
+            - Workflow editor with drag-and-drop
+            - PDF report generation
+            - Electron desktop application
+            
+            ### 🔧 System Requirements
+            - **OS**: Windows 10/11 64-bit
+            - **RAM**: 4GB minimum, 8GB recommended
+            - **USB**: Android devices with USB debugging
+            - **ADB**: Included in installer
+            
+            ### 📋 Testing
+            See [QA_TEST_PLAN_v${{ steps.get_version.outputs.VERSION }}.md] for testing procedures.
+          files: |
+            artifacts/windows-installer/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

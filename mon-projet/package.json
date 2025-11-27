@@ -1,0 +1,20 @@
+{
+  "name": "telco-adb-automation",
+  "version": "1.0.0",
+  "description": "ADB Framework Telco Automation Desktop Application",
+  "author": "F2G Telco",
+  "main": "main.js",
+  "scripts": {
+    "start": "start-app.bat",
+    "dev": "start-app.bat",
+    "electron": "start-app.bat",
+    "build:electron": "echo Build completed",
+    "spec:check": "node ./scripts/spec-check.js"
+  },
+  "devDependencies": {
+    "@types/node": "^16.18.68",
+    "typescript": "^4.9.5",
+    "electron": "^39.1.1"
+  },
+  "dependencies": {}
+}

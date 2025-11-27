@@ -1,0 +1,36 @@
+id: network_switching
+name: "Test Commutation Réseau"
+description: "Test de commutation entre tous les types de réseau"
+steps:
+  - module: check_signal_strength
+  - module: force_phone_to_lte
+  - module: check_signal_strength
+  - module: network_perf
+    with:
+      server_ip: "8.8.8.8"
+  - module: initiate_call
+    with:
+      number: "*123#"
+  - module: reject_incoming_call
+  - module: force_phone_to_3g
+  - module: check_signal_strength
+  - module: network_perf
+    with:
+      server_ip: "1.1.1.1"
+  - module: send_sms
+    with:
+      number: "+237695029469"
+      message: "Test SMS sur 3G"
+  - module: force_phone_to_2g
+  - module: check_signal_strength
+  - module: network_perf
+    with:
+      server_ip: "208.67.222.222"
+  - module: send_sms
+    with:
+      number: "+237695029469"
+      message: "Test SMS sur 2G"
+  - module: force_phone_to_lte
+policy:
+  stop_on_failure: false
+version: "1.0.0"

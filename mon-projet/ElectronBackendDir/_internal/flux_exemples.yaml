@@ -1,0 +1,76 @@
+# Exemples de flux utilisant tous les nouveaux modules
+
+# Flux de test complet réseau
+network_complete_test:
+  id: network_complete_test
+  name: "Test Réseau Complet"
+  steps:
+    - module: check_signal_strength
+    - module: check_ip
+    - module: force_phone_to_lte
+    - module: network_perf
+      with:
+        server_ip: "8.8.8.8"
+    - module: force_phone_to_3g
+    - module: network_perf
+      with:
+        server_ip: "8.8.8.8"
+  policy:
+    stop_on_failure: false
+
+# Flux de test mode avion
+airplane_mode_test:
+  id: airplane_mode_test
+  name: "Test Mode Avion"
+  steps:
+    - module: enable_airplane_mode
+    - module: disable_airplane_mode
+  policy:
+    stop_on_failure: false
+
+# Flux de test Wi-Fi et données
+connectivity_test:
+  id: connectivity_test
+  name: "Test Connectivité Wi-Fi et Données"
+  steps:
+    - module: disable_wifi
+    - module: enable_mobile_data
+    - module: start_data_session
+      with:
+        url: "http://www.google.com"
+    - module: stop_data_session
+    - module: enable_wifi
+    - module: disable_mobile_data
+  policy:
+    stop_on_failure: false
+
+# Flux de test communication
+communication_test:
+  id: communication_test
+  name: "Test Communication (Appel + SMS)"
+  steps:
+    - module: initiate_call
+      with:
+        number: "*123#"
+    - module: reject_incoming_call
+    - module: send_sms
+      with:
+        number: "+237695029469"
+        message: "Test SMS automatique"
+    - module: delete_sms
+  policy:
+    stop_on_failure: false
+
+# Flux de gestion d'applications
+app_management_test:
+  id: app_management_test
+  name: "Test Gestion Applications"
+  steps:
+    - module: capture_screenshot
+    - module: force_close_app
+      with:
+        package_name: "com.android.chrome"
+    - module: wake_screen
+    - module: sleep_screen
+  policy:
+    stop_on_failure: false

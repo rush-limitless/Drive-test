@@ -1,0 +1,12 @@
+id: app_uninstall
+name: "Uninstall App"
+entry_point: "modules.device_actions:uninstall_app"
+timeout_sec: 120
+inputs:
+  package: {type: string, required: true}
+  keep_data: {type: boolean, default: false}
+outputs:
+  - key: package
+    type: string
+version: "1.0.0"
+

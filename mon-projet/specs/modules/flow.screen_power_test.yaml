@@ -1,0 +1,27 @@
+id: screen_power_test
+name: "Test Écran et Alimentation"
+description: "Test des fonctionnalités d'écran et de gestion d'alimentation"
+steps:
+  - module: wake_screen
+  - module: capture_screenshot
+  - module: sleep_screen
+  - module: wake_screen
+  - module: start_data_session
+    with:
+      url: "http://www.google.com"
+  - module: capture_screenshot
+  - module: sleep_screen
+  - module: wake_screen
+  - module: capture_screenshot
+  - module: stop_data_session
+  - module: sleep_screen
+  - module: wake_screen
+  - module: initiate_call
+    with:
+      number: "*123#"
+  - module: capture_screenshot
+  - module: reject_incoming_call
+  - module: sleep_screen
+policy:
+  stop_on_failure: false
+version: "1.0.0"

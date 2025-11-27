@@ -1,0 +1,11 @@
+id: data_session_stop
+name: "Stop Data Session"
+entry_point: "modules.device_actions:stop_data_session"
+timeout_sec: 60
+inputs:
+  package: {type: string, required: false, default: "com.android.chrome"}
+outputs:
+  - key: package
+    type: string
+version: "1.0.0"
+

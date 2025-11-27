@@ -1,0 +1,26 @@
+id: device_management
+name: "Test Gestion Appareil Complet"
+description: "Test de toutes les fonctionnalités de gestion d'appareil"
+steps:
+  - module: capture_screenshot
+  - module: wake_screen
+  - module: capture_screenshot
+  - module: sleep_screen
+  - module: wake_screen
+  - module: force_close_app
+    with:
+      package_name: "com.android.chrome"
+  - module: force_close_app
+    with:
+      package_name: "com.android.messaging"
+  - module: start_data_session
+    with:
+      url: "http://www.google.com"
+  - module: capture_screenshot
+  - module: stop_data_session
+    with:
+      package: "com.android.chrome"
+  - module: capture_screenshot
+policy:
+  stop_on_failure: false
+version: "1.0.0"

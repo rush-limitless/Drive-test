@@ -1,0 +1,10 @@
+id: call_reject
+name: "Reject Incoming Call"
+entry_point: "modules.device_actions:reject_incoming_call"
+timeout_sec: 30
+inputs: {}
+outputs:
+  - key: success
+    type: boolean
+version: "1.0.0"
+

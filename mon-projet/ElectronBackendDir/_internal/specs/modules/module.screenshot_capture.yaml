@@ -1,0 +1,12 @@
+id: screenshot_capture
+name: "Capture Screenshot"
+entry_point: "modules.device_actions:capture_screenshot"
+timeout_sec: 45
+inputs: {}
+artifacts:
+  - type: "png"
+outputs:
+  - key: artifact_png
+    type: string
+version: "1.0.0"
+

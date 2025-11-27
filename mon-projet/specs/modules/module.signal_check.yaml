@@ -1,0 +1,14 @@
+id: signal_check
+name: "Check Signal Strength"
+entry_point: "modules.device_actions:check_signal_strength"
+timeout_sec: 20
+inputs: {}
+outputs:
+  - key: rssi
+    type: number
+  - key: rsrp
+    type: number
+  - key: rsrq
+    type: number
+version: "1.0.0"
+

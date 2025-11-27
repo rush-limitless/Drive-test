@@ -1,0 +1,85 @@
+id: complete_telco_suite
+name: "Suite Télécoms Complète (Tous Modules)"
+description: "Test exhaustif utilisant tous les 29 modules disponibles"
+steps:
+  # Tests de base
+  - module: wake_screen
+  - module: capture_screenshot
+  - module: check_signal_strength
+  - module: check_ip
+  
+  # Tests mode avion
+  - module: enable_airplane_mode
+  - module: check_signal_strength
+  - module: disable_airplane_mode
+  - module: check_signal_strength
+  
+  # Tests réseau
+  - module: force_phone_to_lte
+  - module: network_perf
+    with:
+      server_ip: "8.8.8.8"
+  - module: force_phone_to_3g
+  - module: network_perf
+    with:
+      server_ip: "1.1.1.1"
+  - module: force_phone_to_2g
+  - module: network_perf
+    with:
+      server_ip: "208.67.222.222"
+  - module: force_phone_to_lte
+  
+  # Tests Wi-Fi
+  - module: enable_wifi
+  - module: disable_mobile_data
+  - module: check_ip
+  - module: disable_wifi
+  - module: enable_mobile_data
+  
+  # Tests communication
+  - module: initiate_call
+    with:
+      number: "*123#"
+  - module: reject_incoming_call
+  - module: send_sms
+    with:
+      number: "+237695029469"
+      message: "Test SMS suite complète"
+  - module: call_test
+    with:
+      number: "*123#"
+      calls: 2
+  - module: sms_test
+    with:
+      recipient: "+237695029469"
+      count: 2
+  - module: delete_sms
+  
+  # Tests sessions données
+  - module: start_data_session
+    with:
+      url: "http://www.google.com"
+  - module: capture_screenshot
+  - module: stop_data_session
+  
+  # Tests gestion apps
+  - module: force_close_app
+    with:
+      package_name: "com.android.chrome"
+  - module: force_close_app
+    with:
+      package_name: "com.android.messaging"
+  
+  # Tests écran
+  - module: sleep_screen
+  - module: wake_screen
+  - module: capture_screenshot
+  
+  # Tests réseau final
+  - module: network_check
+  - module: check_ip
+  - module: check_signal_strength
+  
+policy:
+  stop_on_failure: false
+version: "1.0.0"

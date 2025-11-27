@@ -1,0 +1,10 @@
+id: screen_sleep
+name: "Sleep Screen"
+entry_point: "modules.device_actions:sleep_screen"
+timeout_sec: 20
+inputs: {}
+outputs:
+  - key: success
+    type: boolean
+version: "1.0.0"
+

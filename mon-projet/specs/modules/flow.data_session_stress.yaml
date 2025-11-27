@@ -1,0 +1,31 @@
+id: data_session_stress
+name: "Test de Stress Sessions de Données"
+description: "Test intensif des sessions de données avec différents sites"
+steps:
+  - module: enable_mobile_data
+  - module: start_data_session
+    with:
+      url: "http://www.google.com"
+  - module: capture_screenshot
+  - module: stop_data_session
+  - module: start_data_session
+    with:
+      url: "https://www.youtube.com"
+  - module: capture_screenshot
+  - module: stop_data_session
+  - module: start_data_session
+    with:
+      url: "https://www.facebook.com"
+  - module: capture_screenshot
+  - module: stop_data_session
+  - module: start_data_session
+    with:
+      url: "https://www.speedtest.net"
+  - module: capture_screenshot
+  - module: stop_data_session
+  - module: network_perf
+    with:
+      server_ip: "8.8.8.8"
+policy:
+  stop_on_failure: false
+version: "1.0.0"

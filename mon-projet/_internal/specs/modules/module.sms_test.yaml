@@ -1,0 +1,18 @@
+id: sms_test
+name: "SMS Test (Send & Validate)"
+entry_point: "modules.sms_test:send_and_validate_sms"
+timeout_sec: 180
+inputs:
+  recipient: {type: string, required: true}
+  count: {type: integer, default: 3}
+outputs:
+  - key: "sent_count"
+    type: integer
+  - key: "delivered_count"
+    type: integer
+  - key: "latency_ms_avg"
+    type: number
+  - key: "success_rate"
+    type: number
+version: "1.0.0"
+

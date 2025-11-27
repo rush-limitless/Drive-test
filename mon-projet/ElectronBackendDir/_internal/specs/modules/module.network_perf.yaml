@@ -1,0 +1,18 @@
+id: network_perf
+name: "Network Performance (iPerf3)"
+entry_point: "modules.network_perf_test:run_perf_suite"
+timeout_sec: 180
+inputs:
+  server_ip: {type: string, required: true}
+  port: {type: integer, default: 5201}
+  duration_s: {type: integer, default: 10}
+  repeats: {type: integer, default: 3}
+outputs:
+  - key: "throughput_mbps_avg"
+    type: number
+  - key: "rtt_ms_avg"
+    type: number
+artifacts:
+  - type: "csv"
+version: "1.0.0"
+

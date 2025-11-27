@@ -1,0 +1,12 @@
+id: force_2g_only
+name: "Force Phone to 2G"
+entry_point: "modules.device_actions:force_2g_only"
+timeout_sec: 45
+inputs: {}
+outputs:
+  - key: success
+    type: boolean
+  - key: note
+    type: string
+version: "1.0.0"
+

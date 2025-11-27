@@ -1,0 +1,10 @@
+id: mobile_data_disable
+name: "Disable Mobile Data"
+entry_point: "modules.device_actions:disable_mobile_data"
+timeout_sec: 20
+inputs: {}
+outputs:
+  - key: success
+    type: boolean
+version: "1.0.0"
+

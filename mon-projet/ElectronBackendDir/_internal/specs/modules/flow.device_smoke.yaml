@@ -1,0 +1,17 @@
+id: device_smoke
+name: "Device Smoke (Wi-Fi + Checks + Screenshot)"
+targets:
+  device_selector: "any"
+steps:
+  - module: screen_wake
+  - module: wifi_enable
+  - module: signal_check
+  - module: ip_check
+  - module: screenshot_capture
+postprocessing:
+  report:
+    formats: ["CSV", "HTML"]
+policy:
+  stop_on_failure: false
+version: "1.0.0"
+

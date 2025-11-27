@@ -1,0 +1,14 @@
+id: sms_delete
+name: "Delete SMS"
+entry_point: "modules.device_actions:delete_sms"
+timeout_sec: 60
+inputs:
+  box:
+    type: string
+    required: false
+    description: "all|inbox|sent|draft"
+outputs:
+  - key: uri
+    type: string
+version: "1.0.0"
+

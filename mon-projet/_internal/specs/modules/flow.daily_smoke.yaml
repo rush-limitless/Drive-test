@@ -1,0 +1,24 @@
+id: daily_smoke
+name: "Daily Smoke (Voice+SMS+Data)"
+description: "Test complet de fonctionnalités télécoms : réseau, appels, SMS et données"
+targets:
+  device_selector: "any"
+steps:
+  - module: network_check
+  - module: call_test
+    with:
+      number: "*123#"
+      calls: 2
+  - module: sms_test
+    with:
+      recipient: "+237695029469"
+      count: 3
+  - module: network_perf
+    with:
+      server_ip: "192.168.0.100"
+postprocessing:
+  report:
+    formats: ["CSV", "HTML"]
+policy:
+  stop_on_failure: false
+version: "1.0.0"

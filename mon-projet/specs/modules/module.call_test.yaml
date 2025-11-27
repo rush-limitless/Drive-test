@@ -1,0 +1,30 @@
+id: call_test
+name: "Call Test (CST & Drop)"
+entry_point: "modules.call_test:perform_call_tests"
+timeout_sec: 300
+inputs:
+  number: {type: string, required: true, example: "*123#"}
+  calls: {type: integer, default: 2, min: 1, max: 10}
+  interval_sec: {type: integer, default: 10}
+preconditions:
+  - "device.registered == true"
+artifacts:
+  - type: "screenshot"
+  - type: "csv"
+outputs:
+  - key: "cst_seconds_avg"
+    type: number
+  - key: "dropped_count"
+    type: integer
+  - key: "success_rate"
+    type: number
+observability:
+  kpi:
+    - name: "CST (s)"
+      source: "step_result.metrics.cst_seconds_avg"
+    - name: "Call Drop Count"
+      source: "step_result.metrics.dropped_count"
+rollback:
+  - "adb shell input keyevent KEYCODE_ENDCALL"
+version: "1.0.0"
+

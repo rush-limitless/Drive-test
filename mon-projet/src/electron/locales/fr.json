@@ -1,0 +1,23 @@
+{
+  "app": {
+    "title": "Framework ADB d'Automatisation Télécoms",
+    "description": "Framework complet de tests télécommunications"
+  },
+  "menu": {
+    "file": "Fichier",
+    "edit": "Édition",
+    "view": "Affichage", 
+    "help": "Aide"
+  },
+  "buttons": {
+    "start": "Démarrer",
+    "stop": "Arrêter",
+    "connect": "Connecter",
+    "disconnect": "Déconnecter"
+  },
+  "messages": {
+    "connecting": "Connexion à l'appareil...",
+    "connected": "Appareil connecté avec succès",
+    "error": "Une erreur s'est produite"
+  }
+}

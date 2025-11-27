@@ -1,0 +1,23 @@
+id: airplane_mode_complete
+name: "Test Mode Avion Complet"
+description: "Test complet du mode avion avec vérifications réseau"
+steps:
+  - module: check_signal_strength
+  - module: enable_airplane_mode
+  - module: check_signal_strength
+  - module: initiate_call
+    with:
+      number: "*123#"
+  - module: send_sms
+    with:
+      number: "+237695029469"
+      message: "Test SMS en mode avion"
+  - module: start_data_session
+    with:
+      url: "http://www.google.com"
+  - module: disable_airplane_mode
+  - module: check_signal_strength
+  - module: network_check
+policy:
+  stop_on_failure: false
+version: "1.0.0"

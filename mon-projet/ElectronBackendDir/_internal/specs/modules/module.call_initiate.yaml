@@ -1,0 +1,11 @@
+id: call_initiate
+name: "Initiate a Call"
+entry_point: "modules.device_actions:initiate_call"
+timeout_sec: 60
+inputs:
+  number: {type: string, required: true}
+outputs:
+  - key: dialed
+    type: string
+version: "1.0.0"
+

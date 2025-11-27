@@ -1,0 +1,10 @@
+id: wifi_enable
+name: "Enable Wi-Fi"
+entry_point: "modules.device_actions:enable_wifi"
+timeout_sec: 20
+inputs: {}
+outputs:
+  - key: success
+    type: boolean
+version: "1.0.0"
+

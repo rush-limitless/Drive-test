@@ -1,0 +1,10 @@
+id: airplane_disable
+name: "Disable Airplane Mode"
+entry_point: "modules.device_actions:disable_airplane_mode"
+timeout_sec: 30
+inputs: {}
+outputs:
+  - key: success
+    type: boolean
+version: "1.0.0"
+

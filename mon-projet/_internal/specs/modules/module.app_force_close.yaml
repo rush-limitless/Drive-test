@@ -1,0 +1,11 @@
+id: app_force_close
+name: "Force Close App"
+entry_point: "modules.device_actions:force_close_app"
+timeout_sec: 60
+inputs:
+  package: {type: string, required: true}
+outputs:
+  - key: package
+    type: string
+version: "1.0.0"
+

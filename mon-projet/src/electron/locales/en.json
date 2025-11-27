@@ -1,0 +1,23 @@
+{
+  "app": {
+    "title": "ADB Framework Telco Automation",
+    "description": "Comprehensive telecommunications testing framework"
+  },
+  "menu": {
+    "file": "File",
+    "edit": "Edit", 
+    "view": "View",
+    "help": "Help"
+  },
+  "buttons": {
+    "start": "Start",
+    "stop": "Stop",
+    "connect": "Connect",
+    "disconnect": "Disconnect"
+  },
+  "messages": {
+    "connecting": "Connecting to device...",
+    "connected": "Device connected successfully",
+    "error": "An error occurred"
+  }
+}

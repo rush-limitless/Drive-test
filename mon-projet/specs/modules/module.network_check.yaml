@@ -1,0 +1,11 @@
+id: network_check
+name: "Network Registration & Radio Params"
+entry_point: "modules.network_check:validate_registration_for_all_devices"
+timeout_sec: 60
+inputs: {}
+outputs:
+  - key: "registered_devices"
+    type: array
+    description: "Liste devices avec plmn/cell/freq/rsrp"
+version: "1.0.0"
+

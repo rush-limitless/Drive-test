@@ -1,0 +1,10 @@
+id: device_power_off
+name: "Power Off Device"
+entry_point: "modules.device_actions:power_off_device"
+timeout_sec: 60
+inputs: {}
+outputs:
+  - key: success
+    type: boolean
+version: "1.0.0"
+

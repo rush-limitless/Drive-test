@@ -1,0 +1,12 @@
+id: app_install
+name: "Install App (APK)"
+entry_point: "modules.device_actions:install_app"
+timeout_sec: 180
+inputs:
+  apk_path: {type: string, required: true}
+  replace: {type: boolean, default: true}
+outputs:
+  - key: apk_path
+    type: string
+version: "1.0.0"
+

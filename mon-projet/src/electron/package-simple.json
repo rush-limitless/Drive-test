@@ -1,0 +1,62 @@
+{
+  "name": "adb-framework-telco-automation",
+  "version": "1.0.0",
+  "description": "Electron main process for ADB Framework Telco Automation",
+  "author": "F2G Telco",
+  "main": "dist/main.js",
+  "scripts": {
+    "electron": "electron .",
+    "electron:dev": "electron . --dev",
+    "build": "tsc",
+    "build:watch": "tsc --watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^16.18.68",
+    "typescript": "^4.9.5",
+    "electron": "^28.1.0",
+    "electron-builder": "^24.8.1"
+  },
+  "build": {
+    "appId": "com.telco.adb-automation",
+    "productName": "ADB Framework Telco Automation",
+    "copyright": "Copyright © 2025 F2G Telco",
+    "directories": {
+      "output": "../../build/electron",
+      "buildResources": "build-resources"
+    },
+    "compression": "normal",
+    "files": [
+      "dist/**/*",
+      "resources/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/backend",
+        "to": "backend"
+      },
+      {
+        "from": "resources/frontend",
+        "to": "frontend"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico",
+      "publisherName": "F2G Telco"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Telco ADB Automation",
+      "runAfterFinish": true,
+      "artifactName": "${productName}-Setup-${version}.${ext}",
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico",
+      "license": "../../LICENSE.txt"
+    }
+  }
+}

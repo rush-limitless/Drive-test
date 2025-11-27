@@ -1,0 +1,10 @@
+id: mobile_data_enable
+name: "Enable Mobile Data"
+entry_point: "modules.device_actions:enable_mobile_data"
+timeout_sec: 20
+inputs: {}
+outputs:
+  - key: success
+    type: boolean
+version: "1.0.0"
+

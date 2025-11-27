@@ -1,0 +1,36 @@
+id: communication_full
+name: "Test Communication Complet"
+description: "Test exhaustif des fonctionnalités d'appel et SMS"
+steps:
+  - module: initiate_call
+    with:
+      number: "*123#"
+  - module: reject_incoming_call
+  - module: initiate_call
+    with:
+      number: "+237695029469"
+  - module: reject_incoming_call
+  - module: send_sms
+    with:
+      number: "+237695029469"
+      message: "Test SMS 1 - Automatique"
+  - module: send_sms
+    with:
+      number: "+237695029469"
+      message: "Test SMS 2 - Validation"
+  - module: send_sms
+    with:
+      number: "+237695029469"
+      message: "Test SMS 3 - Performance"
+  - module: delete_sms
+  - module: call_test
+    with:
+      number: "*123#"
+      calls: 3
+  - module: sms_test
+    with:
+      recipient: "+237695029469"
+      count: 2
+policy:
+  stop_on_failure: false
+version: "1.0.0"

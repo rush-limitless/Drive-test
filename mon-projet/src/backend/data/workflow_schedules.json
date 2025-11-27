@@ -1,0 +1,309 @@
+[
+  {
+    "id": "b794010b460d4ada8e649f2d1e606a90",
+    "workflow_id": "wf_003",
+    "workflow_name": "cd",
+    "device_id": "R5CT2278CAH",
+    "run_at": "2025-11-13T16:05:15.627000+00:00",
+    "run_at_ts": 1763049915.627,
+    "status": "failed",
+    "created_at": "2025-11-13T15:55:15.635844",
+    "updated_at": null,
+    "started_at": "2025-11-13T17:35:25.360741",
+    "completed_at": "2025-11-13T17:35:25.363458",
+    "result": null,
+    "error": "Workflow definition not found."
+  },
+  {
+    "id": "4e2229f6db0c472faeda8b222f9ed2a7",
+    "workflow_id": "wf_004",
+    "workflow_name": "TEST",
+    "device_id": "R5CT2278CAH",
+    "run_at": "2025-11-13T16:11:41.757000+00:00",
+    "run_at_ts": 1763050301.757,
+    "status": "failed",
+    "created_at": "2025-11-13T16:01:41.764697",
+    "updated_at": null,
+    "started_at": "2025-11-13T17:35:25.360748",
+    "completed_at": "2025-11-13T17:35:25.377239",
+    "result": null,
+    "error": "Workflow definition not found."
+  },
+  {
+    "id": "1b51b38b50b0486780dcb5d94e0618d0",
+    "workflow_id": "wf_004",
+    "workflow_name": "111",
+    "device_id": "R5CT2278CAH",
+    "run_at": "2025-11-13T19:54:22.268000+00:00",
+    "run_at_ts": 1763063662.268,
+    "status": "failed",
+    "created_at": "2025-11-13T19:52:22.278796",
+    "updated_at": null,
+    "started_at": "2025-11-14T15:10:44.573643",
+    "completed_at": "2025-11-14T15:11:55.842376",
+    "result": {
+      "success": false,
+      "execution_id": "exec_wf_004_20251114_161155"
+    },
+    "error": [
+      {
+        "module": "call_test",
+        "number": "*123#",
+        "call_count": 1,
+        "talk_duration_requested": 10,
+        "max_ring_time": 20,
+        "successful_calls": 0,
+        "results": [
+          {
+            "call_number": 1,
+            "number": "*123#",
+            "attempts": 5,
+            "ring_duration": 21.350637197494507,
+            "talk_time_elapsed": 0.0,
+            "answered": false,
+            "status": "ringing",
+            "error": null,
+            "hangup_sent": false,
+            "total_duration": 34.94478416442871
+          }
+        ],
+        "success": false,
+        "total_duration": 34.94478416442871,
+        "step": 1
+      },
+      {
+        "module": "waiting_time",
+        "success": false,
+        "error": "Unknown module: waiting_time",
+        "step": 2
+      },
+      {
+        "module": "call_test",
+        "number": "*123#",
+        "call_count": 1,
+        "talk_duration_requested": 10,
+        "max_ring_time": 20,
+        "successful_calls": 0,
+        "results": [
+          {
+            "call_number": 1,
+            "number": "*123#",
+            "attempts": 4,
+            "ring_duration": 20.08952832221985,
+            "talk_time_elapsed": 0.0,
+            "answered": false,
+            "status": "ringing",
+            "error": null,
+            "hangup_sent": false,
+            "total_duration": 30.32076072692871
+          }
+        ],
+        "success": false,
+        "total_duration": 30.32076072692871,
+        "step": 3
+      },
+      {
+        "module": "waiting_time",
+        "success": false,
+        "error": "Unknown module: waiting_time",
+        "step": 4
+      }
+    ]
+  },
+  {
+    "id": "b24901dcaa6c4b778c73ff80199ae006",
+    "workflow_id": "wf_016",
+    "workflow_name": "111",
+    "device_id": "R5CT20VN4PE",
+    "run_at": "2025-11-14T16:51:59.753000+00:00",
+    "run_at_ts": 1763139119.753,
+    "status": "failed",
+    "created_at": "2025-11-14T16:42:14.961945",
+    "updated_at": null,
+    "started_at": "2025-11-14T18:58:09.188016",
+    "completed_at": "2025-11-14T18:58:17.022950",
+    "result": {
+      "success": false,
+      "execution_id": "exec_wf_016_20251114_195817"
+    },
+    "error": [
+      {
+        "module": "enable_airplane_mode",
+        "success": true,
+        "duration": 0.87,
+        "airplane_mode": true,
+        "state_verified": true,
+        "errors": [
+          {
+            "command": "C:\\Users\\rush\\Pictures\\ADB Tool\\ADB-automation-tool\\mon-projet\\src\\electron\\resources\\adb\\adb.exe shell am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true",
+            "error": "Exception occurred while executing 'broadcast':\njava.lang.SecurityException: Permission Denial: not allowed to send broadcast android.intent.action.AIRPLANE_MODE from pid=16517, uid=2000\n\tat com.android.server.am.ActivityManagerService.broadcastIntentLocked(ActivityManagerService.java:16290)\n\tat com.android.server.am.ActivityManagerService.broadcastIntentLocked(ActivityManagerService.java:16124)\n\tat com.android.server.am.ActivityManagerService.broadcastIntentWithFeature(ActivityManagerService.java:17101)\n\tat com.android.server.am.ActivityManagerShellCommand.runSendBroadcast(ActivityManagerShellCommand.java:867)\n\tat com.android.server.am.ActivityManagerShellCommand.onCommand(ActivityManagerShellCommand.java:235)\n\tat com.android.modules.utils.BasicShellCommandHandler.exec(BasicShellCommandHandler.java:97)\n\tat android.os.ShellCommand.exec(ShellCommand.java:38)\n\tat com.android.server.am.ActivityManagerService.onShellCommand(ActivityManagerService.java:11276)\n\tat android.os.Binder.shellCommand(Binder.java:1085)\n\tat android.os.Binder.onTransact(Binder.java:903)\n\tat android.app.IActivityManager$Stub.onTransact(IActivityManager.java:5643)\n\tat com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:3135)\n\tat android.os.Binder.execTransactInternal(Binder.java:1321)\n\tat android.os.Binder.execTransact(Binder.java:1280)"
+          }
+        ],
+        "warnings": null,
+        "step": 1
+      },
+      {
+        "module": "disable_airplane_mode",
+        "success": true,
+        "duration": 0.42,
+        "airplane_mode": false,
+        "state_verified": true,
+        "errors": [
+          {
+            "command": "C:\\Users\\rush\\Pictures\\ADB Tool\\ADB-automation-tool\\mon-projet\\src\\electron\\resources\\adb\\adb.exe shell am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false",
+            "error": "Exception occurred while executing 'broadcast':\njava.lang.SecurityException: Permission Denial: not allowed to send broadcast android.intent.action.AIRPLANE_MODE from pid=17010, uid=2000\n\tat com.android.server.am.ActivityManagerService.broadcastIntentLocked(ActivityManagerService.java:16290)\n\tat com.android.server.am.ActivityManagerService.broadcastIntentLocked(ActivityManagerService.java:16124)\n\tat com.android.server.am.ActivityManagerService.broadcastIntentWithFeature(ActivityManagerService.java:17101)\n\tat com.android.server.am.ActivityManagerShellCommand.runSendBroadcast(ActivityManagerShellCommand.java:867)\n\tat com.android.server.am.ActivityManagerShellCommand.onCommand(ActivityManagerShellCommand.java:235)\n\tat com.android.modules.utils.BasicShellCommandHandler.exec(BasicShellCommandHandler.java:97)\n\tat android.os.ShellCommand.exec(ShellCommand.java:38)\n\tat com.android.server.am.ActivityManagerService.onShellCommand(ActivityManagerService.java:11276)\n\tat android.os.Binder.shellCommand(Binder.java:1085)\n\tat android.os.Binder.onTransact(Binder.java:903)\n\tat android.app.IActivityManager$Stub.onTransact(IActivityManager.java:5643)\n\tat com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:3135)\n\tat android.os.Binder.execTransactInternal(Binder.java:1321)\n\tat android.os.Binder.execTransact(Binder.java:1280)"
+          }
+        ],
+        "warnings": null,
+        "step": 2
+      },
+      {
+        "module": "waiting_time",
+        "success": false,
+        "error": "Unknown module: waiting_time",
+        "step": 3
+      },
+      {
+        "module": "enable_airplane_mode",
+        "success": true,
+        "duration": 0.55,
+        "airplane_mode": true,
+        "state_verified": true,
+        "errors": [
+          {
+            "command": "C:\\Users\\rush\\Pictures\\ADB Tool\\ADB-automation-tool\\mon-projet\\src\\electron\\resources\\adb\\adb.exe shell am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true",
+            "error": "Exception occurred while executing 'broadcast':\njava.lang.SecurityException: Permission Denial: not allowed to send broadcast android.intent.action.AIRPLANE_MODE from pid=17554, uid=2000\n\tat com.android.server.am.ActivityManagerService.broadcastIntentLocked(ActivityManagerService.java:16290)\n\tat com.android.server.am.ActivityManagerService.broadcastIntentLocked(ActivityManagerService.java:16124)\n\tat com.android.server.am.ActivityManagerService.broadcastIntentWithFeature(ActivityManagerService.java:17101)\n\tat com.android.server.am.ActivityManagerShellCommand.runSendBroadcast(ActivityManagerShellCommand.java:867)\n\tat com.android.server.am.ActivityManagerShellCommand.onCommand(ActivityManagerShellCommand.java:235)\n\tat com.android.modules.utils.BasicShellCommandHandler.exec(BasicShellCommandHandler.java:97)\n\tat android.os.ShellCommand.exec(ShellCommand.java:38)\n\tat com.android.server.am.ActivityManagerService.onShellCommand(ActivityManagerService.java:11276)\n\tat android.os.Binder.shellCommand(Binder.java:1085)\n\tat android.os.Binder.onTransact(Binder.java:903)\n\tat android.app.IActivityManager$Stub.onTransact(IActivityManager.java:5643)\n\tat com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:3135)\n\tat android.os.Binder.execTransactInternal(Binder.java:1321)\n\tat android.os.Binder.execTransact(Binder.java:1280)"
+          }
+        ],
+        "warnings": null,
+        "step": 4
+      }
+    ]
+  },
+  {
+    "id": "0fa18deed8ec4c8cb1fbe643a85f65d5",
+    "workflow_id": "wf_016",
+    "workflow_name": "111",
+    "device_id": "R3CW10MKFSA",
+    "run_at": "2025-11-14T16:51:59.753000+00:00",
+    "run_at_ts": 1763139119.753,
+    "status": "failed",
+    "created_at": "2025-11-14T16:42:14.963294",
+    "updated_at": null,
+    "started_at": "2025-11-14T18:58:09.188030",
+    "completed_at": "2025-11-14T18:58:24.268721",
+    "result": {
+      "success": false,
+      "execution_id": "exec_wf_016_20251114_195824"
+    },
+    "error": [
+      {
+        "module": "enable_airplane_mode",
+        "success": true,
+        "duration": 0.55,
+        "airplane_mode": true,
+        "state_verified": true,
+        "errors": [
+          {
+            "command": "C:\\Users\\rush\\Pictures\\ADB Tool\\ADB-automation-tool\\mon-projet\\src\\electron\\resources\\adb\\adb.exe shell am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true",
+            "error": "Exception occurred while executing 'broadcast':\njava.lang.SecurityException: Permission Denial: not allowed to send broadcast android.intent.action.AIRPLANE_MODE from pid=10540, uid=2000\n\tat com.android.server.am.BroadcastController.broadcastIntentLockedTraced(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:94)\n\tat com.android.server.am.BroadcastController.broadcastIntentLocked(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:18)\n\tat com.android.server.am.ActivityManagerService.broadcastIntentWithFeature(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:149)\n\tat com.android.server.am.ActivityManagerShellCommand.runSendBroadcast(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:104)\n\tat com.android.server.am.ActivityManagerShellCommand.onCommand(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:1958)\n\tat com.android.modules.utils.BasicShellCommandHandler.exec(BasicShellCommandHandler.java:97)\n\tat android.os.ShellCommand.exec(ShellCommand.java:38)\n\tat com.android.server.am.ActivityManagerService.onShellCommand(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:164)\n\tat android.os.Binder.shellCommand(Binder.java:1187)\n\tat android.os.Binder.onTransact(Binder.java:979)\n\tat android.app.IActivityManager$Stub.onTransact(IActivityManager.java:5991)\n\tat com.android.server.am.ActivityManagerService.onTransact(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:425)\n\tat android.os.Binder.execTransactInternal(Binder.java:1462)\n\tat android.os.Binder.execTransact(Binder.java:1401)"
+          }
+        ],
+        "warnings": null,
+        "step": 1
+      },
+      {
+        "module": "disable_airplane_mode",
+        "success": true,
+        "duration": 0.26,
+        "airplane_mode": false,
+        "state_verified": true,
+        "errors": [
+          {
+            "command": "C:\\Users\\rush\\Pictures\\ADB Tool\\ADB-automation-tool\\mon-projet\\src\\electron\\resources\\adb\\adb.exe shell am broadcast -a android.intent.action.AIRPLANE_MODE --ez state false",
+            "error": "Exception occurred while executing 'broadcast':\njava.lang.SecurityException: Permission Denial: not allowed to send broadcast android.intent.action.AIRPLANE_MODE from pid=10810, uid=2000\n\tat com.android.server.am.BroadcastController.broadcastIntentLockedTraced(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:94)\n\tat com.android.server.am.BroadcastController.broadcastIntentLocked(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:18)\n\tat com.android.server.am.ActivityManagerService.broadcastIntentWithFeature(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:149)\n\tat com.android.server.am.ActivityManagerShellCommand.runSendBroadcast(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:104)\n\tat com.android.server.am.ActivityManagerShellCommand.onCommand(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:1958)\n\tat com.android.modules.utils.BasicShellCommandHandler.exec(BasicShellCommandHandler.java:97)\n\tat android.os.ShellCommand.exec(ShellCommand.java:38)\n\tat com.android.server.am.ActivityManagerService.onShellCommand(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:164)\n\tat android.os.Binder.shellCommand(Binder.java:1187)\n\tat android.os.Binder.onTransact(Binder.java:979)\n\tat android.app.IActivityManager$Stub.onTransact(IActivityManager.java:5991)\n\tat com.android.server.am.ActivityManagerService.onTransact(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:425)\n\tat android.os.Binder.execTransactInternal(Binder.java:1462)\n\tat android.os.Binder.execTransact(Binder.java:1401)"
+          }
+        ],
+        "warnings": null,
+        "step": 2
+      },
+      {
+        "module": "waiting_time",
+        "success": false,
+        "error": "Unknown module: waiting_time",
+        "step": 3
+      },
+      {
+        "module": "enable_airplane_mode",
+        "success": true,
+        "duration": 0.43,
+        "airplane_mode": true,
+        "state_verified": true,
+        "errors": [
+          {
+            "command": "C:\\Users\\rush\\Pictures\\ADB Tool\\ADB-automation-tool\\mon-projet\\src\\electron\\resources\\adb\\adb.exe shell am broadcast -a android.intent.action.AIRPLANE_MODE --ez state true",
+            "error": "Exception occurred while executing 'broadcast':\njava.lang.SecurityException: Permission Denial: not allowed to send broadcast android.intent.action.AIRPLANE_MODE from pid=11194, uid=2000\n\tat com.android.server.am.BroadcastController.broadcastIntentLockedTraced(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:94)\n\tat com.android.server.am.BroadcastController.broadcastIntentLocked(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:18)\n\tat com.android.server.am.ActivityManagerService.broadcastIntentWithFeature(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:149)\n\tat com.android.server.am.ActivityManagerShellCommand.runSendBroadcast(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:104)\n\tat com.android.server.am.ActivityManagerShellCommand.onCommand(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:1958)\n\tat com.android.modules.utils.BasicShellCommandHandler.exec(BasicShellCommandHandler.java:97)\n\tat android.os.ShellCommand.exec(ShellCommand.java:38)\n\tat com.android.server.am.ActivityManagerService.onShellCommand(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:164)\n\tat android.os.Binder.shellCommand(Binder.java:1187)\n\tat android.os.Binder.onTransact(Binder.java:979)\n\tat android.app.IActivityManager$Stub.onTransact(IActivityManager.java:5991)\n\tat com.android.server.am.ActivityManagerService.onTransact(qb/102640343 e1ef15caafe0ee5b3507e8c14428ab77340532192772a82f187f1456268a75d7:425)\n\tat android.os.Binder.execTransactInternal(Binder.java:1462)\n\tat android.os.Binder.execTransact(Binder.java:1401)"
+          }
+        ],
+        "warnings": null,
+        "step": 4
+      }
+    ]
+  },
+  {
+    "id": "c37dd6e99e954030a364f3b894b50ae8",
+    "workflow_id": "wf_017",
+    "workflow_name": "111",
+    "device_id": "R5CT20VN4PE",
+    "run_at": "2025-11-14T16:52:00.750000+00:00",
+    "run_at_ts": 1763139120.75,
+    "status": "running",
+    "created_at": "2025-11-14T16:42:14.966921",
+    "updated_at": null,
+    "started_at": "2025-11-14T18:58:09.188033",
+    "completed_at": null,
+    "result": null
+  },
+  {
+    "id": "ac0e8f2af46e46a7877fcc7e23ceb485",
+    "workflow_id": "wf_017",
+    "workflow_name": "111",
+    "device_id": "R3CW10MKFSA",
+    "run_at": "2025-11-14T16:52:00.750000+00:00",
+    "run_at_ts": 1763139120.75,
+    "status": "running",
+    "created_at": "2025-11-14T16:42:14.968136",
+    "updated_at": null,
+    "started_at": "2025-11-14T18:58:09.188036",
+    "completed_at": null,
+    "result": null
+  },
+  {
+    "id": "85766ca761714890a9696f05f8c7e1de",
+    "workflow_id": "wf_018",
+    "workflow_name": "111",
+    "device_id": "R5CT20VN4PE",
+    "run_at": "2025-11-14T16:52:01.538000+00:00",
+    "run_at_ts": 1763139121.538,
+    "status": "running",
+    "created_at": "2025-11-14T16:42:14.972540",
+    "updated_at": null,
+    "started_at": "2025-11-14T18:58:09.188038",
+    "completed_at": null,
+    "result": null
+  },
+  {
+    "id": "8a8a79f3a14f4ce99364f75a5b1ce65f",
+    "workflow_id": "wf_018",
+    "workflow_name": "111",
+    "device_id": "R3CW10MKFSA",
+    "run_at": "2025-11-14T16:52:01.538000+00:00",
+    "run_at_ts": 1763139121.538,
+    "status": "running",
+    "created_at": "2025-11-14T16:42:14.973795",
+    "updated_at": null,
+    "started_at": "2025-11-14T18:58:09.188040",
+    "completed_at": null,
+    "result": null
+  }
+]

@@ -1,0 +1,29 @@
+id: network_stress_test
+name: "Test de Stress Réseau Complet"
+description: "Test exhaustif de tous les types de réseau et connectivité"
+steps:
+  - module: check_signal_strength
+  - module: check_ip
+  - module: force_phone_to_lte
+  - module: network_perf
+    with:
+      server_ip: "8.8.8.8"
+  - module: force_phone_to_3g
+  - module: network_perf
+    with:
+      server_ip: "1.1.1.1"
+  - module: force_phone_to_2g
+  - module: network_perf
+    with:
+      server_ip: "208.67.222.222"
+  - module: enable_wifi
+  - module: disable_mobile_data
+  - module: start_data_session
+    with:
+      url: "http://www.google.com"
+  - module: stop_data_session
+  - module: disable_wifi
+  - module: enable_mobile_data
+policy:
+  stop_on_failure: false
+version: "1.0.0"

@@ -1,0 +1,31 @@
+id: connectivity_matrix
+name: "Matrice de Connectivité Complète"
+description: "Test de toutes les combinaisons Wi-Fi/Données mobiles"
+steps:
+  - module: disable_wifi
+  - module: disable_mobile_data
+  - module: check_ip
+  - module: network_check
+  - module: enable_mobile_data
+  - module: check_ip
+  - module: network_perf
+    with:
+      server_ip: "8.8.8.8"
+  - module: enable_wifi
+  - module: check_ip
+  - module: network_perf
+    with:
+      server_ip: "1.1.1.1"
+  - module: disable_mobile_data
+  - module: check_ip
+  - module: network_perf
+    with:
+      server_ip: "208.67.222.222"
+  - module: start_data_session
+    with:
+      url: "https://www.speedtest.net"
+  - module: capture_screenshot
+  - module: stop_data_session
+policy:
+  stop_on_failure: false
+version: "1.0.0"
