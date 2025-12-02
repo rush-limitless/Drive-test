@@ -10,6 +10,7 @@ interface LayoutProps {
 
 type AppMenuAction = 'about' | 'faq' | 'updates' | 'manual';
 type BackendStatus = 'checking' | 'online' | 'offline';
+const DEFAULT_VERSION_LABEL = process.env.REACT_APP_APP_VERSION ?? '';
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   });
   const [historyLength, setHistoryLength] = useState(() => (typeof window === 'undefined' ? 0 : window.history.length));
   const [backendStatus, setBackendStatus] = useState<BackendStatus>('checking');
+  const [appVersion, setAppVersion] = useState<string>(DEFAULT_VERSION_LABEL);
   const baseApiUrl = resolveBaseUrl();
 
   useEffect(() => {
@@ -55,8 +57,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const handleMenuClick = (action: AppMenuAction) => {
     handleCloseMenu();
     if (action === 'about') {
+      const versionLabel = appVersion ? `v${appVersion}` : 'development build';
       window.alert(
-        'MOBIQ v1.0\n\nUnified console for mobile automation.\n• Bundled FastAPI backend + React dashboard + Electron shell\n• Live device telemetry and diagnostics\n• One-click telco modules and workflow composer\n• Offline Windows installer built with PyInstaller\n\nBuild: v1.0.0 (Electron 28 • React 18 • Python 3.12)'
+        `MOBIQ ${versionLabel}\n\nUnified console for mobile automation.\n• Bundled FastAPI backend + React dashboard + Electron shell\n• Live device telemetry and diagnostics\n• One-click telco modules and workflow composer\n• Offline Windows installer built with PyInstaller\n\nBuild: ${versionLabel} (Electron 28 • React 18 • Python 3.x)`
       );
       return;
     }
@@ -82,23 +85,57 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       return trimmed ? { 'X-API-Key': trimmed } : undefined;
     };
 
+    const updateVersionFromPayload = (payload: unknown) => {
+      if (!payload || typeof payload !== 'object') {
+        return;
+      }
+      const version = (payload as { version?: unknown }).version;
+      if (typeof version === 'string' && version.trim().length > 0) {
+        setAppVersion((prev) => prev || version.trim());
+      }
+    };
+
+    const probeOnce = async () => {
+      const candidates: { url: string; parseVersion: boolean }[] = [
+        { url: `${baseApiUrl}/api/health`, parseVersion: true },
+        { url: `${baseApiUrl}/api/v1/health`, parseVersion: true },
+        { url: `${baseApiUrl}/api/v1/health/adb`, parseVersion: false },
+        { url: `${baseApiUrl}/api/health/adb`, parseVersion: false },
+        { url: `${baseApiUrl}/health`, parseVersion: true },
+      ];
+
+      for (const candidate of candidates) {
+        try {
+          const response = await fetch(candidate.url, {
+            method: 'GET',
+            headers: headers(),
+          });
+            if (response.ok) {
+              if (candidate.parseVersion) {
+                try {
+                  const payload = await response.json();
+                  updateVersionFromPayload(payload);
+                } catch {
+                  // ignore JSON parsing errors for non-compliant endpoints
+                }
+              }
+              return 'online' as BackendStatus;
+            }
+          if (response.status !== 404) {
+            return 'offline' as BackendStatus;
+          }
+        } catch {
+          // Ignore and try the next endpoint.
+        }
+      }
+      return 'offline' as BackendStatus;
+    };
+
     const probe = async () => {
-      try {
-        const response = await fetch(`${baseApiUrl}/api/v1/health/adb`, {
-          method: 'GET',
-          headers: headers(),
-        });
-        if (!cancelled) {
-          setBackendStatus(response.ok ? 'online' : 'offline');
-        }
-      } catch {
-        if (!cancelled) {
-          setBackendStatus('offline');
-        }
-      } finally {
-        if (!cancelled) {
-          timer = window.setTimeout(probe, 7000);
-        }
+      const status = await probeOnce();
+      if (!cancelled) {
+        setBackendStatus(status);
+        timer = window.setTimeout(probe, 7000);
       }
     };
 
@@ -110,6 +147,32 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       }
     };
   }, [baseApiUrl]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    let cancelled = false;
+    const electronVersion = (window as typeof window & { electronAPI?: { getAppVersion?: () => Promise<string> } }).electronAPI;
+    if (!electronVersion?.getAppVersion) {
+      return () => {
+        cancelled = true;
+      };
+    }
+    electronVersion
+      .getAppVersion()
+      .then((version) => {
+        if (!cancelled && version) {
+          setAppVersion((prev) => prev || version);
+        }
+      })
+      .catch(() => {
+        /* ignore */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const statusLabel = backendStatus === 'online' ? 'Backend online' : backendStatus === 'offline' ? 'Backend offline' : 'Checking backend...';
   const statusPalette =
@@ -152,6 +215,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           }}>
             The Future of Telecom Automation
           </Typography>
+          {appVersion && (
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                fontSize: '11px',
+                lineHeight: '16px',
+                mt: 0.5,
+              }}
+            >
+              Version {appVersion}
+            </Typography>
+          )}
         </Box>
 
         <Box sx={{ flex: 1 }}>
