@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 import logging
 
-from core.database import get_db
+from core.database import get_db, ensure_sql_schema
 from models.device import Device, DeviceStatus
 from models.device_log import DeviceLog, LogLevel
 from services.adb_manager import adb_manager
@@ -58,6 +58,7 @@ class DeviceManager:
     async def scan_and_update_devices(self) -> List[Dict]:
         """Scan for devices and update database."""
         try:
+            ensure_sql_schema()
             # Scan for connected devices
             connected_device_ids = await adb_manager.scan_devices()
             

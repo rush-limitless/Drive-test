@@ -54,8 +54,7 @@ from src.backend.modules.flow_executor import FlowExecutor
 from src.backend.modules.adb_executor import ADBExecutor
 from src.backend.modules.telco_modules import TelcoModules
 from src.backend.core.config import ensure_directories
-from src.backend.core.database import engine
-from src.backend.models.base import Base
+from src.backend.core.database import ensure_sql_schema
 
 # Import API routers
 from src.backend.api.devices_v2 import router as devices_router_v2
@@ -71,6 +70,7 @@ from src.backend.api.executions import router as executions_router
 from src.backend.api.reports import router as reports_router
 from src.backend.api.preferences import router as preferences_router
 from src.backend.api.websocket_router import router as websocket_router
+from src.backend.api.health import router as health_router, adb_health as backend_adb_health
 from src.backend.services.device_manager import device_manager
 
 def _import_all_models() -> None:
@@ -98,7 +98,7 @@ async def lifespan(app: FastAPI):
     """Start background services (like the workflow scheduler) for the simple server."""
     _import_all_models()
     ensure_directories()
-    Base.metadata.create_all(bind=engine)
+    ensure_sql_schema()
     start_workflow_scheduler()
     await device_manager.start_monitoring()
     # Prime the cache immediately so the UI sees connected devices without manual refresh.
@@ -136,6 +136,7 @@ def include_all_routes(prefix: str) -> None:
     app.include_router(reports_router, prefix=prefix, tags=["reports"])
     app.include_router(websocket_router, prefix=prefix, tags=["websocket"])
     app.include_router(preferences_router, prefix=prefix, tags=["preferences"])
+    app.include_router(health_router, prefix=prefix, tags=["health"])
 
 # REST endpoints available under /api and /api/v1 to mirror the full backend
 include_all_routes("/api")
@@ -194,6 +195,18 @@ class FlowExecutionRequest(BaseModel):
 static_dir = os.path.join(os.path.dirname(__file__), "src", "backend", "static")
 if os.path.exists(static_dir):
     app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+
+@app.get("/api/health/adb")
+async def proxy_adb_health():
+    """Expose adb health check for legacy clients."""
+    return await backend_adb_health()
+
+
+@app.get("/api/v1/health/adb")
+async def proxy_adb_health_v1():
+    """Expose adb health check with /api/v1 prefix."""
+    return await backend_adb_health()
 
 @app.get("/")
 async def root():

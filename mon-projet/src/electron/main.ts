@@ -120,22 +120,47 @@ function createWindow(): void {
 }
 
 function checkBackendAlreadyRunning(): Promise<boolean> {
-  const healthUrl = `http://${RENDER_HOST}:${BACKEND_PORT}/api/v1/health/adb`;
+  const healthEndpoints = [
+    `/api/v1/health/adb`,
+    `/api/health/adb`,
+    `/health`,
+  ].map((suffix) => `http://${RENDER_HOST}:${BACKEND_PORT}${suffix}`);
+
   return new Promise((resolve) => {
-    const req = http.get(healthUrl, (res) => {
-      res.resume();
-      resolve((res.statusCode ?? 500) < 500);
-    });
-    req.on('error', () => resolve(false));
-    req.setTimeout(1500, () => {
-      req.destroy();
-      resolve(false);
-    });
+    const tryEndpoint = (index: number) => {
+      if (index >= healthEndpoints.length) {
+        resolve(false);
+        return;
+      }
+      const url = healthEndpoints[index];
+      const req = http.get(url, (res) => {
+        res.resume();
+        const status = res.statusCode ?? 500;
+        if (status === 404) {
+          tryEndpoint(index + 1);
+        } else {
+          resolve(true);
+        }
+      });
+      req.on('error', () => tryEndpoint(index + 1));
+      req.setTimeout(1500, () => {
+        req.destroy();
+        tryEndpoint(index + 1);
+      });
+    };
+    tryEndpoint(0);
   });
 }
 
 function startBackendServer(): Promise<void> {
   return new Promise(async (resolve, reject) => {
+    if (process.env.SKIP_BACKEND && process.env.SKIP_BACKEND !== '0' && process.env.SKIP_BACKEND.toLowerCase() !== 'false') {
+      backendManagedExternally = true;
+      console.log(`[electron] SKIP_BACKEND set. Assuming backend already running at http://${RENDER_HOST}:${BACKEND_PORT}`);
+      resolve();
+      return;
+    }
+
     const alreadyRunning = await checkBackendAlreadyRunning();
     if (alreadyRunning) {
       backendManagedExternally = true;

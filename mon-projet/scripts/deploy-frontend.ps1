@@ -15,6 +15,7 @@ $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $repoRoot = Split-Path -Parent $scriptRoot
 $frontendPath = Join-Path $repoRoot 'src/frontend'
 $backendStaticPath = Join-Path $repoRoot 'src/backend/static'
+$electronFrontendPath = Join-Path $repoRoot 'src/electron/resources/frontend/build'
 $buildPath = Join-Path $frontendPath 'build'
 
 Write-Host "[build] Building frontend (npm run build)..." -ForegroundColor Cyan
@@ -40,4 +41,12 @@ if (-not (Test-Path $backendStaticPath)) {
 Write-Host "[copy] Copying new build to backend/static..." -ForegroundColor Cyan
 Copy-Item -Path (Join-Path $buildPath '*') -Destination $backendStaticPath -Recurse
 
-Write-Host "[done] Frontend deployed to src/backend/static/" -ForegroundColor Green
+Write-Host "[copy] Copying new build to Electron resources..." -ForegroundColor Cyan
+if (-not (Test-Path $electronFrontendPath)) {
+  New-Item -ItemType Directory -Path $electronFrontendPath | Out-Null
+} else {
+  Get-ChildItem $electronFrontendPath | Remove-Item -Recurse -Force
+}
+Copy-Item -Path (Join-Path $buildPath '*') -Destination $electronFrontendPath -Recurse
+
+Write-Host "[done] Frontend deployed to backend/static and Electron resources." -ForegroundColor Green

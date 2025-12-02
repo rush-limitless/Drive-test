@@ -20,10 +20,12 @@ except ImportError:
 
 from core.config import settings, ensure_directories
 try:
-    from core.database import db_manager, engine
+    from core.database import db_manager, engine, ensure_sql_schema
 except ImportError:
     db_manager = None
     engine = None
+    def ensure_sql_schema():  # type: ignore
+        return
 from core.logging import setup_logging
 from models.base import Base
 from api.devices import router as devices_router
@@ -129,8 +131,7 @@ async def lifespan(app: FastAPI):
     setup_logging()
     ensure_directories()
     _import_all_models()
-    if engine:
-        Base.metadata.create_all(bind=engine)
+    ensure_sql_schema()
     if db_manager:
         try:
             db_manager.create_collections()

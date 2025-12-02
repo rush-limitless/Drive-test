@@ -7,8 +7,10 @@
   "scripts": {
     "start": "start-app.bat",
     "dev": "start-app.bat",
-    "electron": "start-app.bat",
-    "build:electron": "echo Build completed",
+    "electron": "npm --prefix src/electron install && npm --prefix src/electron run electron",
+    "electron:dev": "npm --prefix src/electron install && npm --prefix src/electron run electron:dev",
+    "build:electron": "npm --prefix src/electron install && npm --prefix src/electron run build",
+    "dist:electron": "npm --prefix src/electron install && npm --prefix src/electron run dist",
     "spec:check": "node ./scripts/spec-check.js"
   },
   "devDependencies": {

@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
+import importlib
 import logging
+import threading
 from contextlib import contextmanager
 from typing import Generator, Optional
 
@@ -162,6 +164,48 @@ class DatabaseManager:
         if not self.db:
             raise RuntimeError("MongoDB disabled; no collections available.")
         return self.db[name]
+
+
+_schema_lock = threading.Lock()
+_schema_initialized = False
+
+
+def ensure_sql_schema() -> None:
+    """Ensure the SQLite schema exists before running ORM queries."""
+    global _schema_initialized
+    if _schema_initialized:
+        return
+
+    with _schema_lock:
+        if _schema_initialized:
+            return
+
+        model_modules = [
+            "models.device",
+            "models.device_log",
+            "models.flow",
+            "models.flow_module",
+            "models.execution",
+            "models.execution_device",
+            "models.execution_step",
+            "models.report",
+            "models.workflow_models",
+            "models.user_preference",
+        ]
+
+        for module_path in model_modules:
+            try:
+                importlib.import_module(module_path)
+            except ModuleNotFoundError:
+                importlib.import_module(f"src.backend.{module_path}")
+
+        try:
+            from models.base import Base  # type: ignore
+        except ModuleNotFoundError:  # pragma: no cover - fallback for packaged runs
+            from src.backend.models.base import Base  # type: ignore
+
+        Base.metadata.create_all(bind=engine)
+        _schema_initialized = True
 
 
 db_manager = DatabaseManager()
