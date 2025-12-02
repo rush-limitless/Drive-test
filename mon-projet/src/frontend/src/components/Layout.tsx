@@ -96,31 +96,33 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     };
 
     const probeOnce = async () => {
-      const candidates: { url: string; parseVersion: boolean }[] = [
-        { url: `${baseApiUrl}/api/health`, parseVersion: true },
-        { url: `${baseApiUrl}/api/v1/health`, parseVersion: true },
-        { url: `${baseApiUrl}/api/v1/health/adb`, parseVersion: false },
-        { url: `${baseApiUrl}/api/health/adb`, parseVersion: false },
-        { url: `${baseApiUrl}/health`, parseVersion: true },
+      const candidates = [
+        `${baseApiUrl}/api/health`,
+        `${baseApiUrl}/api/v1/health`,
+        `${baseApiUrl}/health`,
       ];
 
-      for (const candidate of candidates) {
+      for (const url of candidates) {
         try {
-          const response = await fetch(candidate.url, {
+          const response = await fetch(url, {
             method: 'GET',
             headers: headers(),
           });
-            if (response.ok) {
-              if (candidate.parseVersion) {
-                try {
-                  const payload = await response.json();
-                  updateVersionFromPayload(payload);
-                } catch {
-                  // ignore JSON parsing errors for non-compliant endpoints
-                }
+          if (response.ok) {
+            try {
+              const payload = await response.json();
+              updateVersionFromPayload(payload);
+              const statusValue =
+                (payload && typeof payload === 'object' && 'status' in payload && typeof (payload as any).status === 'string'
+                  ? (payload as any).status.toLowerCase()
+                  : undefined) ?? 'ok';
+              if (statusValue === 'ok' || statusValue === 'degraded') {
+                return 'online' as BackendStatus;
               }
+            } catch {
               return 'online' as BackendStatus;
             }
+          }
           if (response.status !== 404) {
             return 'offline' as BackendStatus;
           }
