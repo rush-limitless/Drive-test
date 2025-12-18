@@ -760,6 +760,9 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         : 'Select an active device from the Dashboard before running modules.';
   const [draggingModuleId, setDraggingModuleId] = useState<string | null>(null);
   const [draggingCatalogModuleId, setDraggingCatalogModuleId] = useState<string | null>(null);
+  const [hoveredBuilderTarget, setHoveredBuilderTarget] = useState<
+    { id: string; insertAfter: boolean } | null
+  >(null);
   const [lastDeviceModuleRun, setLastDeviceModuleRun] = useState<DeviceModuleRunSnapshot | null>(null);
 
   useEffect(() => {
@@ -1628,30 +1631,47 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
     return event.clientX > rect.left + rect.width / 2;
   };
 
+  const swapHoverState = useCallback(
+    (targetId: string | null, insertAfter: boolean) => {
+      if (!targetId) {
+        setHoveredBuilderTarget(null);
+        return;
+      }
+      setHoveredBuilderTarget({ id: targetId, insertAfter });
+    },
+    []
+  );
+
   const handleModuleDragStart = (event: React.DragEvent<HTMLDivElement>, moduleId: string) => {
     event.dataTransfer.setData('text/plain', `builder:${moduleId}`);
     event.dataTransfer.effectAllowed = 'move';
     setDraggingModuleId(moduleId);
     setDraggingCatalogModuleId(null);
+    setHoveredBuilderTarget(null);
   };
 
-  const handleModuleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
+  const handleModuleDragOver = (event: React.DragEvent<HTMLDivElement>, targetId: string | null) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
+    const insertAfter = shouldInsertAfterTarget(event, targetId);
+    swapHoverState(targetId, insertAfter);
   };
 
   const handleModuleDrop = (event: React.DragEvent<HTMLDivElement>, targetId: string | null) => {
     event.preventDefault();
     const payload = parseDragPayload(event.dataTransfer.getData('text/plain'));
-    const insertAfterTarget = shouldInsertAfterTarget(event, targetId);
+    const resolvedTargetId = targetId ?? hoveredBuilderTarget?.id ?? null;
+    const insertAfterTarget =
+      targetId !== null ? shouldInsertAfterTarget(event, targetId) : hoveredBuilderTarget?.insertAfter ?? true;
     if (payload?.source === 'builder') {
-      reorderSelectedModules(payload.id, targetId, insertAfterTarget);
+      reorderSelectedModules(payload.id, resolvedTargetId, insertAfterTarget);
     } else if (payload?.source === 'catalog') {
       const module = findModuleById(payload.id);
-      insertModuleInstance(module ?? null, targetId, insertAfterTarget);
+      insertModuleInstance(module ?? null, resolvedTargetId, insertAfterTarget);
     }
     setDraggingModuleId(null);
     setDraggingCatalogModuleId(null);
+    setHoveredBuilderTarget(null);
   };
 
   const handleModuleDragEnd = () => {
@@ -1876,7 +1896,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
               display="flex"
               flexWrap="wrap"
               gap={1}
-              onDragOver={handleModuleDragOver}
+              onDragOver={(event) => handleModuleDragOver(event, null)}
               onDrop={(event) => handleModuleDrop(event, null)}
               sx={{
                 minHeight: 64,
@@ -1892,7 +1912,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
                   key={entry.instanceId}
                   draggable
                   onDragStart={(event) => handleModuleDragStart(event, entry.instanceId)}
-                  onDragOver={handleModuleDragOver}
+                  onDragOver={(event) => handleModuleDragOver(event, entry.instanceId)}
                   onDrop={(event) => handleModuleDrop(event, entry.instanceId)}
                   onDragEnd={handleModuleDragEnd}
                   sx={{ cursor: 'grab', display: 'inline-flex' }}
