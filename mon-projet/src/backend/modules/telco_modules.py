@@ -538,6 +538,8 @@ class TelcoModules(ADBExecutor):
                 'airplane_mode': current_state,
                 'state_verified': True,
                 'already_in_state': True,
+                'already_on': enable,
+                'already_off': not enable,
                 'message': f'Airplane mode is already {"enabled" if enable else "disabled"}',
             }
         
@@ -566,6 +568,8 @@ class TelcoModules(ADBExecutor):
             'airplane_mode': final_state,
             'state_verified': state_matches and verified,
             'already_in_state': False,
+            'already_on': success and enable and bool(final_state),
+            'already_off': success and not enable and final_state is False,
             'errors': errors or None,
             'warnings': None if success or state_known else 'Airplane mode state could not be confirmed (root commands used)',
         }
