@@ -1396,7 +1396,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
   };
 
   const insertModuleInstance = useCallback(
-    (module: ModuleMetadata | null, targetId: string | null) => {
+    (module: ModuleMetadata | null, targetId: string | null, insertAfterTarget: boolean = false) => {
       if (!module) {
         return;
       }
@@ -1408,7 +1408,8 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
             return [...prev, instance];
           }
           const next = [...prev];
-          next.splice(targetIndex, 0, instance);
+          const insertionIndex = Math.min(next.length, targetIndex + (insertAfterTarget ? 1 : 0));
+          next.splice(insertionIndex, 0, instance);
           return next;
         }
         return [...prev, instance];
@@ -1586,7 +1587,11 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
     );
   };
 
-  const reorderSelectedModules = (draggedId: string, targetId: string | null) => {
+  const reorderSelectedModules = (
+    draggedId: string,
+    targetId: string | null,
+    insertAfterTarget: boolean = false
+  ) => {
     if (draggedId === targetId) {
       return;
     }
@@ -1604,10 +1609,23 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         if (targetIndex === -1) {
           return prev;
         }
-        next.splice(targetIndex, 0, removed);
+        const insertionIndex = Math.min(next.length, targetIndex + (insertAfterTarget ? 1 : 0));
+        next.splice(insertionIndex, 0, removed);
       }
       return next;
     });
+  };
+
+  const shouldInsertAfterTarget = (
+    event: React.DragEvent<HTMLDivElement>,
+    targetId: string | null
+  ) => {
+    if (!targetId) {
+      return true;
+    }
+    const element = event.currentTarget as HTMLElement;
+    const rect = element.getBoundingClientRect();
+    return event.clientX > rect.left + rect.width / 2;
   };
 
   const handleModuleDragStart = (event: React.DragEvent<HTMLDivElement>, moduleId: string) => {
@@ -1625,11 +1643,12 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
   const handleModuleDrop = (event: React.DragEvent<HTMLDivElement>, targetId: string | null) => {
     event.preventDefault();
     const payload = parseDragPayload(event.dataTransfer.getData('text/plain'));
+    const insertAfterTarget = shouldInsertAfterTarget(event, targetId);
     if (payload?.source === 'builder') {
-      reorderSelectedModules(payload.id, targetId);
+      reorderSelectedModules(payload.id, targetId, insertAfterTarget);
     } else if (payload?.source === 'catalog') {
       const module = findModuleById(payload.id);
-      insertModuleInstance(module ?? null, targetId);
+      insertModuleInstance(module ?? null, targetId, insertAfterTarget);
     }
     setDraggingModuleId(null);
     setDraggingCatalogModuleId(null);
