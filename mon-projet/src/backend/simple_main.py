@@ -1,27 +1,19 @@
 """Simple FastAPI server without MongoDB dependencies."""
 
-from fastapi import FastAPI
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-# Import the modules router from the spec-kit api directory
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'api'))
-
 try:
-    from modules import router as modules_router
-except ImportError:
-    # Fallback if import fails
-    from fastapi import APIRouter
-    modules_router = APIRouter()
-    
-    @modules_router.get("/modules")
-    async def get_modules():
-        return [
-            {"id": "call_test", "name": "Call Test", "description": "Test voice call"},
-            {"id": "airplane_mode_on", "name": "Airplane Mode", "description": "Toggle airplane mode"}
-        ]
+    from src.backend.api.modules import router as modules_router
+except Exception as exc:  # pragma: no cover - ensure local dev fallback
+    fallback_router = APIRouter()
+
+    @fallback_router.get("/modules")
+    async def _unavailable_modules():
+        return {"error": "modules API unavailable", "detail": str(exc)}
+
+    modules_router = fallback_router
 
 app = FastAPI(
     title="Telco ADB Automation API",
@@ -49,10 +41,12 @@ async def root():
 async def health_check():
     return {"status": "healthy", "version": "1.0.0"}
 
+DEFAULT_PORT = 8007
+
 if __name__ == "__main__":
     uvicorn.run(
-        "simple_main:app",
+        "src.backend.simple_main:app",
         host="0.0.0.0",
-        port=8000,
+        port=DEFAULT_PORT,
         reload=True
     )

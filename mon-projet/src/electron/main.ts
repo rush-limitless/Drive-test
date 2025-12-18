@@ -19,8 +19,8 @@ if (!fs.existsSync(customUserData)) {
 }
 app.setPath('userData', customUserData);
 
-function resolveBackendExecutable(): { executable: string; args: string[]; cwd: string; env?: any } {
-  const sharedEnv = {
+function resolveBackendExecutable(): { executable: string; args: string[]; cwd: string; env?: NodeJS.ProcessEnv } {
+  const sharedEnv: NodeJS.ProcessEnv = {
     ...process.env,
     TELCO_SIMPLE_PORT: String(BACKEND_PORT),
     TELCO_SIMPLE_HOST: BACKEND_HOST,
@@ -30,16 +30,29 @@ function resolveBackendExecutable(): { executable: string; args: string[]; cwd: 
   if (app.isPackaged) {
     // backend packagé (PyInstaller) copié dans resources/backend/server
     const backendDir = path.join(process.resourcesPath, 'backend', 'server');
+    const platformToolsDir = path.join(backendDir, '_internal', 'platform-tools');
+    const packagedAdbDir = path.join(process.resourcesPath, 'adb');
+    const mergedPath = [platformToolsDir, packagedAdbDir, sharedEnv.PATH || process.env.PATH || '']
+      .filter(Boolean)
+      .join(path.delimiter);
     return {
       executable: path.join(backendDir, 'TelcoADBServer.exe'),
       args: [],
       cwd: backendDir,
-      env: sharedEnv,
+      env: {
+        ...sharedEnv,
+        PATH: mergedPath,
+      },
     };
   }
 
   // Mode développement : lancer simple-server.py via python local
   const projectRoot = path.join(__dirname, '..', '..', '..');
+  const devPlatformTools = path.join(projectRoot, 'platform-tools');
+  const devEmbeddedAdb = path.join(projectRoot, 'src', 'electron', 'resources', 'adb');
+  const mergedDevPath = [devPlatformTools, devEmbeddedAdb, sharedEnv.PATH || process.env.PATH || '']
+    .filter(Boolean)
+    .join(path.delimiter);
   const scriptPath = path.join(projectRoot, 'simple-server.py');
   return {
     executable: 'python',
@@ -48,6 +61,7 @@ function resolveBackendExecutable(): { executable: string; args: string[]; cwd: 
     env: {
       ...sharedEnv,
       PYTHONPATH: `${projectRoot}\\src;${projectRoot}\\src\\backend`,
+      PATH: mergedDevPath,
     },
   };
 }

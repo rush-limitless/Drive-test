@@ -1,9 +1,11 @@
 """
 Reports API endpoints for ADB Framework
 """
+import csv
 from datetime import datetime, timedelta, timezone
+import io
 import json
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -13,6 +15,7 @@ from sqlalchemy.orm import Session
 from core.database import get_db
 from models.execution import Execution, ExecutionStatus
 from models.execution_device import ExecutionDevice
+from models.module_run import ModuleRun
 
 router = APIRouter()
 
@@ -22,6 +25,23 @@ class ReportFilter(BaseModel):
     device_id: Optional[str] = None
     workflow_id: Optional[str] = None
     report_type: Optional[str] = None
+
+
+class ModuleRunMetric(BaseModel):
+    module_id: str
+    module_name: str
+    total_runs: int
+    success_rate: float
+    average_duration_ms: Optional[float]
+
+
+class ModuleReportSummaryResponse(BaseModel):
+    total_runs: int
+    success_rate: float
+    average_duration_ms: Optional[float]
+    device_coverage: int
+    last_run_at: Optional[datetime]
+    modules: List[ModuleRunMetric]
 
 # Mock reports data
 reports_db = [
@@ -109,6 +129,26 @@ def _parse_iso_datetime(value: Optional[str]) -> Optional[datetime]:
         ) from None
 
 
+def _module_run_query(
+    db: Session,
+    *,
+    module_id: Optional[str],
+    device_id: Optional[str],
+    start_dt: Optional[datetime],
+    end_dt: Optional[datetime],
+):
+    query = db.query(ModuleRun)
+    if module_id:
+        query = query.filter(ModuleRun.module_id == module_id)
+    if device_id:
+        query = query.filter(ModuleRun.device_id == device_id)
+    if start_dt:
+        query = query.filter(ModuleRun.created_at >= start_dt)
+    if end_dt:
+        query = query.filter(ModuleRun.created_at <= end_dt)
+    return query
+
+
 @router.get("/reports/summary", response_model=ReportSummary)
 def get_report_summary(
     date_from: Optional[str] = None,
@@ -193,6 +233,150 @@ def get_report_summary(
             cancelled=status_counts.get(ExecutionStatus.CANCELLED.value, 0),
         ),
     )
+
+
+@router.get("/reports/modules/summary", response_model=ModuleReportSummaryResponse)
+def get_module_report_summary(
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    module_id: Optional[str] = None,
+    device_id: Optional[str] = None,
+    top: int = 5,
+    db: Session = Depends(get_db),
+):
+    """Aggregate KPIs for module executions stored in module_runs."""
+    start_dt = _parse_iso_datetime(date_from)
+    end_dt = _parse_iso_datetime(date_to)
+    query = _module_run_query(
+        db,
+        module_id=module_id,
+        device_id=device_id,
+        start_dt=start_dt,
+        end_dt=end_dt,
+    )
+    runs = query.all()
+    total_runs = len(runs)
+    successes = sum(1 for run in runs if run.success)
+    success_rate = round((successes / total_runs) * 100, 2) if total_runs else 0.0
+
+    durations = [run.duration_ms for run in runs if run.duration_ms]
+    average_duration_ms = round(sum(durations) / len(durations), 2) if durations else None
+
+    per_module: Dict[str, Dict[str, Any]] = {}
+    for run in runs:
+        stats = per_module.setdefault(
+            run.module_id,
+            {"name": run.module_name, "total": 0, "success": 0, "durations": []},
+        )
+        stats["total"] += 1
+        stats["success"] += 1 if run.success else 0
+        if run.duration_ms:
+            stats["durations"].append(run.duration_ms)
+
+    module_metrics = []
+    for mod_id, stats in per_module.items():
+        duration_avg = (
+            round(sum(stats["durations"]) / len(stats["durations"]), 2)
+            if stats["durations"]
+            else None
+        )
+        module_metrics.append(
+            ModuleRunMetric(
+                module_id=mod_id,
+                module_name=stats["name"],
+                total_runs=stats["total"],
+                success_rate=round(
+                    (stats["success"] / stats["total"]) * 100, 2
+                )
+                if stats["total"]
+                else 0.0,
+                average_duration_ms=duration_avg,
+            )
+        )
+
+    module_metrics.sort(key=lambda item: item.total_runs, reverse=True)
+    module_metrics = module_metrics[: max(top, 1)]
+
+    device_coverage = len({run.device_id for run in runs if run.device_id})
+    last_run_at = None
+    if runs:
+        last_run = max(
+            runs,
+            key=lambda run: run.completed_at or run.started_at or run.created_at,
+        )
+        last_run_at = last_run.completed_at or last_run.started_at or last_run.created_at
+
+    return ModuleReportSummaryResponse(
+        total_runs=total_runs,
+        success_rate=success_rate,
+        average_duration_ms=average_duration_ms,
+        device_coverage=device_coverage,
+        last_run_at=last_run_at,
+        modules=module_metrics,
+    )
+
+
+@router.get("/reports/modules/export")
+def export_module_runs_csv(
+    date_from: Optional[str] = None,
+    date_to: Optional[str] = None,
+    module_id: Optional[str] = None,
+    device_id: Optional[str] = None,
+    limit: int = 1000,
+    db: Session = Depends(get_db),
+):
+    """Generate a CSV export of individual module runs."""
+    start_dt = _parse_iso_datetime(date_from)
+    end_dt = _parse_iso_datetime(date_to)
+    query = (
+        _module_run_query(
+            db,
+            module_id=module_id,
+            device_id=device_id,
+            start_dt=start_dt,
+            end_dt=end_dt,
+        )
+        .order_by(ModuleRun.created_at.desc())
+        .limit(max(min(limit, 5000), 1))
+    )
+    runs = query.all()
+
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(
+        [
+            "run_id",
+            "module_id",
+            "module_name",
+            "device_id",
+            "status",
+            "success",
+            "duration_ms",
+            "started_at",
+            "completed_at",
+        ]
+    )
+    for run in runs:
+        writer.writerow(
+            [
+                run.id,
+                run.module_id,
+                run.module_name,
+                run.device_id or "",
+                run.status.value,
+                "1" if run.success else "0",
+                run.duration_ms or "",
+                (run.started_at.isoformat() if run.started_at else ""),
+                (run.completed_at.isoformat() if run.completed_at else ""),
+            ]
+        )
+
+    return {
+        "filename": "module-runs.csv",
+        "content": buffer.getvalue(),
+        "media_type": "text/csv",
+        "row_count": len(runs),
+    }
 
 
 # ---------------------------------------------------------------------------

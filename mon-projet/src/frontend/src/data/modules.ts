@@ -22,6 +22,14 @@ export const MODULE_CATALOG: ModuleMetadata[] = [
     editable: true,
   },
   {
+    id: 'sms_send',
+    name: 'Send SMS',
+    script: 'send_sms.sh',
+    description: 'Send a custom SMS message to the selected device.',
+    category: 'Voice & Messaging',
+    editable: true,
+  },
+  {
     id: 'enable_airplane_mode',
     name: 'Airplane Mode On',
     script: 'enable_airplane_mode.sh',

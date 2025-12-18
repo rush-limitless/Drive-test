@@ -275,7 +275,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <Box sx={{ textAlign: 'center', mt: 2 }}>
           <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
             <Chip 
-              label="MOBIQ v1.0"
+              label="Version 2.3.0"
               size="small"
               sx={{
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',

@@ -1,16 +1,36 @@
 """Modules API endpoints for compatibility."""
 
+import json
 import logging
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 # Import compatible both from backend cwd and project root
 try:
     from modules.telco_modules import TelcoModules, DEFAULT_WRONG_APN
 except ImportError:  # pragma: no cover
     from src.backend.modules.telco_modules import TelcoModules, DEFAULT_WRONG_APN  # type: ignore
+
+try:
+    from services.module_catalog import (
+        ModuleDefinition,
+        ModuleExecutionError,
+        ModuleNotFoundError,
+        module_catalog,
+    )
+except ImportError:  # pragma: no cover
+    from src.backend.services.module_catalog import (  # type: ignore
+        ModuleDefinition,
+        ModuleExecutionError,
+        ModuleNotFoundError,
+        module_catalog,
+    )
+
+from core.database import get_db
+from models.module_run import ModuleRun, ModuleRunStatus
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +58,7 @@ def _base_module_fields(module: Dict[str, Any]) -> Dict[str, Any]:
     return enriched
 
 
-modules_db: List[Dict[str, Any]] = [
+legacy_modules_db: List[Dict[str, Any]] = [
     {
         "id": "voice_call_test",
         "name": "Voice Call Test",
@@ -188,7 +208,78 @@ modules_db: List[Dict[str, Any]] = [
         "device_required": True,
     },
 ]
-modules_db = [_base_module_fields(entry) for entry in modules_db]
+legacy_modules_db = [_base_module_fields(entry) for entry in legacy_modules_db]
+
+
+def _serialize_catalog_definition(definition: ModuleDefinition) -> Dict[str, Any]:
+    parameters: Dict[str, Dict[str, Any]] = {}
+    for name, details in (definition.inputs or {}).items():
+        parameters[name] = {
+            "type": details.get("type"),
+            "required": bool(details.get("required", False)),
+            "default": details.get("default"),
+            "example": details.get("example"),
+            "min": details.get("min"),
+            "max": details.get("max"),
+        }
+
+    payload = {
+        "id": definition.id,
+        "name": definition.name,
+        "description": definition.description,
+        "category": definition.category,
+        "parameters": parameters,
+        "artifacts": definition.artifacts,
+        "version": definition.version,
+        "timeout_seconds": definition.timeout_sec,
+        "source": "spec-catalog",
+    }
+    return _base_module_fields(payload)
+
+
+def _catalog_definitions() -> List[ModuleDefinition]:
+    try:
+        return module_catalog.list_modules()
+    except Exception as exc:  # pragma: no cover - defensive logging
+        logger.warning("Failed to load Spec modules: %s", exc)
+        return []
+
+
+def _catalog_module_payloads() -> List[Dict[str, Any]]:
+    return [_serialize_catalog_definition(item) for item in _catalog_definitions()]
+
+
+def _merged_modules() -> Dict[str, Dict[str, Any]]:
+    merged: Dict[str, Dict[str, Any]] = {}
+    for entry in _catalog_module_payloads():
+        merged[entry["id"]] = entry
+    for entry in legacy_modules_db:
+        merged.setdefault(entry["id"], entry)
+    return merged
+
+
+def _get_catalog_definition(module_id: str) -> Optional[ModuleDefinition]:
+    try:
+        return module_catalog.get_module(module_id)
+    except ModuleNotFoundError:
+        return None
+    except Exception as exc:  # pragma: no cover - defensive logging
+        logger.warning("Failed to resolve module %s from catalog: %s", module_id, exc)
+        return None
+
+
+def _validate_catalog_parameters(definition: ModuleDefinition, params: Dict[str, Any]) -> None:
+    params = params or {}
+    missing = [
+        name
+        for name, details in (definition.inputs or {}).items()
+        if details.get("required") and params.get(name) in (None, "")
+    ]
+    if missing:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Missing required parameter(s): {', '.join(missing)}",
+        )
 
 DEVICE_REQUIRED_MODULES = {
     "voice_call_test",
@@ -208,39 +299,158 @@ DEVICE_REQUIRED_MODULES = {
 @router.get("/modules")
 async def get_modules(category: Optional[str] = None, active_only: bool = True):
     """Return modules; optionally filter by category. active_only is currently informational."""
-    items = modules_db
+    modules = list(_merged_modules().values())
     if category:
-        items = [m for m in items if m.get("category") == category]
-    # active_only is accepted for compatibility; all modules are active for now
-    return items
+        modules = [m for m in modules if m.get("category") == category]
+    return modules
 
 
 @router.get("/modules/categories")
 async def list_categories():
     """Return distinct module categories."""
-    return sorted({m.get("category", "uncategorized") for m in modules_db})
+    return sorted({m.get("category", "uncategorized") for m in _merged_modules().values()})
 
 
 @router.get("/modules/{module_id}")
 async def get_module(module_id: str):
-    module = next((m for m in modules_db if m["id"] == module_id), None)
-    if not module:
-        raise HTTPException(status_code=404, detail="Module not found")
-    return module
+    module = _merged_modules().get(module_id)
+    if module:
+        return module
+    raise HTTPException(status_code=404, detail="Module not found")
 
 
 @router.post("/modules/{module_id}/validate")
 async def validate_module_input(module_id: str, params: Dict[str, Any]):
     """Basic passthrough validation placeholder for frontend compatibility."""
-    module = next((m for m in modules_db if m["id"] == module_id), None)
+    definition = _get_catalog_definition(module_id)
+    if definition:
+        _validate_catalog_parameters(definition, params or {})
+        return {"module_id": module_id, "valid": True, "input_params": params or {}}
+
+    module = _merged_modules().get(module_id)
     if not module:
         raise HTTPException(status_code=404, detail="Module not found")
     return {"module_id": module_id, "valid": True, "input_params": params or {}}
 
 
+
 @router.post("/modules/{module_id}/execute")
-async def execute_module(module_id: str, execution: ModuleExecute, background_tasks: BackgroundTasks):
-    module = next((m for m in modules_db if m["id"] == module_id), None)
+async def execute_module(module_id: str, execution: ModuleExecute, db: Session = Depends(get_db)):
+    definition = _get_catalog_definition(module_id)
+    if definition:
+        return _execute_catalog_module(definition, execution, db)
+    return _execute_legacy_module(module_id, execution)
+
+
+@router.get("/modules/runs")
+async def list_module_runs(
+    module_id: Optional[str] = None,
+    device_id: Optional[str] = None,
+    status: Optional[ModuleRunStatus] = None,
+    limit: int = 50,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+):
+    """Return historical module runs for reporting/diagnostics."""
+    query = db.query(ModuleRun)
+    if module_id:
+        query = query.filter(ModuleRun.module_id == module_id)
+    if device_id:
+        query = query.filter(ModuleRun.device_id == device_id)
+    if status:
+        query = query.filter(ModuleRun.status == status)
+
+    total = query.count()
+    runs = (
+        query.order_by(ModuleRun.created_at.desc())
+        .offset(max(offset, 0))
+        .limit(max(min(limit, 200), 1))
+        .all()
+    )
+    return {
+        "items": [_serialize_run(run) for run in runs],
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
+
+
+@router.get("/modules/runs/{run_id}")
+async def get_module_run(run_id: str, db: Session = Depends(get_db)):
+    run = db.query(ModuleRun).filter(ModuleRun.id == run_id).first()
+    if not run:
+        raise HTTPException(status_code=404, detail="Run not found")
+    return _serialize_run(run)
+
+
+def _execute_catalog_module(definition: ModuleDefinition, execution: ModuleExecute, db: Session) -> Dict[str, Any]:
+    """Execute a Spec-defined module and persist a run record."""
+    _validate_catalog_parameters(definition, execution.parameters or {})
+
+    run = ModuleRun(
+        module_id=definition.id,
+        module_name=definition.name,
+        device_id=execution.device_id,
+        parameters_json=json.dumps(execution.parameters or {}),
+    )
+    db.add(run)
+    db.commit()
+    db.refresh(run)
+
+    run.mark_running()
+    db.commit()
+
+    try:
+        result = module_catalog.execute_module(
+            definition.id,
+            device_id=execution.device_id,
+            parameters=execution.parameters or {},
+        )
+    except ModuleExecutionError as exc:
+        run.mark_failed(str(exc))
+        db.commit()
+        raise HTTPException(status_code=500, detail=str(exc) or "Module execution failed") from exc
+    except Exception as exc:  # pragma: no cover - defensive logging
+        run.mark_failed(str(exc))
+        db.commit()
+        raise HTTPException(status_code=500, detail="Module execution failed") from exc
+
+    run.mark_completed(
+        success=result.success,
+        result_json=json.dumps(result.result),
+        duration_ms=int(result.duration_ms),
+    )
+    db.commit()
+    db.refresh(run)
+
+    return {
+        "run_id": run.id,
+        "module_id": definition.id,
+        "module_name": definition.name,
+        "device_id": execution.device_id,
+        "status": run.status.value,
+        "success": run.success,
+        "result": result.result,
+        "parameters": execution.parameters or {},
+        "duration_ms": run.duration_ms,
+        "started_at": run.started_at.isoformat() if run.started_at else None,
+        "completed_at": run.completed_at.isoformat() if run.completed_at else None,
+        "entry_point": definition.entry_point,
+    }
+
+
+def _serialize_run(run: ModuleRun) -> Dict[str, Any]:
+    payload = run.to_dict()
+    payload["parameters"] = json.loads(run.parameters_json or "{}")
+    payload["result"] = json.loads(run.result_json) if run.result_json else None
+    payload["status"] = run.status.value
+    payload.pop("parameters_json", None)
+    payload.pop("result_json", None)
+    return payload
+
+
+def _execute_legacy_module(module_id: str, execution: ModuleExecute) -> Dict[str, Any]:
+    module = next((m for m in legacy_modules_db if m["id"] == module_id), None)
     if not module:
         raise HTTPException(status_code=404, detail="Module not found")
 
@@ -248,6 +458,7 @@ async def execute_module(module_id: str, execution: ModuleExecute, background_ta
 
     if module_id in DEVICE_REQUIRED_MODULES and not execution.device_id:
         raise HTTPException(status_code=400, detail="device_id is required for this module")
+
 
     if module_id == "voice_call_test":
         params = execution.parameters or {}

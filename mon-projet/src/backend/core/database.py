@@ -189,6 +189,7 @@ def ensure_sql_schema() -> None:
             "models.execution_device",
             "models.execution_step",
             "models.report",
+            "models.module_run",
             "models.workflow_models",
             "models.user_preference",
         ]

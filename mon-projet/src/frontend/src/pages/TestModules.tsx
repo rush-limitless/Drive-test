@@ -78,6 +78,11 @@ interface PingDialogState {
   interval: string;
 }
 
+interface SmsSendConfig {
+  recipient: string;
+  message: string;
+}
+
 interface WorkflowBuilderDraftModule {
   id: string;
   waitDurationSeconds?: number;
@@ -349,6 +354,7 @@ const DEVICE_MODULE_IDS = new Set([
   'stop_rf_logging',
   'pull_rf_logs',
   'dial_secret_code',
+  'sms_send',
 ]);
 
 const sanitizeWaitingTimeDuration = (value: number): number => {
@@ -428,6 +434,9 @@ const WRONG_APN_STORAGE_KEY = 'module.wrongApnValue';
 const DEFAULT_WRONG_APN = 'arnaud';
 const LOG_PULL_STORAGE_KEY = 'module.logPullDestination';
 const DEFAULT_LOG_PULL_DESTINATION = 'C:\\\\Users\\\\rush\\\\Documents\\\\logs';
+const SMS_SEND_STORAGE_KEY = 'module.smsSendConfig';
+const DEFAULT_SMS_RECIPIENT = '+237600000000';
+const DEFAULT_SMS_MESSAGE = 'Automation test SMS';
 
 const readStoredWrongApn = (): string => {
   if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
@@ -480,6 +489,43 @@ const persistLogDestination = (value: string) => {
     window.localStorage.setItem(LOG_PULL_STORAGE_KEY, value);
   } catch (error) {
     console.warn('[LogPull] Failed to persist destination', error);
+  }
+};
+
+const defaultSmsConfig = (): SmsSendConfig => ({
+  recipient: DEFAULT_SMS_RECIPIENT,
+  message: DEFAULT_SMS_MESSAGE,
+});
+
+const readStoredSmsConfig = (): SmsSendConfig => {
+  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+    return defaultSmsConfig();
+  }
+  try {
+    const raw = window.localStorage.getItem(SMS_SEND_STORAGE_KEY);
+    if (!raw) {
+      return defaultSmsConfig();
+    }
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object' && typeof parsed.recipient === 'string' && typeof parsed.message === 'string') {
+      const recipient = parsed.recipient.trim() || DEFAULT_SMS_RECIPIENT;
+      const message = parsed.message.trim() || DEFAULT_SMS_MESSAGE;
+      return { recipient, message };
+    }
+  } catch {
+    // ignore and fall back to defaults
+  }
+  return defaultSmsConfig();
+};
+
+const persistSmsConfig = (config: SmsSendConfig) => {
+  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+    return;
+  }
+  try {
+    window.localStorage.setItem(SMS_SEND_STORAGE_KEY, JSON.stringify(config));
+  } catch (error) {
+    console.warn('[SendSMS] Failed to persist configuration', error);
   }
 };
 
@@ -649,6 +695,11 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
   const [customScriptDialogOpen, setCustomScriptDialogOpen] = useState(false);
   const [customScriptDraft, setCustomScriptDraft] = useState(customCode);
   const [customScriptDialogError, setCustomScriptDialogError] = useState<string | null>(null);
+  const [smsConfig, setSmsConfig] = useState<SmsSendConfig>(() => readStoredSmsConfig());
+  const [smsDialogOpen, setSmsDialogOpen] = useState(false);
+  const [smsRecipientDraft, setSmsRecipientDraft] = useState(smsConfig.recipient);
+  const [smsMessageDraft, setSmsMessageDraft] = useState(smsConfig.message);
+  const [smsDialogErrors, setSmsDialogErrors] = useState<{ recipient?: string; message?: string }>({});
   const [moduleRunStatuses, setModuleRunStatuses] = useState<Record<string, 'idle' | 'running'>>({});
   const { devices: discoveredDevices, status: devicesStatus } = useDevices({ backendUrl });
   const readyBackendDeviceIds = useMemo(
@@ -735,6 +786,10 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
   useEffect(() => {
     persistLogDestination(logPullDestination);
   }, [logPullDestination]);
+
+  useEffect(() => {
+    persistSmsConfig(smsConfig);
+  }, [smsConfig]);
 
   useEffect(() => {
     if (!workflowDraftLoaded) {
@@ -1109,52 +1164,64 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
           return;
         }
         sharedParameters.code = code;
+      } else if (module.id === 'sms_send') {
+        const recipient = smsConfig.recipient.trim();
+        const message = smsConfig.message.trim();
+        if (!recipient || !message) {
+          setSnackbar({
+            severity: 'error',
+            message: 'Configure a recipient and message before sending an SMS.',
+          });
+          return;
+        }
+        sharedParameters.recipient = recipient;
+        sharedParameters.message = message;
       }
-      const successes: string[] = [];
-      const failures: { deviceId: string; reason: string }[] = [];
-      const deviceResults: DeviceModuleResult[] = [];
+      const executeForDevice = async (deviceId: string): Promise<DeviceModuleResult> => {
+        try {
+          const response = await fetch(`${normalizedBackendUrl}/api/modules/${module.id}/execute`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...authHeaders(),
+            },
+            body: JSON.stringify({
+              device_id: deviceId,
+              parameters: sharedParameters,
+            }),
+          });
+
+          if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text || `Backend failure (HTTP ${response.status})`);
+          }
+
+          const data = await response.json();
+          const success = typeof data.success === 'boolean' ? data.success : true;
+          const failureReason = success ? undefined : resolveModuleFailureReason(data) ?? 'Execution failed.';
+          return {
+            deviceId,
+            success,
+            response: data,
+            ...(failureReason ? { error: failureReason } : {}),
+          };
+        } catch (error) {
+          const message =
+            error instanceof Error ? error.message : 'Unknown error while communicating with the backend.';
+          return { deviceId, success: false, error: message };
+        }
+      };
+
       setModuleRunStatuses((prev) => ({ ...prev, [module.id]: 'running' }));
       try {
-        for (const deviceId of targets) {
-          try {
-            const response = await fetch(`${normalizedBackendUrl}/api/modules/${module.id}/execute`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                ...authHeaders(),
-              },
-              body: JSON.stringify({
-                device_id: deviceId,
-                parameters: sharedParameters,
-              }),
-            });
-
-            if (!response.ok) {
-              const text = await response.text();
-              throw new Error(text || `Backend failure (HTTP ${response.status})`);
-            }
-
-            const data = await response.json();
-            const success = typeof data.success === 'boolean' ? data.success : true;
-            const failureReason = success ? undefined : resolveModuleFailureReason(data) ?? 'Execution failed.';
-            deviceResults.push({
-              deviceId,
-              success,
-              response: data,
-              ...(failureReason ? { error: failureReason } : {}),
-            });
-            if (success) {
-              successes.push(deviceId);
-            } else {
-              failures.push({ deviceId, reason: failureReason ?? 'Execution failed.' });
-            }
-          } catch (error) {
-            const message =
-              error instanceof Error ? error.message : 'Unknown error while communicating with the backend.';
-            failures.push({ deviceId, reason: message });
-            deviceResults.push({ deviceId, success: false, error: message });
-          }
-        }
+        const deviceResults = await Promise.all(targets.map((deviceId) => executeForDevice(deviceId)));
+        const successes = deviceResults.filter((result) => result.success).map((result) => result.deviceId);
+        const failures = deviceResults
+          .filter((result) => !result.success)
+          .map((result) => ({
+            deviceId: result.deviceId,
+            reason: result.error ?? 'Execution failed.',
+          }));
 
         setLastDeviceModuleRun({
           moduleId: module.id,
@@ -1220,7 +1287,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         });
       }
     },
-    [backendUrl, resolveRunTargets, pingConfig, wrongApnValue, logPullDestination]
+    [backendUrl, resolveRunTargets, pingConfig, wrongApnValue, logPullDestination, customCode, smsConfig]
   );
 
   const handleRun = (module: ModuleMetadata) => {
@@ -1302,6 +1369,14 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
       setLogPullDraft(logPullDestination);
       setLogPullDialogError(null);
       setLogPullDialogOpen(true);
+      return;
+    }
+
+    if (module.id === 'sms_send') {
+      setSmsRecipientDraft(smsConfig.recipient);
+      setSmsMessageDraft(smsConfig.message);
+      setSmsDialogErrors({});
+      setSmsDialogOpen(true);
       return;
     }
 
@@ -1439,6 +1514,37 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
     });
     setLogPullDialogError(null);
     setLogPullDialogOpen(false);
+  };
+
+  const handleSmsDialogClose = () => {
+    setSmsDialogOpen(false);
+    setSmsDialogErrors({});
+  };
+
+  const handleSmsDialogSave = () => {
+    const trimmedRecipient = (smsRecipientDraft || '').trim();
+    const trimmedMessage = (smsMessageDraft || '').trim();
+    const errors: { recipient?: string; message?: string } = {};
+    if (!trimmedRecipient) {
+      errors.recipient = 'Recipient phone number is required.';
+    }
+    if (!trimmedMessage) {
+      errors.message = 'Message body is required.';
+    }
+    if (Object.keys(errors).length > 0) {
+      setSmsDialogErrors(errors);
+      return;
+    }
+    const nextConfig: SmsSendConfig = { recipient: trimmedRecipient, message: trimmedMessage };
+    setSmsConfig(nextConfig);
+    setSmsRecipientDraft(trimmedRecipient);
+    setSmsMessageDraft(trimmedMessage);
+    setSnackbar({
+      severity: 'success',
+      message: 'SMS template saved.',
+    });
+    setSmsDialogOpen(false);
+    setSmsDialogErrors({});
   };
 
   const renderPingDetails = (response?: Record<string, unknown>) => {
@@ -2126,6 +2232,48 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         <DialogActions>
           <Button onClick={handleLogPullClose}>Cancel</Button>
           <Button variant="contained" onClick={handleLogPullSave}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={smsDialogOpen} onClose={handleSmsDialogClose} fullWidth maxWidth="xs">
+        <DialogTitle>Send SMS Configuration</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ color: '#475569', mb: 2 }}>
+            Define the recipient number and message used when running the Send SMS module.
+          </Typography>
+          <Stack spacing={2}>
+            <TextField
+              label="Recipient phone number"
+              value={smsRecipientDraft}
+              onChange={(event) => {
+                setSmsRecipientDraft(event.target.value);
+                setSmsDialogErrors((prev) => ({ ...prev, recipient: undefined }));
+              }}
+              error={Boolean(smsDialogErrors.recipient)}
+              helperText={smsDialogErrors.recipient ?? 'Include the country code if needed.'}
+              fullWidth
+            />
+            <TextField
+              label="Message body"
+              value={smsMessageDraft}
+              onChange={(event) => {
+                setSmsMessageDraft(event.target.value);
+                setSmsDialogErrors((prev) => ({ ...prev, message: undefined }));
+              }}
+              error={Boolean(smsDialogErrors.message)}
+              helperText={smsDialogErrors.message ?? `${smsMessageDraft.length}/10000 characters`}
+              fullWidth
+              multiline
+              minRows={3}
+              inputProps={{ maxLength: 10000 }}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleSmsDialogClose}>Cancel</Button>
+          <Button variant="contained" onClick={handleSmsDialogSave}>
             Save
           </Button>
         </DialogActions>

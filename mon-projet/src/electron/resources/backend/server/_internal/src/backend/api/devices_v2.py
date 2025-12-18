@@ -9,6 +9,11 @@ import logging
 from datetime import datetime, timezone
 import re
 
+try:  # Always prefer the resolved adb binary bundled with the app
+    from core.adb_path import ADB_EXECUTABLE  # type: ignore
+except Exception:  # pragma: no cover - fallback if import fails
+    ADB_EXECUTABLE = "adb"
+
 router = APIRouter()
 logger = logging.getLogger(__name__)
 from api.security import require_api_key, enforce_rate_limit  # noqa: E402
@@ -17,12 +22,18 @@ class DeviceManager:
     def __init__(self):
         self.device_cache = {}
         self.last_scan = 0
+
+    def _adb_cmd(self, base_args: list[str], device_id: Optional[str] = None) -> list[str]:
+        """Build an adb command using the resolved executable and optional device id."""
+        if device_id:
+            return [ADB_EXECUTABLE, "-s", device_id, *base_args]
+        return [ADB_EXECUTABLE, *base_args]
     
     async def get_devices(self) -> List[Dict[str, Any]]:
         """Get all connected ADB devices with detailed information"""
         try:
             result = subprocess.run(
-                ['adb', 'devices'], 
+                self._adb_cmd(['devices']), 
                 capture_output=True, 
                 text=True, 
                 timeout=10
@@ -135,7 +146,7 @@ class DeviceManager:
             try:
                 # Get device model
                 model_result = subprocess.run(
-                    ['adb', '-s', device_id, 'shell', 'getprop', 'ro.product.model'],
+                    self._adb_cmd(['shell', 'getprop', 'ro.product.model'], device_id),
                     capture_output=True, text=True, timeout=5
                 )
                 if model_result.returncode == 0:
@@ -143,7 +154,7 @@ class DeviceManager:
                 
                 # Get Android version
                 version_result = subprocess.run(
-                    ['adb', '-s', device_id, 'shell', 'getprop', 'ro.build.version.release'],
+                    self._adb_cmd(['shell', 'getprop', 'ro.build.version.release'], device_id),
                     capture_output=True, text=True, timeout=5
                 )
                 if version_result.returncode == 0:
@@ -151,7 +162,7 @@ class DeviceManager:
                 
                 # Read airplane mode state so UI can react immediately
                 airplane_state = subprocess.run(
-                    ['adb', '-s', device_id, 'shell', 'settings', 'get', 'global', 'airplane_mode_on'],
+                    self._adb_cmd(['shell', 'settings', 'get', 'global', 'airplane_mode_on'], device_id),
                     capture_output=True, text=True, timeout=5
                 )
                 if airplane_state.returncode == 0:
@@ -159,7 +170,7 @@ class DeviceManager:
                 
                 # Get device name (brand + model + marketing name)
                 brand_result = subprocess.run(
-                    ['adb', '-s', device_id, 'shell', 'getprop', 'ro.product.brand'],
+                    self._adb_cmd(['shell', 'getprop', 'ro.product.brand'], device_id),
                     capture_output=True, text=True, timeout=5
                 )
                 
@@ -179,7 +190,7 @@ class DeviceManager:
                 for prop in props_to_try:
                     try:
                         result = subprocess.run(
-                            ['adb', '-s', device_id, 'shell', 'getprop', prop],
+                            self._adb_cmd(['shell', 'getprop', prop], device_id),
                             capture_output=True, text=True, timeout=3
                         )
                         if result.returncode == 0 and result.stdout.strip():
@@ -296,7 +307,7 @@ class DeviceManager:
                 try:
                     device_info["battery_level"] = "Unknown"
                     battery_result = subprocess.run(
-                        ['adb', '-s', device_id, 'shell', 'dumpsys', 'battery'],
+                        self._adb_cmd(['shell', 'dumpsys', 'battery'], device_id),
                         capture_output=True, text=True, timeout=5
                     )
                     if battery_result.returncode == 0:
@@ -320,7 +331,7 @@ class DeviceManager:
 
                     for prop in operator_props:
                         result = subprocess.run(
-                            ['adb', '-s', device_id, 'shell', 'getprop', prop],
+                            self._adb_cmd(['shell', 'getprop', prop], device_id),
                             capture_output=True, text=True, timeout=3
                         )
                         if result.returncode == 0 and result.stdout.strip():
@@ -331,7 +342,7 @@ class DeviceManager:
                         numeric_props = ['gsm.operator.numeric', 'gsm.sim.operator.numeric']
                         for prop in numeric_props:
                             result = subprocess.run(
-                                ['adb', '-s', device_id, 'shell', 'getprop', prop],
+                                self._adb_cmd(['shell', 'getprop', prop], device_id),
                                 capture_output=True, text=True, timeout=3
                             )
                             if result.returncode == 0 and result.stdout.strip():
@@ -347,7 +358,7 @@ class DeviceManager:
                 try:
                     network_type = None
                     network_prop = subprocess.run(
-                        ['adb', '-s', device_id, 'shell', 'getprop', 'gsm.network.type'],
+                        self._adb_cmd(['shell', 'getprop', 'gsm.network.type'], device_id),
                         capture_output=True, text=True, timeout=5
                     )
                     if network_prop.returncode == 0:
@@ -357,7 +368,7 @@ class DeviceManager:
 
                     if not network_type:
                         telephony = subprocess.run(
-                            ['adb', '-s', device_id, 'shell', 'dumpsys', 'telephony.registry'],
+                            self._adb_cmd(['shell', 'dumpsys', 'telephony.registry'], device_id),
                             capture_output=True, text=True, timeout=7
                         )
                         if telephony.returncode == 0:
@@ -380,7 +391,7 @@ class DeviceManager:
         """Test device connectivity"""
         try:
             result = subprocess.run(
-                ['adb', '-s', device_id, 'shell', 'echo', 'test'],
+                self._adb_cmd(['shell', 'echo', 'test'], device_id),
                 capture_output=True, text=True, timeout=10
             )
             
@@ -410,7 +421,7 @@ class DeviceManager:
         """Reboot a specific device"""
         try:
             result = subprocess.run(
-                ['adb', '-s', device_id, 'reboot'],
+                self._adb_cmd(['reboot'], device_id),
                 capture_output=True, text=True, timeout=10
             )
             
@@ -440,7 +451,7 @@ class DeviceManager:
         """Disconnect a specific device"""
         try:
             result = subprocess.run(
-                ['adb', 'disconnect', device_id],
+                self._adb_cmd(['disconnect', device_id]),
                 capture_output=True, text=True, timeout=10
             )
             
@@ -522,7 +533,7 @@ async def get_device_info(device_id: str, dep1=Depends(require_api_key), dep2=De
         for key, prop in info_commands.items():
             try:
                 result = subprocess.run(
-                    ['adb', '-s', device_id, 'shell', 'getprop', prop],
+                    device_manager._adb_cmd(['shell', 'getprop', prop], device_id),
                     capture_output=True, text=True, timeout=5
                 )
                 if result.returncode == 0:

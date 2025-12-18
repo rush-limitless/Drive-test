@@ -885,14 +885,24 @@ class TelcoModules(ADBExecutor):
                 time.sleep(0.2)
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_CENTER'])
             time.sleep(1)
+            # Placer le focus sur le premier APN de la liste et entrer dans le détail
+            self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_DOWN'])
+            time.sleep(0.2)
+            self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_CENTER'])
+            time.sleep(1)
             # 5) Sélection APN (tap sur premier item de la liste) sans toucher le bouton retour
             selected = False
             # Essayer de tap sur le libellé de l'APN ou sa valeur
             if self._tap_by_text('MTN CM') or self._tap_by_text('mtnwap'):
                 selected = True
             else:
-                # Fallback: tap coordonnées au centre de la carte (éviter la barre du haut)
+                # Fallbacks: d'abord un tap approximatif au centre, puis navigation clavier
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'tap', '540', '650'])
+                time.sleep(0.5)
+                # Utiliser DPAD pour sélectionner la première entrée si le tap ne suffit pas
+                self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_DOWN'])
+                time.sleep(0.2)
+                self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_CENTER'])
                 selected = True
             time.sleep(1)
             if not selected:
@@ -1218,10 +1228,77 @@ class TelcoModules(ADBExecutor):
     # -----------------------------
     # SMS
     # -----------------------------
+    def _sanitize_text_input(self, value: str) -> str:
+        """Prepare strings for `adb shell input text` (spaces must be %s)."""
+        safe = value.replace(' ', '%s')
+        for ch in ['"', "'", '\\']:
+            safe = safe.replace(ch, '')
+        return safe
+
     def send_sms(self, number: str, message: str) -> Dict[str, Any]:
-        self.execute_command([ADB_EXECUTABLE, 'shell', 'am', 'start', '-a', 'android.intent.action.SENDTO', '-d', f'sms:{number}', '--es', 'sms_body', message])
-        self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_ENTER'])
-        return {'module': 'send_sms', 'success': True, 'duration': 0.1}
+        """Send an SMS by mimicking the provided automation logic."""
+        start = time.time()
+        sanitized_message = self._sanitize_text_input(message)
+        number_value = number.strip()
+        attempts: List[Dict[str, Any]] = []
+
+        def _run_sequence(sequence_name: str) -> bool:
+            attempts.append({'strategy': sequence_name})
+            if sequence_name == 'intent_sendto':
+                result = self.execute_command([
+                    ADB_EXECUTABLE, 'shell', 'am', 'start',
+                    '-a', 'android.intent.action.SENDTO',
+                    '-d', f'sms:{number_value}',
+                ])
+                attempts[-1]['start_success'] = result.success
+                if not result.success:
+                    attempts[-1]['error'] = result.error
+                    return False
+                time.sleep(2)
+                self.execute_command([
+                    ADB_EXECUTABLE, 'shell', 'input', 'text', sanitized_message
+                ])
+                time.sleep(1)
+                tap = self.execute_command([
+                    ADB_EXECUTABLE, 'shell', 'input', 'tap', '666', '889'
+                ])
+                attempts[-1]['tap_success'] = tap.success
+                attempts[-1]['tap_error'] = tap.error if not tap.success else None
+                return tap.success
+
+            if sequence_name == 'app_messages':
+                result = self.execute_command([
+                    ADB_EXECUTABLE, 'shell', 'am', 'start',
+                    '-a', 'android.intent.action.MAIN',
+                    '-c', 'android.intent.category.DEFAULT',
+                    '-t', 'vnd.android-dir/mms-sms',
+                ])
+                attempts[-1]['start_success'] = result.success
+                if not result.success:
+                    attempts[-1]['error'] = result.error
+                    return False
+                time.sleep(2)
+                self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_MENU'])
+                time.sleep(1)
+                self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'text', self._sanitize_text_input(number_value)])
+                self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_TAB'])
+                self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'text', sanitized_message])
+                tap = self.execute_command([
+                    ADB_EXECUTABLE, 'shell', 'input', 'tap', '666', '889'
+                ])
+                attempts[-1]['tap_success'] = tap.success
+                attempts[-1]['tap_error'] = tap.error if not tap.success else None
+                return tap.success
+            return False
+
+        success = _run_sequence('intent_sendto') or _run_sequence('app_messages')
+        duration = time.time() - start
+        return {
+            'module': 'send_sms',
+            'success': success,
+            'duration': duration,
+            'attempts': attempts,
+        }
 
     def delete_sms(self) -> Dict[str, Any]:
         result = self.execute_command([ADB_EXECUTABLE, 'shell', 'pm', 'clear', 'com.android.messaging'])
