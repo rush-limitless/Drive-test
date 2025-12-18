@@ -674,6 +674,9 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
 
   const [moduleCategoryFilter, setModuleCategoryFilter] = useState<string>('all');
   const [workflowDescription, setWorkflowDescription] = useState('');
+  const [appLauncherSelection, setAppLauncherSelection] = useState<AppLauncherOption>(readAppLauncherSelection);
+  const [appLauncherDialogSelection, setAppLauncherDialogSelection] = useState<AppLauncherOption>(readAppLauncherSelection);
+  const [appLauncherDialogOpen, setAppLauncherDialogOpen] = useState(false);
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
       return;
@@ -684,9 +687,6 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
       // best effort persistence
     }
   }, [appLauncherSelection]);
-  const [appLauncherSelection, setAppLauncherSelection] = useState<AppLauncherOption>(readAppLauncherSelection);
-  const [appLauncherDialogSelection, setAppLauncherDialogSelection] = useState<AppLauncherOption>(readAppLauncherSelection);
-  const [appLauncherDialogOpen, setAppLauncherDialogOpen] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(() => readFavorites());
   const [moduleFilterMode, setModuleFilterMode] = useState<'all' | 'favorites' | 'recents'>('all');
   const [recents, setRecents] = useState<string[]>(() => readRecents());
@@ -1217,6 +1217,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         sharedParameters.message = message;
       }
       const executeForDevice = async (deviceId: string): Promise<DeviceModuleResult> => {
+        console.log(`[runDeviceModule] starting ${module.id} on ${deviceId} at ${new Date().toISOString()}`);
         try {
           const response = await fetch(`${normalizedBackendUrl}/api/modules/${module.id}/execute`, {
             method: 'POST',
@@ -1237,6 +1238,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
 
           const data = await response.json();
           const success = typeof data.success === 'boolean' ? data.success : true;
+          console.log(`[runDeviceModule] completed ${module.id} on ${deviceId} => success=${success} at ${new Date().toISOString()}`);
           const failureReason = success ? undefined : resolveModuleFailureReason(data) ?? 'Execution failed.';
           return {
             deviceId,

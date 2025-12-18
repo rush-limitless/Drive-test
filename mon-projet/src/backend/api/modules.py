@@ -471,6 +471,14 @@ def _serialize_run(run: ModuleRun) -> Dict[str, Any]:
     return payload
 
 
+def _with_stage(result: Dict[str, Any], stage: str, message: Optional[str] = None) -> Dict[str, Any]:
+    wrapped = dict(result)
+    wrapped["stage"] = stage
+    if message:
+        wrapped["stage_message"] = message
+    return wrapped
+
+
 def _execute_legacy_module(module_id: str, execution: ModuleExecute) -> Dict[str, Any]:
     module = next((m for m in legacy_modules_db if m["id"] == module_id), None)
     if not module:
@@ -523,7 +531,7 @@ def _execute_legacy_module(module_id: str, execution: ModuleExecute) -> Dict[str
             },
             "status": "completed" if success else "failed",
             "success": success,
-            "result": result,
+            "result": _with_stage(result, "completed", "Voice call test finished"),
         }
 
     if module_id in {"enable_airplane_mode", "disable_airplane_mode"}:
@@ -540,7 +548,7 @@ def _execute_legacy_module(module_id: str, execution: ModuleExecute) -> Dict[str
             "parameters": execution.parameters or {},
             "status": "completed" if success else "failed",
             "success": success,
-            "result": result,
+            "result": _with_stage(result, "completed", "Airplane mode toggled"),
         }
 
     if module_id == "launch_app":
@@ -556,7 +564,7 @@ def _execute_legacy_module(module_id: str, execution: ModuleExecute) -> Dict[str
             "parameters": {"app": app_choice},
             "status": "completed" if success else "failed",
             "success": success,
-            "result": result,
+            "result": _with_stage(result, "completed", f"Launch app {app_choice}"),
         }
 
     if module_id == "ping":
@@ -577,7 +585,7 @@ def _execute_legacy_module(module_id: str, execution: ModuleExecute) -> Dict[str
             },
             "status": "completed" if result.get("success", True) else "failed",
             "success": result.get("success", True),
-            "result": result,
+            "result": _with_stage(result, "completed", "Ping finished"),
         }
 
     if module_id == "activate_data":
@@ -591,7 +599,7 @@ def _execute_legacy_module(module_id: str, execution: ModuleExecute) -> Dict[str
             "parameters": {},
             "status": "completed" if success else "failed",
             "success": success,
-            "result": result,
+            "result": _with_stage(result, "completed", "Mobile data enabled"),
         }
 
     if module_id == "wrong_apn_configuration":
@@ -608,7 +616,7 @@ def _execute_legacy_module(module_id: str, execution: ModuleExecute) -> Dict[str
             "parameters": {"apn_value": apn_value, "use_ui_flow": use_ui_flow},
             "status": "completed" if success else "failed",
             "success": success,
-            "result": result,
+            "result": _with_stage(result, "completed", "APN updated"),
         }
 
     if module_id == "pull_device_logs":
@@ -635,6 +643,7 @@ def _execute_legacy_module(module_id: str, execution: ModuleExecute) -> Dict[str
         else:
             result = executor.stop_rf_logging()
         success = result.get("success", True)
+        stage_msg = "RF logging started" if module_id == "start_rf_logging" else "RF logging stopped"
         return {
             "execution_id": f"exec_{module_id}",
             "module_id": module_id,
@@ -643,7 +652,7 @@ def _execute_legacy_module(module_id: str, execution: ModuleExecute) -> Dict[str
             "parameters": {},
             "status": "completed" if success else "failed",
             "success": success,
-            "result": result,
+            "result": _with_stage(result, "completed", stage_msg),
         }
 
     if module_id == "pull_rf_logs":
@@ -683,12 +692,13 @@ def _execute_legacy_module(module_id: str, execution: ModuleExecute) -> Dict[str
         }
 
     execution_id = f"exec_{module_id}"
-    return {
-        "execution_id": execution_id,
-        "module_id": module_id,
-        "module_name": module["name"],
-        "device_id": execution.device_id,
-        "parameters": execution.parameters,
-        "status": "started",
-        "message": f"Module '{module['name']}' execution started",
-    }
+        return {
+            "execution_id": execution_id,
+            "module_id": module_id,
+            "module_name": module["name"],
+            "device_id": execution.device_id,
+            "parameters": execution.parameters,
+            "status": "started",
+            "message": f"Module '{module['name']}' execution started",
+            "result": {"stage": "requested", "message": "Request queued"},
+        }
