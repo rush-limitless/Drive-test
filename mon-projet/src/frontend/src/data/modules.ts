@@ -71,6 +71,14 @@ export const MODULE_CATALOG: ModuleMetadata[] = [
     editable: false,
   },
   {
+    id: 'launch_app',
+    name: 'Smart App Launcher',
+    script: 'launch_app.sh',
+    description: 'Launch Google or YouTube to generate realistic data traffic.',
+    category: 'Automation',
+    editable: true,
+  },
+  {
     id: 'wrong_apn_configuration',
     name: 'Change APN',
     script: 'wrong_apn_configuration.sh',

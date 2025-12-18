@@ -14,6 +14,7 @@ import {
   TextField,
   InputAdornment,
   FormControl,
+  FormControlLabel,
   Select,
   MenuItem,
   Dialog,
@@ -24,6 +25,8 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Divider,
+  Radio,
+  RadioGroup,
 } from '@mui/material';
 import { 
   Play, 
@@ -163,6 +166,21 @@ const DEFAULT_PING_CONFIG: PingConfig = {
   target: '8.8.8.8',
   duration: 10,
   interval: 1.0,
+};
+type AppLauncherOption = 'youtube' | 'google';
+
+const APP_LAUNCHER_STORAGE_KEY = 'appLauncherSelection';
+const APP_LAUNCHER_DISPLAY: Record<AppLauncherOption, string> = {
+  youtube: 'YouTube',
+  google: 'Google',
+};
+
+const readAppLauncherSelection = (): AppLauncherOption => {
+  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+    return 'youtube';
+  }
+  const stored = window.localStorage.getItem(APP_LAUNCHER_STORAGE_KEY);
+  return stored === 'google' ? 'google' : 'youtube';
 };
 const WAITING_TIME_DEFAULT_DURATION = 5;
 const WAITING_TIME_MIN_DURATION = 1;
@@ -348,6 +366,7 @@ const DEVICE_MODULE_IDS = new Set([
   'disable_airplane_mode',
   'ping',
   'activate_data',
+  'launch_app',
   'wrong_apn_configuration',
   'pull_device_logs',
   'start_rf_logging',
@@ -655,6 +674,19 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
 
   const [moduleCategoryFilter, setModuleCategoryFilter] = useState<string>('all');
   const [workflowDescription, setWorkflowDescription] = useState('');
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+      return;
+    }
+    try {
+      window.localStorage.setItem(APP_LAUNCHER_STORAGE_KEY, appLauncherSelection);
+    } catch {
+      // best effort persistence
+    }
+  }, [appLauncherSelection]);
+  const [appLauncherSelection, setAppLauncherSelection] = useState<AppLauncherOption>(readAppLauncherSelection);
+  const [appLauncherDialogSelection, setAppLauncherDialogSelection] = useState<AppLauncherOption>(readAppLauncherSelection);
+  const [appLauncherDialogOpen, setAppLauncherDialogOpen] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(() => readFavorites());
   const [moduleFilterMode, setModuleFilterMode] = useState<'all' | 'favorites' | 'recents'>('all');
   const [recents, setRecents] = useState<string[]>(() => readRecents());
@@ -1144,6 +1176,10 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
 
     const normalizedBackendUrl = backendUrl.replace(/\/$/, '');
     const sharedParameters: Record<string, any> = {};
+
+    if (module.id === 'launch_app') {
+      sharedParameters.app = appLauncherSelection;
+    }
     if (module.id === 'wrong_apn_configuration') {
         sharedParameters.apn_value = (wrongApnValue || DEFAULT_WRONG_APN).trim() || DEFAULT_WRONG_APN;
         sharedParameters.use_ui_flow = true;
@@ -1290,7 +1326,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         });
       }
     },
-    [backendUrl, resolveRunTargets, pingConfig, wrongApnValue, logPullDestination, customCode, smsConfig]
+    [backendUrl, resolveRunTargets, pingConfig, wrongApnValue, logPullDestination, customCode, smsConfig, appLauncherSelection]
   );
 
   const handleRun = (module: ModuleMetadata) => {
@@ -1330,6 +1366,20 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
     setSnackbar({ message: `Run placeholder: ${module.script}`, severity: 'info' });
   };
 
+  const closeAppLauncherDialog = () => {
+    setAppLauncherDialogSelection(appLauncherSelection);
+    setAppLauncherDialogOpen(false);
+  };
+
+  const handleAppLauncherDialogSave = () => {
+    setAppLauncherSelection(appLauncherDialogSelection);
+    setAppLauncherDialogOpen(false);
+    setSnackbar({
+      severity: 'success',
+      message: `Smart App Launcher will now target ${APP_LAUNCHER_DISPLAY[appLauncherDialogSelection]}.`,
+    });
+  };
+
   const handleEdit = (module: ModuleMetadata) => {
     if (module.id === 'call_test') {
       const sequence = liveSelectedDeviceIds.length > 0 ? liveSelectedDeviceIds : [GLOBAL_CALL_TEST_KEY];
@@ -1343,6 +1393,11 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
       setCallTestPendingValues({});
       runResultsRef.current = { success: [], failure: [] };
       setCallTestDialogOpen(true);
+      return;
+    }
+    if (module.id === 'launch_app') {
+      setAppLauncherDialogSelection(appLauncherSelection);
+      setAppLauncherDialogOpen(true);
       return;
     }
 
@@ -2023,6 +2078,11 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
                 }}>
                   {module.description}
                 </Typography>
+                {module.id === 'launch_app' && (
+                  <Typography variant="caption" sx={{ color: '#475569', fontWeight: 600, mb: 1 }}>
+                    Target: {APP_LAUNCHER_DISPLAY[appLauncherSelection]}
+                  </Typography>
+                )}
 
                 <Box display="flex" gap={2} mb={3}>
                   <Box display="flex" alignItems="center" gap={1}>
@@ -2251,6 +2311,38 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
           <Button onClick={handleWrongApnClose}>Cancel</Button>
           <Button variant="contained" onClick={handleWrongApnSave}>
             Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={appLauncherDialogOpen} onClose={closeAppLauncherDialog} fullWidth maxWidth="xs">
+        <DialogTitle>Smart App Launcher</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ color: '#475569', mb: 2 }}>
+            Choisissez l'application cible : YouTube ouvre une vidéo aléatoire, Google lance une recherche aléatoire pour provoquer du trafic.
+          </Typography>
+          <RadioGroup
+            value={appLauncherDialogSelection}
+            onChange={(event) => setAppLauncherDialogSelection(event.target.value as AppLauncherOption)}
+          >
+            <FormControlLabel
+              value="youtube"
+              control={<Radio />}
+              label="YouTube (lecture d'une vidéo tirée de la liste)"
+            />
+            <FormControlLabel
+              value="google"
+              control={<Radio />}
+              label="Google (recherche aléatoire)"
+            />
+          </RadioGroup>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeAppLauncherDialog} sx={{ textTransform: 'none' }}>
+            Annuler
+          </Button>
+          <Button variant="contained" onClick={handleAppLauncherDialogSave} sx={{ textTransform: 'none' }}>
+            Sauvegarder
           </Button>
         </DialogActions>
       </Dialog>

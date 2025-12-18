@@ -6,6 +6,7 @@ import re
 import subprocess
 import time
 import math
+import random
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
@@ -59,6 +60,25 @@ DEFAULT_REDIAL_DELAY = 3.0
 AIRPLANE_STATE_TIMEOUT = 12.0
 AIRPLANE_STATE_POLL_SEC = 0.5
 DEFAULT_WRONG_APN = "arnaud"
+APP_LAUNCHER_VIDEO_IDS = [
+    "M7lc1UVf-VE",
+    "kffacxfA7G4",
+    "3JZ_D3ELwOQ",
+    "7wtfhZwyrcc",
+    "6Dh-RL__uN4",
+]
+APP_LAUNCHER_QUERIES = [
+    "network performance automation",
+    "youtube video recommendations",
+    "how to optimize mobile data",
+    "android adb automation tips",
+    "live streaming quality test",
+]
+APP_LAUNCHER_PACKAGE_MAP = {
+    "youtube": "com.google.android.youtube",
+    "google": "com.google.android.googlequicksearchbox",
+}
+APP_LAUNCHER_DEFAULT = "youtube"
 
 
 def _extract_field(source: str, field: str) -> Optional[str]:
@@ -185,6 +205,12 @@ class TelcoModules(ADBExecutor):
             info['emergency_only'] = emergency_only
 
         return info or None
+
+    def _is_app_running(self, package: str) -> bool:
+        if not package:
+            return False
+        result = self.execute_command([ADB_EXECUTABLE, 'shell', 'pidof', package])
+        return bool(result.success and result.output and result.output.strip())
     
     # -----------------------------
     # Call Handling
@@ -1052,6 +1078,63 @@ class TelcoModules(ADBExecutor):
         result = self.ping_target(target=target, duration_seconds=duration_seconds, interval_seconds=interval_seconds)
         result['module'] = 'test_data_connection'
         return result
+
+    def launch_app(self, app: Optional[str]) -> Dict[str, Any]:
+        normalized = (str(app or APP_LAUNCHER_DEFAULT)).strip().lower()
+        package = APP_LAUNCHER_PACKAGE_MAP.get(normalized)
+        if not package:
+            return {
+                'module': 'launch_app',
+                'success': False,
+                'duration': 0.0,
+                'app': normalized,
+                'error': f'Unsupported app "{app or ""}"',
+            }
+
+        already_running = self._is_app_running(package)
+        if normalized == 'youtube':
+            video_id = random.choice(APP_LAUNCHER_VIDEO_IDS)
+            target_url = f"https://www.youtube.com/watch?v={video_id}"
+            cmd = [
+                ADB_EXECUTABLE,
+                'shell',
+                'am',
+                'start',
+                '-a',
+                'android.intent.action.VIEW',
+                '-d',
+                target_url,
+            ]
+        else:
+            query = random.choice(APP_LAUNCHER_QUERIES)
+            target_url = f"search:{query}"
+            cmd = [
+                ADB_EXECUTABLE,
+                'shell',
+                'am',
+                'start',
+                '-a',
+                'android.intent.action.WEB_SEARCH',
+                '-e',
+                'query',
+                query,
+                '-n',
+                'com.google.android.googlequicksearchbox/com.google.android.apps.gsa.searchnow.SearchActivity',
+            ]
+
+        cmd_result = self.execute_command(cmd)
+        success = cmd_result.success
+        return {
+            'module': 'launch_app',
+            'success': success,
+            'duration': cmd_result.duration,
+            'app': normalized,
+            'app_package': package,
+            'target': target_url,
+            'already_on': already_running,
+            'already_off': not already_running,
+            'error': None if success else cmd_result.error,
+        }
 
     # -----------------------------
     # Wi-Fi

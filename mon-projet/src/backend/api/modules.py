@@ -134,6 +134,27 @@ legacy_modules_db: List[Dict[str, Any]] = [
         "device_required": True,
     },
     {
+        "id": "launch_app",
+        "name": "Smart App Launcher",
+        "description": "Launch Google or YouTube to generate data usage.",
+        "category": "automation",
+        "complexity": "simple",
+        "duration_estimate": "<30s",
+        "parameters": {
+            "app": {
+                "type": "string",
+                "required": True,
+                "default": "youtube",
+                "enum": ["youtube", "google"],
+            }
+        },
+        "requirements": ["adb"],
+        "last_run": None,
+        "success_rate": 0,
+        "total_runs": 0,
+        "device_required": True,
+    },
+    {
         "id": "wrong_apn_configuration",
         "name": "Wrong APN Configuration",
         "description": "Force the device APN to an invalid value to simulate data failures.",
@@ -287,6 +308,7 @@ DEVICE_REQUIRED_MODULES = {
     "disable_airplane_mode",
     "ping",
     "activate_data",
+    "launch_app",
     "wrong_apn_configuration",
     "pull_device_logs",
     "start_rf_logging",
@@ -516,6 +538,22 @@ def _execute_legacy_module(module_id: str, execution: ModuleExecute) -> Dict[str
             "module_name": module["name"],
             "device_id": execution.device_id,
             "parameters": execution.parameters or {},
+            "status": "completed" if success else "failed",
+            "success": success,
+            "result": result,
+        }
+
+    if module_id == "launch_app":
+        params = execution.parameters or {}
+        app_choice = str(params.get("app", "youtube")).lower()
+        result = executor.launch_app(app_choice)
+        success = result.get("success", True)
+        return {
+            "execution_id": f"exec_{module_id}",
+            "module_id": module_id,
+            "module_name": module["name"],
+            "device_id": execution.device_id,
+            "parameters": {"app": app_choice},
             "status": "completed" if success else "failed",
             "success": success,
             "result": result,
