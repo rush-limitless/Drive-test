@@ -1,13 +1,29 @@
 """WebSocket connection manager for real-time updates."""
 
 from fastapi import WebSocket, WebSocketDisconnect
-from typing import Dict, List, Set
+from typing import Any, Dict, List, Set
 import json
 import logging
 import asyncio
 from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
+
+
+def _format_device_result_message(result: Dict[str, Any]) -> str:
+    candidate_error = result.get("error")
+    if isinstance(candidate_error, str) and candidate_error.strip():
+        return candidate_error.strip()
+    payload = result.get("result") or result
+    if isinstance(payload, dict):
+        candidate_stage = payload.get("stage_message") or payload.get("summary") or payload.get("message")
+        if isinstance(candidate_stage, str) and candidate_stage.strip():
+            return candidate_stage.strip()
+        serialized = json.dumps(payload)
+        return serialized if len(serialized) <= 120 else f"{serialized[:117]}..."
+    if isinstance(payload, str) and payload.strip():
+        return payload.strip()
+    return "No details available"
 
 
 class ConnectionManager:
@@ -113,6 +129,28 @@ class ConnectionManager:
         }
         await self.broadcast_to_execution(execution_id, message)
         
+    async def send_module_status(self, execution_id: str, module_id: str, status_entry: dict):
+        """Broadcast module status updates."""
+        device_notifications = []
+        for entry in status_entry.get("device_results") or []:
+            device_notifications.append(
+                {
+                    "device_id": entry.get("device_id") or entry.get("deviceId") or "unknown",
+                    "success": bool(entry.get("success", True)),
+                    "message": _format_device_result_message(entry),
+                }
+            )
+
+        message = {
+            "type": "module_status",
+            "execution_id": execution_id,
+            "module_id": module_id,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "status": status_entry,
+            "device_notifications": device_notifications,
+        }
+        await self.broadcast_to_execution(execution_id, message)
+
     async def send_device_status(self, device_id: str, status_data: dict):
         """Send device status update."""
         message = {

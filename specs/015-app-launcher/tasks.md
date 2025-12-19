@@ -27,6 +27,9 @@ description: "Task list for implementing the Smart App Launcher module"
 
 **Independent Test**: Open the module editor for Smart App Launcher, switch between Google and YouTube, save, then run the module and observe the chosen app launching.
 
+- [x] T00A [US2] Extend the dialog to capture a duration (seconds) setting, persist it in localStorage, and display it under the module card.
+- [x] T00B [US2] Validate the duration input (positive integer) and ensure `appLauncherDuration` is included in the payload when running the module.
+
 - [ ] T005 [US2] Add the Smart App Launcher entry to `frontend/src/data/modules.ts` with `editable: true` and a descriptive category/text.
 - [ ] T006 [US2] Extend `frontend/src/pages/TestModules.tsx`:
   - Maintain `appLauncherSelection` state and storage for the chosen target.
@@ -47,4 +50,3 @@ description: "Task list for implementing the Smart App Launcher module"
 
 - [ ] T010 [P] Add or update any necessary docs (specifies, release notes, README) that mention the new module.
 - [ ] T011 [P] Run `npm run spec:check` to validate the triad of spec/plan/tasks and ensure compliance with Spec Kit.
-

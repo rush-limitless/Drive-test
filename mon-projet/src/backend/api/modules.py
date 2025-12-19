@@ -1,8 +1,14 @@
 """Modules API endpoints for compatibility."""
 
+import asyncio
 import json
 import logging
-from typing import Any, Dict, List, Optional
+import time
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -29,6 +35,7 @@ except ImportError:  # pragma: no cover
         module_catalog,
     )
 
+from api.websocket import connection_manager
 from core.database import get_db
 from models.module_run import ModuleRun, ModuleRunStatus
 
@@ -37,11 +44,144 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+def _now_iso() -> str:
+    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+
+
+module_status_entries: Dict[str, Dict[str, Any]] = {}
+module_latest_status: Dict[str, str] = {}
+
+
+DATA_DIR = Path(__file__).resolve().parents[1] / "data"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+RETRY_QUEUE_PATH = DATA_DIR / "module_retry_queue.json"
+RETRY_BASE_DELAY_SECONDS = 5
+MAX_RETRY_ATTEMPTS = 3
+module_retry_queue: Optional["ModuleRetryQueue"] = None
+
+
+def _emit_module_status(entry: Dict[str, Any]):
+    snapshot = dict(entry)
+    asyncio.create_task(
+        connection_manager.send_module_status(
+            snapshot.get("execution_id", f"exec_{snapshot.get('module_id', '')}"),
+            snapshot.get("module_id", ""),
+            snapshot,
+        )
+    )
+
+
 class ModuleExecute(BaseModel):
     device_id: Optional[str] = None
+    device_ids: List[str] = Field(default_factory=list)
     parameters: Dict[str, Any] = Field(default_factory=dict)
+    parameters_by_device: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
 
 
+class ModuleRetryQueue:
+    """Persistent queue that retries failed legacy module runs."""
+
+    def __init__(self, persistence_path: Path):
+        self.path = persistence_path
+        self.lock = threading.Lock()
+        self.queue: List[Dict[str, Any]] = []
+        self._load()
+        self._thread = threading.Thread(target=self._run, daemon=True)
+        self._thread.start()
+
+    def _load(self):
+        if not self.path.exists():
+            self.queue = []
+            return
+        try:
+            with open(self.path, 'r', encoding='utf-8') as f:
+                self.queue = json.load(f)
+        except Exception:
+            logger.exception("Failed to load module retry queue, starting fresh.")
+            self.queue = []
+
+    def _persist(self):
+        try:
+            with open(self.path, 'w', encoding='utf-8') as f:
+                json.dump(self.queue, f, ensure_ascii=False, indent=2)
+        except Exception:
+            logger.exception("Failed to persist module retry queue.")
+
+    def schedule_retry(
+        self,
+        module_id: str,
+        device_ids: List[str],
+        parameters: Dict[str, Any],
+        parameters_by_device: Optional[Dict[str, Dict[str, Any]]],
+        status_id: str,
+        summary: str,
+    ):
+        with self.lock:
+            if any(entry.get("status_id") == status_id for entry in self.queue):
+                return
+            entry = {
+                "module_id": module_id,
+                "device_ids": list(device_ids),
+                "parameters": dict(parameters or {}),
+                "parameters_by_device": dict(parameters_by_device or {}),
+                "status_id": status_id,
+                "next_retry": time.time() + RETRY_BASE_DELAY_SECONDS,
+                "attempts": 0,
+                "max_attempts": MAX_RETRY_ATTEMPTS,
+                "summary": summary,
+                "last_error": None,
+            }
+            self.queue.append(entry)
+            self._persist()
+
+    def _run(self):
+        while True:
+            entry = self._next_entry()
+            if entry:
+                self._attempt(entry)
+            else:
+                time.sleep(2)
+
+    def _next_entry(self) -> Optional[Dict[str, Any]]:
+        now = time.time()
+        with self.lock:
+            for entry in self.queue:
+                if entry.get("running"):
+                    continue
+                if entry.get("next_retry", 0) <= now:
+                    entry["running"] = True
+                    return entry
+        return None
+
+    def _attempt(self, entry: Dict[str, Any]):
+        try:
+            execution = ModuleExecute(
+                device_ids=entry.get("device_ids", []),
+                parameters={**entry.get("parameters", {}), "_retrying": True, "_retry_attempt": entry.get("attempts", 0) + 1},
+                parameters_by_device=entry.get("parameters_by_device", {}) or {},
+            )
+            result = _execute_legacy_module(entry["module_id"], execution, schedule_retry=False)
+            success = bool(result.get("success"))
+            failure_reason = (
+                (result.get("result") or {}).get("stage_message")
+                or (result.get("result") or {}).get("summary")
+                or result.get("error")
+            )
+            if failure_reason:
+                entry["last_error"] = failure_reason
+        except Exception as exc:  # pragma: no cover - best effort
+            logger.exception("Retry execution for %s failed", entry["module_id"])
+            success = False
+            entry["last_error"] = str(exc)
+        with self.lock:
+            if success or entry.get("attempts", 0) + 1 >= entry.get("max_attempts", MAX_RETRY_ATTEMPTS):
+                self.queue = [item for item in self.queue if item.get("status_id") != entry.get("status_id")]
+            else:
+                entry["attempts"] = entry.get("attempts", 0) + 1
+                entry["running"] = False
+                entry["last_error"] = entry.get("last_error")
+                entry["next_retry"] = time.time() + min(600, (2 ** entry["attempts"]) * RETRY_BASE_DELAY_SECONDS)
+            self._persist()
 def _base_module_fields(module: Dict[str, Any]) -> Dict[str, Any]:
     """Ensure modules carry the shape expected by the frontend service."""
     default_fields = {
@@ -134,6 +274,17 @@ legacy_modules_db: List[Dict[str, Any]] = [
         "device_required": True,
     },
     {
+        "id": "preflight_check",
+        "name": "Preflight Check",
+        "description": "Verify ADB, Wi-Fi and network services before running workflows.",
+        "category": "diagnostics",
+        "complexity": "simple",
+        "duration_estimate": "<45s",
+        "parameters": {},
+        "requirements": ["adb"],
+        "device_required": True,
+    },
+    {
         "id": "launch_app",
         "name": "Smart App Launcher",
         "description": "Launch Google or YouTube to generate data usage.",
@@ -141,12 +292,17 @@ legacy_modules_db: List[Dict[str, Any]] = [
         "complexity": "simple",
         "duration_estimate": "<30s",
         "parameters": {
-            "app": {
-                "type": "string",
-                "required": True,
-                "default": "youtube",
-                "enum": ["youtube", "google"],
-            }
+                "app": {
+                    "type": "string",
+                    "required": True,
+                    "default": "youtube",
+                "enum": ["youtube", "maps", "chrome_news"],
+                },
+            "duration_seconds": {
+                "type": "integer",
+                "required": False,
+                "default": 15,
+            },
         },
         "requirements": ["adb"],
         "last_run": None,
@@ -364,6 +520,32 @@ async def execute_module(module_id: str, execution: ModuleExecute, db: Session =
     return _execute_legacy_module(module_id, execution)
 
 
+@router.get("/modules/status")
+async def get_module_status(
+    module_id: Optional[str] = None,
+    status_id: Optional[str] = None,
+):
+    """Expose the latest status report for legacy modules (per module or status id)."""
+    if status_id:
+        entry = module_status_entries.get(status_id)
+        if entry:
+            return entry
+        raise HTTPException(status_code=404, detail="Module status not found")
+    if module_id:
+        latest_key = module_latest_status.get(module_id)
+        if latest_key:
+            entry = module_status_entries.get(latest_key)
+            if entry:
+                return entry
+        raise HTTPException(status_code=404, detail="Module status not found")
+    sorted_entries = sorted(
+        module_status_entries.values(),
+        key=lambda value: value.get("started_at") or "",
+        reverse=True,
+    )
+    return {"entries": sorted_entries}
+
+
 @router.get("/modules/runs")
 async def list_module_runs(
     module_id: Optional[str] = None,
@@ -471,6 +653,253 @@ def _serialize_run(run: ModuleRun) -> Dict[str, Any]:
     return payload
 
 
+def _collect_device_targets(execution: ModuleExecute) -> List[str]:
+    targets: List[str] = []
+    for device_id in execution.device_ids or []:
+        cleaned = (device_id or "").strip()
+        if cleaned:
+            targets.append(cleaned)
+    if not targets and execution.device_id:
+        cleaned = execution.device_id.strip()
+        if cleaned:
+            targets.append(cleaned)
+    # Deduplicate while preserving order
+    seen = set()
+    unique_targets: List[str] = []
+    for device_id in targets:
+        if device_id not in seen:
+            seen.add(device_id)
+            unique_targets.append(device_id)
+    return unique_targets
+
+
+def _default_stage_message(module_name: str, success_count: int, failure_count: int) -> str:
+    if success_count + failure_count == 0:
+        return f"{module_name} was not executed: no devices targeted."
+    if failure_count == 0:
+        plural = "s" if success_count != 1 else ""
+        return f"{module_name} executed successfully on {success_count} device{plural}."
+    success_label = "success" if success_count == 1 else "successes"
+    failure_label = "failure" if failure_count == 1 else "failures"
+    return (
+        f"{module_name} completed: {success_count} {success_label}, {failure_count} {failure_label}."
+    )
+
+
+def _run_legacy_module_on_devices_with_params(
+    module: Dict[str, Any],
+    module_id: str,
+    device_ids: List[str],
+    worker: Callable[[TelcoModules, Dict[str, Any]], Dict[str, Any]],
+    *,
+    parameters: Dict[str, Any],
+    parameters_by_device: Dict[str, Dict[str, Any]],
+    stage_message: Optional[str] = None,
+    schedule_retry: bool = True,
+) -> Dict[str, Any]:
+    status_id = f"{module_id}_{int(time.time() * 1000)}"
+    execution_id = f"exec_{module_id}"
+    module_status_entries[status_id] = {
+        "status_id": status_id,
+        "execution_id": execution_id,
+        "module_id": module_id,
+        "module_name": module.get("name") or module_id,
+        "state": "running",
+        "started_at": _now_iso(),
+        "device_ids": list(device_ids),
+        "pending_device_ids": list(device_ids),
+        "device_results": [],
+        "stage_message": stage_message,
+        "summary": stage_message or "",
+        "success": None,
+    }
+    _emit_module_status(module_status_entries[status_id])
+    module_latest_status[module_id] = status_id
+
+    def resolve_params(device_id: str) -> Dict[str, Any]:
+        merged = dict(parameters or {})
+        per_device = parameters_by_device.get(device_id) or {}
+        merged.update(per_device)
+        return merged
+
+    results: List[Dict[str, Any]] = []
+    pool_size = max(1, len(device_ids))
+    with ThreadPoolExecutor(max_workers=pool_size) as executor:
+        future_to_device = {
+            executor.submit(_run_worker_for_device_with_params, worker, device_id, resolve_params(device_id)): device_id
+            for device_id in device_ids
+        }
+        for future in as_completed(future_to_device):
+            device_id = future_to_device[future]
+            try:
+                value = future.result()
+                results.append(
+                    {
+                        "device_id": device_id,
+                        "success": bool(value.get("success", True)),
+                        "result": value,
+                    }
+                )
+            except Exception as exc:
+                results.append(
+                    {
+                        "device_id": device_id,
+                        "success": False,
+                        "error": str(exc),
+                    }
+                )
+
+    overall_success = all(entry.get("success", False) for entry in results)
+    success_count = sum(1 for entry in results if entry.get("success"))
+    failure_count = len(results) - success_count
+    summary = stage_message or _default_stage_message(module.get("name") or module_id, success_count, failure_count)
+
+    entry = module_status_entries.get(status_id)
+    if entry:
+        entry.update(
+            {
+                "state": "completed",
+                "completed_at": _now_iso(),
+                "device_results": results,
+                "pending_device_ids": [],
+                "success": overall_success,
+                "stage_message": summary,
+                "summary": summary,
+                "success_count": success_count,
+                "failure_count": failure_count,
+                "last_update": _now_iso(),
+            }
+        )
+        _emit_module_status(entry)
+        if failure_count > 0 and schedule_retry and module_retry_queue:
+            module_retry_queue.schedule_retry(
+                module_id,
+                device_ids,
+                parameters,
+                parameters_by_device,
+                status_id,
+                summary,
+            )
+
+    return {
+        "execution_id": execution_id,
+        "module_id": module_id,
+        "module_name": module.get("name"),
+        "device_id": device_ids[0] if device_ids else None,
+        "device_ids": device_ids,
+        "status": "completed" if overall_success else "failed",
+        "success": overall_success,
+        "parameters": parameters,
+        "parameters_by_device": parameters_by_device,
+        "result": {
+            "stage": "completed",
+            "stage_message": summary,
+            "summary": summary,
+            "device_results": results,
+            "success_count": success_count,
+            "failure_count": failure_count,
+        },
+        "status_id": status_id,
+    }
+
+
+def _run_worker_for_device_with_params(
+    worker: Callable[[TelcoModules, Dict[str, Any]], Dict[str, Any]],
+    device_id: str,
+    params: Dict[str, Any],
+) -> Dict[str, Any]:
+    executor = TelcoModules(device_id)
+    result = worker(executor, params)
+    if not isinstance(result, dict):
+        result = {"result": result}
+    result.setdefault("success", True)
+    return result
+
+
+def _run_legacy_module_on_devices(
+    module: Dict[str, Any],
+    module_id: str,
+    device_ids: List[str],
+    worker: Callable[[TelcoModules], Dict[str, Any]],
+    *,
+    parameters: Dict[str, Any],
+    stage_message: Optional[str] = None,
+    schedule_retry: bool = True,
+) -> Dict[str, Any]:
+    status_id = f"{module_id}_{int(time.time() * 1000)}"
+    execution_id = f"exec_{module_id}"
+    module_status_entries[status_id] = {
+        "status_id": status_id,
+        "execution_id": execution_id,
+        "module_id": module_id,
+        "module_name": module.get("name") or module_id,
+        "state": "running",
+        "started_at": _now_iso(),
+        "device_ids": list(device_ids),
+        "pending_device_ids": list(device_ids),
+        "device_results": [],
+        "stage_message": stage_message,
+        "summary": stage_message or "",
+        "success": None,
+    }
+    _emit_module_status(module_status_entries[status_id])
+    module_latest_status[module_id] = status_id
+
+    aggregation = TelcoModules.execute_on_multiple_devices(
+        device_ids, worker, module_name=module.get("name") or module_id
+    )
+    device_results = aggregation.get("device_results") or []
+    success_count = sum(1 for entry in device_results if entry.get("success"))
+    failure_count = len(device_results) - success_count
+    summary = stage_message or _default_stage_message(module.get("name") or module_id, success_count, failure_count)
+    entry = module_status_entries.get(status_id)
+    if entry:
+        entry.update(
+            {
+                "state": "completed",
+                "completed_at": _now_iso(),
+                "device_results": device_results,
+                "pending_device_ids": [],
+                "success": aggregation.get("success", False),
+                "stage_message": summary,
+                "summary": summary,
+                "success_count": success_count,
+                "failure_count": failure_count,
+                "last_update": _now_iso(),
+            }
+        )
+        _emit_module_status(entry)
+        if failure_count > 0 and schedule_retry and module_retry_queue:
+            module_retry_queue.schedule_retry(
+                module_id,
+                device_ids,
+                parameters,
+                {},
+                status_id,
+                summary,
+            )
+    return {
+        "execution_id": execution_id,
+        "module_id": module_id,
+        "module_name": module.get("name"),
+        "device_id": device_ids[0] if device_ids else None,
+        "device_ids": device_ids,
+        "status": "completed" if aggregation.get("success") else "failed",
+        "success": aggregation.get("success", False),
+        "parameters": parameters,
+        "result": {
+            "stage": "completed",
+            "stage_message": summary,
+            "summary": summary,
+            "device_results": device_results,
+            "success_count": success_count,
+            "failure_count": failure_count,
+            "error": aggregation.get("error"),
+        },
+        "status_id": status_id,
+    }
+
+
 def _with_stage(result: Dict[str, Any], stage: str, message: Optional[str] = None) -> Dict[str, Any]:
     wrapped = dict(result)
     wrapped["stage"] = stage
@@ -479,226 +908,282 @@ def _with_stage(result: Dict[str, Any], stage: str, message: Optional[str] = Non
     return wrapped
 
 
-def _execute_legacy_module(module_id: str, execution: ModuleExecute) -> Dict[str, Any]:
+def _execute_legacy_module(module_id: str, execution: ModuleExecute, schedule_retry: bool = True) -> Dict[str, Any]:
     module = next((m for m in legacy_modules_db if m["id"] == module_id), None)
     if not module:
         raise HTTPException(status_code=404, detail="Module not found")
 
-    executor = TelcoModules(execution.device_id)
+    parameters = execution.parameters or {}
+    parameters_by_device = execution.parameters_by_device or {}
+    targets = _collect_device_targets(execution)
 
-    if module_id in DEVICE_REQUIRED_MODULES and not execution.device_id:
-        raise HTTPException(status_code=400, detail="device_id is required for this module")
+    if module_id in DEVICE_REQUIRED_MODULES and not targets:
+        raise HTTPException(status_code=400, detail="device_id or device_ids is required for this module")
 
+    def run_for_devices(
+        worker: Callable[[TelcoModules], Dict[str, Any]],
+        params: Optional[Dict[str, Any]] = None,
+        stage_message: Optional[str] = None,
+        schedule_retry_override: Optional[bool] = None,
+        worker_with_params: Optional[Callable[[TelcoModules, Dict[str, Any]], Dict[str, Any]]] = None,
+    ) -> Dict[str, Any]:
+        schedule_flag = schedule_retry if schedule_retry_override is None else schedule_retry_override
+        if parameters_by_device and worker_with_params:
+            return _run_legacy_module_on_devices_with_params(
+                module,
+                module_id,
+                targets,
+                worker_with_params,
+                parameters=params if params is not None else parameters,
+                parameters_by_device=parameters_by_device,
+                stage_message=stage_message,
+                schedule_retry=schedule_flag,
+            )
+        return _run_legacy_module_on_devices(
+            module,
+            module_id,
+            targets,
+            worker,
+            parameters=params if params is not None else parameters,
+            stage_message=stage_message,
+            schedule_retry=schedule_flag,
+        )
 
     if module_id == "voice_call_test":
         params = execution.parameters or {}
-        number = params.get("number")
-        if not number or not isinstance(number, str):
-            raise HTTPException(status_code=400, detail="Parameter 'number' is required")
 
-        try:
-            duration = int(params.get("duration", 10))
-        except (TypeError, ValueError):
-            raise HTTPException(status_code=400, detail="Parameter 'duration' must be an integer")
+        def voice_call_worker(executor: TelcoModules, worker_params: Dict[str, Any]) -> Dict[str, Any]:
+            number = worker_params.get("number")
+            if not number or not isinstance(number, str):
+                return {"success": False, "error": "Parameter 'number' is required"}
+            try:
+                duration = int(worker_params.get("duration", 10))
+            except (TypeError, ValueError):
+                return {"success": False, "error": "Parameter 'duration' must be an integer"}
+            try:
+                call_count = int(worker_params.get("call_count", 1))
+            except (TypeError, ValueError):
+                return {"success": False, "error": "Parameter 'call_count' must be an integer"}
+            if duration <= 0:
+                return {"success": False, "error": "Parameter 'duration' must be greater than 0"}
+            if call_count < 1:
+                return {"success": False, "error": "Parameter 'call_count' must be at least 1"}
+            return executor.voice_call_test(number, duration, call_count)
 
-        try:
-            call_count = int(params.get("call_count", 1))
-        except (TypeError, ValueError):
-            raise HTTPException(status_code=400, detail="Parameter 'call_count' must be an integer")
+        if not parameters_by_device:
+            number = params.get("number")
+            if not number or not isinstance(number, str):
+                raise HTTPException(status_code=400, detail="Parameter 'number' is required")
+            try:
+                duration = int(params.get("duration", 10))
+            except (TypeError, ValueError):
+                raise HTTPException(status_code=400, detail="Parameter 'duration' must be an integer")
+            try:
+                call_count = int(params.get("call_count", 1))
+            except (TypeError, ValueError):
+                raise HTTPException(status_code=400, detail="Parameter 'call_count' must be an integer")
+            if duration <= 0:
+                raise HTTPException(status_code=400, detail="Parameter 'duration' must be greater than 0")
+            if call_count < 1:
+                raise HTTPException(status_code=400, detail="Parameter 'call_count' must be at least 1")
 
-        if duration <= 0:
-            raise HTTPException(status_code=400, detail="Parameter 'duration' must be greater than 0")
-        if call_count < 1:
-            raise HTTPException(status_code=400, detail="Parameter 'call_count' must be at least 1")
-
-        try:
-            result = executor.voice_call_test(number, duration, call_count)
-        except Exception as exc:  # pragma: no cover - logging only
-            logger.exception("Voice call test failed: %s", exc)
-            raise HTTPException(status_code=500, detail=str(exc) or "Voice call test failed.")
-
-        success = result.get("success", True)
-
-        return {
-            "execution_id": f"exec_{module_id}",
-            "module_id": module_id,
-            "module_name": module["name"],
-            "device_id": execution.device_id,
-            "parameters": {
-                "number": number,
-                "duration": duration,
-                "call_count": call_count,
-            },
-            "status": "completed" if success else "failed",
-            "success": success,
-            "result": _with_stage(result, "completed", "Voice call test finished"),
-        }
+        return run_for_devices(
+            lambda executor: voice_call_worker(executor, params),
+            params=params,
+            worker_with_params=voice_call_worker,
+        )
 
     if module_id in {"enable_airplane_mode", "disable_airplane_mode"}:
-        if module_id == "enable_airplane_mode":
-            result = executor.enable_airplane_mode()
-        else:
-            result = executor.disable_airplane_mode()
-        success = result.get("success", True)
-        return {
-            "execution_id": f"exec_{module_id}",
-            "module_id": module_id,
-            "module_name": module["name"],
-            "device_id": execution.device_id,
-            "parameters": execution.parameters or {},
-            "status": "completed" if success else "failed",
-            "success": success,
-            "result": _with_stage(result, "completed", "Airplane mode toggled"),
-        }
+        return run_for_devices(
+            lambda executor: executor.enable_airplane_mode()
+            if module_id == "enable_airplane_mode"
+            else executor.disable_airplane_mode(),
+            params=parameters,
+            stage_message="Airplane mode toggled",
+        )
 
     if module_id == "launch_app":
         params = execution.parameters or {}
-        app_choice = str(params.get("app", "youtube")).lower()
-        result = executor.launch_app(app_choice)
-        success = result.get("success", True)
-        return {
-            "execution_id": f"exec_{module_id}",
-            "module_id": module_id,
-            "module_name": module["name"],
-            "device_id": execution.device_id,
-            "parameters": {"app": app_choice},
-            "status": "completed" if success else "failed",
-            "success": success,
-            "result": _with_stage(result, "completed", f"Launch app {app_choice}"),
-        }
+
+        def launch_app_worker(executor: TelcoModules, worker_params: Dict[str, Any]) -> Dict[str, Any]:
+            app_choice = str(worker_params.get("app", "youtube")).lower()
+            duration_raw = worker_params.get("duration_seconds")
+            duration_seconds: Optional[int] = None
+            if duration_raw is not None:
+                try:
+                    duration_seconds = int(duration_raw)
+                except (TypeError, ValueError):
+                    return {"success": False, "error": "Parameter 'duration_seconds' must be an integer"}
+                if duration_seconds <= 0:
+                    return {"success": False, "error": "Parameter 'duration_seconds' must be greater than 0"}
+
+            target_sequence: List[Dict[str, Any]] = []
+            raw_sequence = worker_params.get("targets")
+            if isinstance(raw_sequence, list):
+                for entry in raw_sequence:
+                    if not entry or not isinstance(entry, dict):
+                        continue
+                    candidate_app = entry.get("app")
+                    if not candidate_app:
+                        continue
+                    candidate_duration = entry.get("duration_seconds")
+                    parsed_duration: Optional[int] = None
+                    if candidate_duration is not None:
+                        try:
+                            parsed_duration = int(candidate_duration)
+                            if parsed_duration <= 0:
+                                parsed_duration = None
+                        except (TypeError, ValueError):
+                            parsed_duration = None
+                    target_sequence.append(
+                        {"app": str(candidate_app).lower(), "duration_seconds": parsed_duration}
+                    )
+
+            if not target_sequence:
+                target_sequence = [{"app": app_choice, "duration_seconds": duration_seconds}]
+
+            return executor.launch_app(
+                app=None,
+                duration_seconds=None,
+                targets=target_sequence,
+            )
+
+        return run_for_devices(
+            lambda executor: launch_app_worker(executor, params),
+            params=params,
+            stage_message="Launching apps",
+            worker_with_params=launch_app_worker,
+        )
 
     if module_id == "ping":
         params = execution.parameters or {}
-        target = params.get("target", "8.8.8.8")
-        duration = params.get("duration", 10)
-        interval = params.get("interval", 1.0)
-        result = executor.ping_target(target=target, duration_seconds=duration, interval_seconds=interval)
-        return {
-            "execution_id": f"exec_{module_id}",
-            "module_id": module_id,
-            "module_name": module["name"],
-            "device_id": execution.device_id,
-            "parameters": {
-                "target": target,
-                "duration": duration,
-                "interval": interval,
-            },
-            "status": "completed" if result.get("success", True) else "failed",
-            "success": result.get("success", True),
-            "result": _with_stage(result, "completed", "Ping finished"),
-        }
+
+        def ping_worker(executor: TelcoModules, worker_params: Dict[str, Any]) -> Dict[str, Any]:
+            target = worker_params.get("target", "8.8.8.8")
+            duration = worker_params.get("duration", 10)
+            interval = worker_params.get("interval", 1.0)
+            return executor.ping_target(target=target, duration_seconds=duration, interval_seconds=interval)
+
+        return run_for_devices(
+            lambda executor: ping_worker(executor, params),
+            params=params,
+            stage_message="Ping completed",
+            worker_with_params=ping_worker,
+        )
 
     if module_id == "activate_data":
-        result = executor.enable_mobile_data()
-        success = result.get("success", True)
-        return {
-            "execution_id": f"exec_{module_id}",
-            "module_id": module_id,
-            "module_name": module["name"],
-            "device_id": execution.device_id,
-            "parameters": {},
-            "status": "completed" if success else "failed",
-            "success": success,
-            "result": _with_stage(result, "completed", "Mobile data enabled"),
-        }
+        return run_for_devices(
+            lambda executor: executor.enable_mobile_data(),
+            params={},
+            stage_message="Mobile data activated",
+        )
+
+    if module_id == "preflight_check":
+        return run_for_devices(
+            lambda executor: executor.preflight_check(),
+            params={},
+            stage_message="Preflight checks completed",
+        )
 
     if module_id == "wrong_apn_configuration":
         params = execution.parameters or {}
-        apn_value = params.get("apn_value") or DEFAULT_WRONG_APN
-        use_ui_flow = bool(params.get("use_ui_flow", True))
-        result = executor.configure_wrong_apn(apn_value, use_ui_flow=use_ui_flow)
-        success = result.get("success", True)
-        return {
-            "execution_id": f"exec_{module_id}",
-            "module_id": module_id,
-            "module_name": module["name"],
-            "device_id": execution.device_id,
-            "parameters": {"apn_value": apn_value, "use_ui_flow": use_ui_flow},
-            "status": "completed" if success else "failed",
-            "success": success,
-            "result": _with_stage(result, "completed", "APN updated"),
-        }
+
+        def wrong_apn_worker(executor: TelcoModules, worker_params: Dict[str, Any]) -> Dict[str, Any]:
+            apn_value = worker_params.get("apn_value") or DEFAULT_WRONG_APN
+            use_ui_flow = bool(worker_params.get("use_ui_flow", True))
+            return executor.configure_wrong_apn(apn_value, use_ui_flow=use_ui_flow)
+
+        return run_for_devices(
+            lambda executor: wrong_apn_worker(executor, params),
+            params=params,
+            stage_message="Wrong APN configuration applied",
+            worker_with_params=wrong_apn_worker,
+        )
 
     if module_id == "pull_device_logs":
         params = execution.parameters or {}
-        destination = params.get("destination")
-        if not destination or not isinstance(destination, str):
-            raise HTTPException(status_code=400, detail="Parameter 'destination' is required.")
-        result = executor.pull_device_logs(destination)
-        success = result.get("success", True)
-        return {
-            "execution_id": f"exec_{module_id}",
-            "module_id": module_id,
-            "module_name": module["name"],
-            "device_id": execution.device_id,
-            "parameters": {"destination": destination},
-            "status": "completed" if success else "failed",
-            "success": success,
-            "result": result,
-        }
+
+        def log_pull_worker(executor: TelcoModules, worker_params: Dict[str, Any]) -> Dict[str, Any]:
+            destination = worker_params.get("destination")
+            if not destination or not isinstance(destination, str):
+                return {"success": False, "error": "Parameter 'destination' is required."}
+            return executor.pull_device_logs(destination)
+
+        if not parameters_by_device:
+            destination = params.get("destination")
+            if not destination or not isinstance(destination, str):
+                raise HTTPException(status_code=400, detail="Parameter 'destination' is required.")
+
+        return run_for_devices(
+            lambda executor: log_pull_worker(executor, params),
+            params=params,
+            stage_message="Device logs collected",
+            worker_with_params=log_pull_worker,
+        )
 
     if module_id in {"start_rf_logging", "stop_rf_logging"}:
-        if module_id == "start_rf_logging":
-            result = executor.start_rf_logging()
-        else:
-            result = executor.stop_rf_logging()
-        success = result.get("success", True)
-        stage_msg = "RF logging started" if module_id == "start_rf_logging" else "RF logging stopped"
-        return {
-            "execution_id": f"exec_{module_id}",
-            "module_id": module_id,
-            "module_name": module["name"],
-            "device_id": execution.device_id,
-            "parameters": {},
-            "status": "completed" if success else "failed",
-            "success": success,
-            "result": _with_stage(result, "completed", stage_msg),
-        }
+        message = "RF logging started" if module_id == "start_rf_logging" else "RF logging stopped"
+        return run_for_devices(
+            lambda executor: executor.start_rf_logging()
+            if module_id == "start_rf_logging"
+            else executor.stop_rf_logging(),
+            params={},
+            stage_message=message,
+        )
 
     if module_id == "pull_rf_logs":
         params = execution.parameters or {}
-        destination = params.get("destination")
-        if not destination or not isinstance(destination, str):
-            raise HTTPException(status_code=400, detail="Parameter 'destination' is required.")
-        result = executor.pull_rf_logs(destination)
-        success = result.get("success", True)
-        return {
-            "execution_id": f"exec_{module_id}",
-            "module_id": module_id,
-            "module_name": module["name"],
-            "device_id": execution.device_id,
-            "parameters": {"destination": destination},
-            "status": "completed" if success else "failed",
-            "success": success,
-            "result": result,
-        }
+
+        def rf_log_pull_worker(executor: TelcoModules, worker_params: Dict[str, Any]) -> Dict[str, Any]:
+            destination = worker_params.get("destination")
+            if not destination or not isinstance(destination, str):
+                return {"success": False, "error": "Parameter 'destination' is required."}
+            return executor.pull_rf_logs(destination)
+
+        if not parameters_by_device:
+            destination = params.get("destination")
+            if not destination or not isinstance(destination, str):
+                raise HTTPException(status_code=400, detail="Parameter 'destination' is required.")
+
+        return run_for_devices(
+            lambda executor: rf_log_pull_worker(executor, params),
+            params=params,
+            stage_message="RF logs downloaded",
+            worker_with_params=rf_log_pull_worker,
+        )
 
     if module_id == "dial_secret_code":
         params = execution.parameters or {}
-        code = params.get("code")
-        if not code or not isinstance(code, str):
-            raise HTTPException(status_code=400, detail="Parameter 'code' is required.")
-        result = executor.dial_secret_code(code)
-        success = result.get("success", True)
-        return {
-            "execution_id": f"exec_{module_id}",
-            "module_id": module_id,
-            "module_name": module["name"],
-            "device_id": execution.device_id,
-            "parameters": {"code": code},
-            "status": "completed" if success else "failed",
-            "success": success,
-            "result": result,
-        }
+
+        def dial_code_worker(executor: TelcoModules, worker_params: Dict[str, Any]) -> Dict[str, Any]:
+            code = worker_params.get("code")
+            if not code or not isinstance(code, str):
+                return {"success": False, "error": "Parameter 'code' is required."}
+            return executor.dial_secret_code(code)
+
+        if not parameters_by_device:
+            code = params.get("code")
+            if not code or not isinstance(code, str):
+                raise HTTPException(status_code=400, detail="Parameter 'code' is required.")
+
+        return run_for_devices(
+            lambda executor: dial_code_worker(executor, params),
+            params=params,
+            stage_message="USSD code dialed",
+            worker_with_params=dial_code_worker,
+        )
 
     execution_id = f"exec_{module_id}"
-        return {
-            "execution_id": execution_id,
-            "module_id": module_id,
-            "module_name": module["name"],
-            "device_id": execution.device_id,
-            "parameters": execution.parameters,
-            "status": "started",
-            "message": f"Module '{module['name']}' execution started",
-            "result": {"stage": "requested", "message": "Request queued"},
-        }
+    return {
+        "execution_id": execution_id,
+        "module_id": module_id,
+        "module_name": module["name"],
+        "device_id": execution.device_id,
+        "parameters": execution.parameters,
+        "status": "started",
+        "message": f"Module '{module['name']}' execution started",
+        "result": {"stage": "requested", "message": "Request queued"},
+    }
+
+
+module_retry_queue = ModuleRetryQueue(RETRY_QUEUE_PATH)

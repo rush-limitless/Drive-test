@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Typography,
@@ -14,7 +14,7 @@ import {
   TextField,
   InputAdornment,
   FormControl,
-  FormControlLabel,
+  InputLabel,
   Select,
   MenuItem,
   Dialog,
@@ -25,16 +25,29 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Divider,
-  Radio,
-  RadioGroup,
+  LinearProgress,
 } from '@mui/material';
-import { 
-  Play, 
-  Pencil, 
+import {
+  Play,
+  Pencil,
   Timer,
   Search,
   Star,
-  StarOff
+  StarOff,
+  Airplay,
+  AirVent,
+  Wifi,
+  Smartphone,
+  AlertTriangle,
+  FilePlus,
+  Radio as RadioIcon,
+  MessageCircle,
+  PhoneCall,
+  Activity,
+  SignalHigh,
+  FileText,
+  ArrowLeft,
+  ArrowRight,
 } from 'lucide-react';
 
 import Layout from '../components/Layout';
@@ -107,6 +120,10 @@ const resolveModuleFailureReason = (payload: unknown): string | undefined => {
   if (typeof candidateError === 'string' && candidateError.trim().length > 0) {
     return candidateError.trim();
   }
+  const candidateDetail = (payload as Record<string, unknown>).detail;
+  if (typeof candidateDetail === 'string' && candidateDetail.trim().length > 0) {
+    return candidateDetail.trim();
+  }
   const candidateMessage = (payload as Record<string, unknown>).message;
   if (typeof candidateMessage === 'string' && candidateMessage.trim().length > 0) {
     return candidateMessage.trim();
@@ -125,10 +142,81 @@ type DeviceModuleResult = {
   error?: string;
 };
 
+type DeviceNotification = {
+  id: string;
+  moduleId: string;
+  deviceId: string;
+  success: boolean;
+  message: string;
+};
+
 type DeviceModuleRunSnapshot = {
   moduleId: string;
   timestamp: string;
   results: DeviceModuleResult[];
+};
+
+const MODULE_ICON_MAP: Record<string, React.ComponentType<any>> = {
+  enable_airplane_mode: Airplay,
+  disable_airplane_mode: AirVent,
+  ping: SignalHigh,
+  activate_data: Wifi,
+  launch_app: Smartphone,
+  wrong_apn_configuration: AlertTriangle,
+  pull_device_logs: FilePlus,
+  pull_rf_logs: RadioIcon,
+  start_rf_logging: RadioIcon,
+  stop_rf_logging: RadioIcon,
+  dial_secret_code: PhoneCall,
+  sms_send: MessageCircle,
+  default: Activity,
+};
+
+type ModuleStatusEntry = {
+  status_id: string;
+  execution_id: string;
+  module_id: string;
+  module_name?: string;
+  state: 'running' | 'completed';
+  device_ids: string[];
+  pending_device_ids: string[];
+  device_results: DeviceModuleResult[];
+  success?: boolean;
+  started_at: string;
+  completed_at?: string;
+  summary?: string;
+  stage_message?: string;
+  success_count?: number;
+  failure_count?: number;
+};
+
+const formatDeviceMessage = (result: DeviceModuleResult): string => {
+  const payload = (result.response as any)?.result ?? result.response;
+  const candidateMessage =
+    (payload && typeof payload.message === 'string' && payload.message.trim()) ||
+    (payload && typeof payload.stage_message === 'string' && payload.stage_message.trim()) ||
+    (payload && typeof payload.summary === 'string' && payload.summary.trim());
+  if (result.error) {
+    return result.error;
+  }
+  if (candidateMessage) {
+    return candidateMessage;
+  }
+  if (payload && typeof payload === 'object') {
+    const serialized = JSON.stringify(payload);
+    return serialized.length > 80 ? `${serialized.slice(0, 80)}…` : serialized;
+  }
+  return 'No details available';
+};
+
+const buildDeviceNotificationMessage = (results: DeviceModuleResult[]): string => {
+  const entries = results
+    .map((result) => {
+      const stateLabel = result.success ? 'Success' : 'Failed';
+      return `${result.deviceId}: ${stateLabel}`;
+    })
+    .filter((entry) => entry && entry.trim().length > 0);
+  return entries.join(' | ');
 };
 
 const resolveApiKey = (): string | null => {
@@ -167,20 +255,25 @@ const DEFAULT_PING_CONFIG: PingConfig = {
   duration: 10,
   interval: 1.0,
 };
-type AppLauncherOption = 'youtube' | 'google';
+type AppLauncherOption = 'youtube' | 'maps' | 'chrome_news';
 
 const APP_LAUNCHER_STORAGE_KEY = 'appLauncherSelection';
+const APP_LAUNCHER_OPTIONS: AppLauncherOption[] = ['youtube', 'maps', 'chrome_news'];
 const APP_LAUNCHER_DISPLAY: Record<AppLauncherOption, string> = {
   youtube: 'YouTube',
-  google: 'Google',
+  maps: 'Maps navigation',
+  chrome_news: 'Chrome news site',
 };
 
 const readAppLauncherSelection = (): AppLauncherOption => {
   if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
     return 'youtube';
   }
-  const stored = window.localStorage.getItem(APP_LAUNCHER_STORAGE_KEY);
-  return stored === 'google' ? 'google' : 'youtube';
+  const stored = window.localStorage.getItem(APP_LAUNCHER_STORAGE_KEY) as AppLauncherOption | null;
+  if (stored && APP_LAUNCHER_DISPLAY[stored]) {
+    return stored;
+  }
+  return 'youtube';
 };
 const WAITING_TIME_DEFAULT_DURATION = 5;
 const WAITING_TIME_MIN_DURATION = 1;
@@ -675,7 +768,9 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
   const [moduleCategoryFilter, setModuleCategoryFilter] = useState<string>('all');
   const [workflowDescription, setWorkflowDescription] = useState('');
   const [appLauncherSelection, setAppLauncherSelection] = useState<AppLauncherOption>(readAppLauncherSelection);
+  const [appLauncherDuration, setAppLauncherDuration] = useState<number>(15);
   const [appLauncherDialogSelection, setAppLauncherDialogSelection] = useState<AppLauncherOption>(readAppLauncherSelection);
+  const [appLauncherDialogDuration, setAppLauncherDialogDuration] = useState<number>(15);
   const [appLauncherDialogOpen, setAppLauncherDialogOpen] = useState(false);
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
@@ -733,6 +828,12 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
   const [smsMessageDraft, setSmsMessageDraft] = useState(smsConfig.message);
   const [smsDialogErrors, setSmsDialogErrors] = useState<{ recipient?: string; message?: string }>({});
   const [moduleRunStatuses, setModuleRunStatuses] = useState<Record<string, 'idle' | 'running'>>({});
+  const [moduleRunProgress, setModuleRunProgress] = useState<Record<string, number>>({});
+  const [moduleStatusEntries, setModuleStatusEntries] = useState<
+    Record<string, ModuleStatusEntry>
+  >({});
+  const [deviceNotifications, setDeviceNotifications] = useState<DeviceNotification[]>([]);
+  const executionSockets = useRef<Record<string, WebSocket | null>>({});
   const { devices: discoveredDevices, status: devicesStatus } = useDevices({ backendUrl });
   const readyBackendDeviceIds = useMemo(
     () =>
@@ -741,6 +842,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         .map((device) => device.id),
     [discoveredDevices]
   );
+  const progressIntervals = useRef<Record<string, number>>({});
   const readyBackendDeviceSet = useMemo(() => new Set(readyBackendDeviceIds), [readyBackendDeviceIds]);
   const hasWorkflowDraft =
     workflowDraftLoaded &&
@@ -895,6 +997,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         throw new Error('Backend unavailable: no URL configured.');
       }
 
+      connectExecutionSocket(module.id);
       const normalizedBackendUrl = backendUrl.replace(/\/$/, '');
       try {
         const response = await fetch(`${normalizedBackendUrl}/api/modules/voice_call_test/execute`, {
@@ -915,7 +1018,17 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
 
         if (!response.ok) {
           const text = await response.text();
-          throw new Error(text || `Backend failure (HTTP ${response.status})`);
+          let detail = text.trim();
+          if (!detail) {
+            detail = `Backend failure (HTTP ${response.status})`;
+          }
+          try {
+            const parsed = JSON.parse(text);
+            detail = resolveModuleFailureReason(parsed) ?? detail;
+          } catch {
+            // ignore parse errors
+          }
+          throw new Error(detail);
         }
 
         await response.json().catch(() => undefined);
@@ -955,17 +1068,81 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         return;
       }
 
-      const results = await Promise.allSettled(
-        uniqueTargets.map((deviceId) => {
-          const override = overrides[deviceId];
-          const stored =
-            callTestMap[deviceId] ??
-            callTestMap[GLOBAL_CALL_TEST_KEY] ??
-            CALL_TEST_DEFAULTS;
-          const values = override ?? stored;
-          return executeCallTestForDevice(deviceId, values);
-        })
-      );
+      if (!backendUrl) {
+        setSnackbar({
+          severity: 'error',
+          message: 'Backend unavailable: no URL configured.',
+        });
+        return;
+      }
+
+      const normalizedBackendUrl = backendUrl.replace(/\/$/, '');
+      const parametersByDevice: Record<string, Record<string, any>> = {};
+      const effectiveValues: Record<string, CallTestValues> = {};
+
+      uniqueTargets.forEach((deviceId) => {
+        const override = overrides[deviceId];
+        const stored =
+          callTestMap[deviceId] ??
+          callTestMap[GLOBAL_CALL_TEST_KEY] ??
+          CALL_TEST_DEFAULTS;
+        const values = override ?? stored;
+        const sanitized = sanitizeCallTestValues(values);
+        const fullNumber = `${sanitized.countryCode}${sanitized.phoneNumber}`;
+        effectiveValues[deviceId] = sanitized;
+        parametersByDevice[deviceId] = {
+          number: fullNumber,
+          duration: sanitized.duration,
+          call_count: sanitized.callCount,
+        };
+      });
+
+      const runLocalCallScript = () => {
+        if ((window as any).electronAPI?.runScript) {
+          uniqueTargets.forEach(() => {
+            try {
+              (window as any).electronAPI.runScript(scriptPath('call_control.sh'));
+            } catch (ipcError) {
+              console.warn('[CallTest] runScript unavailable', ipcError);
+            }
+          });
+        }
+      };
+
+      let results: PromiseSettledResult<unknown>[] | null = null;
+      try {
+        connectExecutionSocket('voice_call_test');
+        const response = await fetch(`${normalizedBackendUrl}/api/modules/voice_call_test/execute`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders(),
+          },
+          body: JSON.stringify({
+            device_ids: uniqueTargets,
+            parameters_by_device: parametersByDevice,
+          }),
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          if (response.status === 422 || (response.status === 400 && text.toLowerCase().includes('parameters_by_device'))) {
+            results = await Promise.allSettled(
+              uniqueTargets.map((deviceId) => executeCallTestForDevice(deviceId, effectiveValues[deviceId]))
+            );
+          } else {
+            throw new Error(text || `Backend failure (HTTP ${response.status})`);
+          }
+        } else {
+          await response.json().catch(() => undefined);
+          runLocalCallScript();
+          results = uniqueTargets.map(() => ({ status: 'fulfilled', value: undefined }));
+        }
+      } catch (error) {
+        results = await Promise.allSettled(
+          uniqueTargets.map((deviceId) => executeCallTestForDevice(deviceId, effectiveValues[deviceId]))
+        );
+      }
 
       const successes: string[] = [];
       const failures: { deviceId: string; reason: string }[] = [];
@@ -1006,7 +1183,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
 
       runResultsRef.current = { success: successes, failure: failures };
     },
-    [callTestMap, executeCallTestForDevice]
+    [backendUrl, callTestMap, executeCallTestForDevice]
   );
 
   const handleCallTestSubmit = useCallback(
@@ -1154,6 +1331,218 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
     return fallback.filter((deviceId) => readyBackendDeviceSet.has(deviceId));
   }, [liveSelectedDeviceIds, readyBackendDeviceSet]);
 
+  const fetchModuleStatus = useCallback(
+    async ({
+      moduleId,
+      statusId,
+      signal,
+    }: {
+      moduleId?: string;
+      statusId?: string;
+      signal?: AbortSignal;
+    }) => {
+      if (!backendUrl) {
+        return null;
+      }
+      const normalizedBackendUrl = backendUrl.replace(/\/$/, '');
+      const params = new URLSearchParams();
+      if (moduleId) {
+        params.append('module_id', moduleId);
+      }
+      if (statusId) {
+        params.append('status_id', statusId);
+      }
+      if (!params.toString()) {
+        return null;
+      }
+      try {
+        const response = await fetch(`${normalizedBackendUrl}/api/modules/status?${params.toString()}`, {
+          headers: {
+            ...authHeaders(),
+          },
+          signal,
+        });
+        if (!response.ok) {
+          return null;
+        }
+        const payload = await response.json();
+        if (!payload || typeof payload !== 'object') {
+          return null;
+        }
+        return payload as ModuleStatusEntry;
+      } catch {
+        return null;
+      }
+    },
+    [backendUrl]
+  );
+
+  const showDeviceNotifications = useCallback((entries: Omit<DeviceNotification, 'id'>[]) => {
+    entries.forEach((entry) => {
+      const id = `${entry.moduleId}-${entry.deviceId}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const notification: DeviceNotification = { id, ...entry };
+      setDeviceNotifications((prev) => [...prev, notification]);
+      if (typeof window !== 'undefined') {
+        window.setTimeout(() => {
+          setDeviceNotifications((prev) => prev.filter((item) => item.id !== id));
+        }, 4200);
+      }
+    });
+  }, []);
+
+  const runningModuleIds = useMemo(
+    () =>
+      Object.entries(moduleRunStatuses)
+        .filter(([, status]) => status === 'running')
+        .map(([moduleId]) => moduleId),
+    [moduleRunStatuses]
+  );
+  const runningModulesKey = runningModuleIds.join(',');
+
+  const startProgress = useCallback((moduleId: string) => {
+    setModuleRunProgress((prev) => ({ ...prev, [moduleId]: 0 }));
+    if (progressIntervals.current[moduleId]) {
+      window.clearInterval(progressIntervals.current[moduleId]);
+    }
+    progressIntervals.current[moduleId] = window.setInterval(() => {
+      setModuleRunProgress((prev) => {
+        const current = prev[moduleId] ?? 0;
+        const nextValue = Math.min(95, current + 5);
+        return { ...prev, [moduleId]: nextValue };
+      });
+    }, 500);
+  }, []);
+
+  const stopProgress = useCallback((moduleId: string) => {
+    if (progressIntervals.current[moduleId]) {
+      window.clearInterval(progressIntervals.current[moduleId]);
+      delete progressIntervals.current[moduleId];
+    }
+    setModuleRunProgress((prev) => ({ ...prev, [moduleId]: 100 }));
+    window.setTimeout(() => {
+      setModuleRunProgress((prev) => {
+        const next = { ...prev };
+        delete next[moduleId];
+        return next;
+      });
+    }, 1200);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      Object.values(progressIntervals.current).forEach((intervalId) => {
+        window.clearInterval(intervalId);
+      });
+    };
+  }, []);
+
+  const websocketBase = useMemo(() => {
+    if (!backendUrl) {
+      return null;
+    }
+    if (backendUrl.startsWith('https://')) {
+      return backendUrl.replace(/^https:/, 'wss:');
+    }
+    if (backendUrl.startsWith('http://')) {
+      return backendUrl.replace(/^http:/, 'ws:');
+    }
+    return backendUrl;
+  }, [backendUrl]);
+
+  const connectExecutionSocket = useCallback(
+    (moduleId: string) => {
+      const base = websocketBase;
+      if (!base || executionSockets.current[moduleId]) {
+        return;
+      }
+      const executionId = `exec_${moduleId}`;
+      try {
+        const socket = new WebSocket(`${base}/ws/executions/${executionId}`);
+            socket.addEventListener('message', ({ data }) => {
+              try {
+                const payload = JSON.parse(data);
+                if (payload?.type === 'module_status' && payload.module_id === moduleId) {
+                  const entry = payload.status as ModuleStatusEntry;
+                  if (entry) {
+                    setModuleStatusEntries((prev) => ({ ...prev, [moduleId]: entry }));
+                  }
+                  if (Array.isArray(payload.device_notifications) && payload.device_notifications.length > 0) {
+                    showDeviceNotifications(
+                      payload.device_notifications.map((item: any) => ({
+                        moduleId,
+                        deviceId: item.device_id ?? 'unknown',
+                        success: Boolean(item.success),
+                        message: item.message ?? 'No details available',
+                      }))
+                    );
+                  }
+                }
+              } catch {
+                // ignore invalid payloads
+              }
+            });
+        socket.addEventListener('close', () => {
+          if (executionSockets.current[moduleId] === socket) {
+            executionSockets.current[moduleId] = null;
+          }
+        });
+        executionSockets.current[moduleId] = socket;
+      } catch {
+        // websocket unavailable
+      }
+    },
+    [websocketBase, showDeviceNotifications]
+  );
+
+  useEffect(() => {
+    return () => {
+      Object.values(executionSockets.current).forEach((socket) => {
+        if (socket) {
+          socket.close();
+        }
+      });
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!backendUrl || runningModuleIds.length === 0) {
+      return;
+    }
+    const controller = new AbortController();
+    const fetchStatuses = async () => {
+      const entries: ModuleStatusEntry[] = [];
+      await Promise.all(
+        runningModuleIds.map(async (moduleId) => {
+          const entry = await fetchModuleStatus({ moduleId, signal: controller.signal });
+          if (entry) {
+            entries.push(entry);
+          }
+        })
+      );
+      if (entries.length === 0) {
+        return;
+      }
+      setModuleStatusEntries((prev) => {
+        const next = { ...prev };
+        entries.forEach((entry) => {
+          if (entry.module_id) {
+            next[entry.module_id] = entry;
+          }
+        });
+        return next;
+      });
+    };
+
+    void fetchStatuses();
+    const interval = setInterval(() => {
+      void fetchStatuses();
+    }, 1500);
+    return () => {
+      controller.abort();
+      clearInterval(interval);
+    };
+  }, [backendUrl, fetchModuleStatus, runningModulesKey]);
+
   const runDeviceModule = useCallback(
     async (module: ModuleMetadata, options?: { silent?: boolean }) => {
       const silent = options?.silent === true;
@@ -1174,13 +1563,14 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         return;
       }
 
-    const normalizedBackendUrl = backendUrl.replace(/\/$/, '');
-    const sharedParameters: Record<string, any> = {};
+      const normalizedBackendUrl = backendUrl.replace(/\/$/, '');
+      const sharedParameters: Record<string, any> = {};
 
-    if (module.id === 'launch_app') {
-      sharedParameters.app = appLauncherSelection;
-    }
-    if (module.id === 'wrong_apn_configuration') {
+      if (module.id === 'launch_app') {
+        sharedParameters.app = appLauncherSelection;
+        sharedParameters.duration_seconds = appLauncherDuration;
+      }
+      if (module.id === 'wrong_apn_configuration') {
         sharedParameters.apn_value = (wrongApnValue || DEFAULT_WRONG_APN).trim() || DEFAULT_WRONG_APN;
         sharedParameters.use_ui_flow = true;
       } else if (module.id === 'pull_device_logs' || module.id === 'pull_rf_logs') {
@@ -1216,59 +1606,125 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         sharedParameters.recipient = recipient;
         sharedParameters.message = message;
       }
-      const executeForDevice = async (deviceId: string): Promise<DeviceModuleResult> => {
-        console.log(`[runDeviceModule] starting ${module.id} on ${deviceId} at ${new Date().toISOString()}`);
-        try {
+
+      const buildDeviceResult = (entry: Record<string, any>, fallbackReason?: string): DeviceModuleResult => {
+        const success = Boolean(entry.success);
+        const payload = entry.result ?? entry;
+        const deviceId =
+          (typeof entry.device_id === 'string' && entry.device_id) ||
+          (typeof entry.deviceId === 'string' && entry.deviceId) ||
+          'unknown';
+        const failureReason =
+          success
+            ? undefined
+            : entry.error ??
+              resolveModuleFailureReason(entry.result ?? entry) ??
+              fallbackReason ??
+              'Execution failed.';
+        return {
+          deviceId,
+          success,
+          response: payload,
+          ...(failureReason ? { error: failureReason } : {}),
+        };
+      };
+
+      setModuleRunStatuses((prev) => ({ ...prev, [module.id]: 'running' }));
+      startProgress(module.id);
+      try {
+        console.log(
+          `[runDeviceModule] requesting ${module.id} on ${targets.length} device${targets.length === 1 ? '' : 's'} at ${new Date().toISOString()}`
+        );
+
+        const parametersByDevice: Record<string, Record<string, any>> = {};
+        targets.forEach((deviceId) => {
+          parametersByDevice[deviceId] = { ...sharedParameters };
+        });
+
+        const executeRequest = async (payload: Record<string, any>) => {
           const response = await fetch(`${normalizedBackendUrl}/api/modules/${module.id}/execute`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               ...authHeaders(),
             },
-            body: JSON.stringify({
-              device_id: deviceId,
-              parameters: sharedParameters,
-            }),
+            body: JSON.stringify(payload),
           });
-
           if (!response.ok) {
             const text = await response.text();
-            throw new Error(text || `Backend failure (HTTP ${response.status})`);
+            throw { status: response.status, text };
           }
+          return response.json();
+        };
 
-          const data = await response.json();
-          const success = typeof data.success === 'boolean' ? data.success : true;
-          console.log(`[runDeviceModule] completed ${module.id} on ${deviceId} => success=${success} at ${new Date().toISOString()}`);
-          const failureReason = success ? undefined : resolveModuleFailureReason(data) ?? 'Execution failed.';
-          return {
-            deviceId,
-            success,
-            response: data,
-            ...(failureReason ? { error: failureReason } : {}),
-          };
-        } catch (error) {
-          const message =
-            error instanceof Error ? error.message : 'Unknown error while communicating with the backend.';
-          return { deviceId, success: false, error: message };
+        let data: any;
+        try {
+          data = await executeRequest({
+            device_ids: targets,
+            parameters_by_device: parametersByDevice,
+          });
+        } catch (error: any) {
+          const text = typeof error?.text === 'string' ? error.text : '';
+          if (error?.status === 422 || (error?.status === 400 && text.toLowerCase().includes('parameters_by_device'))) {
+            data = await executeRequest({
+              device_ids: targets,
+              parameters: sharedParameters,
+            });
+          } else {
+            throw new Error(text || `Backend failure (HTTP ${error?.status ?? 'unknown'})`);
+          }
         }
-      };
 
-      setModuleRunStatuses((prev) => ({ ...prev, [module.id]: 'running' }));
-      try {
-        const deviceResults = await Promise.all(targets.map((deviceId) => executeForDevice(deviceId)));
-        const successes = deviceResults.filter((result) => result.success).map((result) => result.deviceId);
-        const failures = deviceResults
-          .filter((result) => !result.success)
-          .map((result) => ({
-            deviceId: result.deviceId,
-            reason: result.error ?? 'Execution failed.',
+        const statusIdFromServer =
+          typeof data.status_id === 'string' && data.status_id ? data.status_id : undefined;
+        const rawDeviceEntries: Record<string, any>[] = Array.isArray(data?.result?.device_results)
+          ? data.result.device_results
+          : Array.isArray(data?.device_results)
+            ? data.device_results
+            : [];
+
+        let deviceResults: DeviceModuleResult[] = rawDeviceEntries.map((entry) =>
+          buildDeviceResult(entry, resolveModuleFailureReason(data))
+        );
+        if (deviceResults.length === 0) {
+          const fallbackReason = resolveModuleFailureReason(data) ?? 'Execution result unavailable for devices.';
+          deviceResults = targets.map((deviceId) => ({
+            deviceId,
+            success: false,
+            response: data,
+            error: fallbackReason,
           }));
+        }
 
-        setLastDeviceModuleRun({
-          moduleId: module.id,
-          timestamp: new Date().toISOString(),
-          results: deviceResults,
-        });
+        if (statusIdFromServer) {
+          const finalStatus = await fetchModuleStatus({ statusId: statusIdFromServer });
+          if (finalStatus?.module_id) {
+            setModuleStatusEntries((prev) => ({
+              ...prev,
+              [finalStatus.module_id]: finalStatus,
+            }));
+          }
+        }
+
+        console.log(
+          `[runDeviceModule] completed ${module.id} (${deviceResults.length} device results) at ${new Date().toISOString()}`
+        );
+
+      const successes = deviceResults.filter((result) => result.success).map((result) => result.deviceId);
+      const failures = deviceResults
+        .filter((result) => !result.success)
+        .map((result) => ({
+          deviceId: result.deviceId,
+          reason: result.error ?? 'Execution failed.',
+        }));
+      const detailMessage = buildDeviceNotificationMessage(deviceResults);
+      const detailSuffix = detailMessage ? ` Details: ${detailMessage}` : '';
+
+      setLastDeviceModuleRun({
+        moduleId: module.id,
+        timestamp: new Date().toISOString(),
+        results: deviceResults,
+      });
 
         const activityTimestamp = new Date().toISOString();
         deviceResults.forEach((result) => {
@@ -1286,8 +1742,8 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         if (!silent) {
           const alreadyDevices = deviceResults
             .filter((item) => {
-              const res = (item.response as any)?.result;
-              return res && (res.already_active || res.already_configured || res.already_on || res.already_off);
+              const payload = (item.response as any)?.result ?? (item.response as any);
+              return payload && (payload.already_active || payload.already_configured || payload.already_on || payload.already_off);
             })
             .map((item) => item.deviceId);
 
@@ -1295,40 +1751,52 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
             if (alreadyDevices.length > 0) {
               setSnackbar({
                 severity: 'info',
-                message: `${module.name}: device already in desired state (${alreadyDevices.join(', ')}).`,
+                message: `${module.name}: device already in desired state (${alreadyDevices.join(', ')}).${detailSuffix}`,
               });
             } else {
               setSnackbar({
                 severity: 'success',
-                message: `${module.name} executed successfully on ${successes.length} device${successes.length === 1 ? '' : 's'}.`,
+                message: `${module.name} executed successfully on ${successes.length} device${successes.length === 1 ? '' : 's'}.${detailSuffix}`,
               });
             }
-          } else if (successes.length > 0) {
+        } else if (successes.length > 0) {
+          const alreadyOnStatuses = deviceResults.filter((result) => result.success).filter((result) => {
+            const payload = (result.response as any)?.result ?? (result.response as any);
+            return Boolean(payload?.already_on || payload?.already_active);
+          });
+          if (module.id === 'activate_data' && alreadyOnStatuses.length === deviceResults.length) {
+            setSnackbar({
+              severity: 'error',
+              message: `${module.name}: Mobile data is already enabled.${detailSuffix}`,
+            });
+          } else {
             const failedList = failures.map((item) => item.deviceId).join(', ');
             setSnackbar({
               severity: 'warning',
-              message: `${module.name} executed on ${successes.length} device${successes.length === 1 ? '' : 's'}. Failed for: ${failedList}.`,
+              message: `${module.name} executed on ${successes.length} device${successes.length === 1 ? '' : 's'}. Failed for: ${failedList}.${detailSuffix}`,
             });
-          } else {
+          }
+        } else {
             const reasons = failures.map((item) => `${item.deviceId}: ${item.reason}`).join(' | ');
             setSnackbar({
               severity: 'error',
-              message: `${module.name} failed on all selected devices. ${reasons}`,
+              message: `${module.name} failed on all selected devices. ${reasons}.${detailSuffix}`,
             });
           }
         }
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Unexpected error during module execution.';
         setSnackbar({ severity: 'error', message: `${module.name} execution aborted: ${msg}` });
-      } finally {
-        setModuleRunStatuses((prev) => {
-          const next = { ...prev };
-          delete next[module.id];
-          return next;
-        });
-      }
+    } finally {
+      stopProgress(module.id);
+      setModuleRunStatuses((prev) => {
+        const next = { ...prev };
+        delete next[module.id];
+        return next;
+      });
+    }
     },
-    [backendUrl, resolveRunTargets, pingConfig, wrongApnValue, logPullDestination, customCode, smsConfig, appLauncherSelection]
+    [backendUrl, resolveRunTargets, pingConfig, wrongApnValue, logPullDestination, customCode, smsConfig, appLauncherSelection, fetchModuleStatus]
   );
 
   const handleRun = (module: ModuleMetadata) => {
@@ -1370,19 +1838,28 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
 
   const closeAppLauncherDialog = () => {
     setAppLauncherDialogSelection(appLauncherSelection);
+    setAppLauncherDialogDuration(appLauncherDuration);
     setAppLauncherDialogOpen(false);
   };
 
   const handleAppLauncherDialogSave = () => {
     setAppLauncherSelection(appLauncherDialogSelection);
+    setAppLauncherDuration(appLauncherDialogDuration);
     setAppLauncherDialogOpen(false);
     setSnackbar({
       severity: 'success',
-      message: `Smart App Launcher will now target ${APP_LAUNCHER_DISPLAY[appLauncherDialogSelection]}.`,
+      message: `Smart App Launcher will target ${APP_LAUNCHER_DISPLAY[appLauncherDialogSelection]} for ${appLauncherDialogDuration}s.`,
     });
   };
 
   const handleEdit = (module: ModuleMetadata) => {
+    if (moduleRunStatuses[module.id] === 'running') {
+      setSnackbar({
+        severity: 'info',
+        message: 'This module is running and cannot be edited right now.',
+      });
+      return;
+    }
     if (module.id === 'call_test') {
       const sequence = liveSelectedDeviceIds.length > 0 ? liveSelectedDeviceIds : [GLOBAL_CALL_TEST_KEY];
       setCallTestMode('edit');
@@ -1666,11 +2143,11 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         next.push(removed);
       } else {
         const targetIndex = next.findIndex((entry) => entry.instanceId === targetId);
-        if (targetIndex === -1) {
-          return prev;
-        }
-        const insertionIndex = Math.min(next.length, targetIndex + (insertAfterTarget ? 1 : 0));
-        next.splice(insertionIndex, 0, removed);
+    if (targetIndex === -1) {
+      return prev;
+    }
+    const insertionIndex = Math.min(next.length, targetIndex + (insertAfterTarget ? 1 : 0));
+    next.splice(insertionIndex, 0, removed);
       }
       return next;
     });
@@ -1731,6 +2208,23 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
     setHoveredBuilderTarget(null);
   };
 
+  const moveSelectedModule = useCallback((instanceId: string, direction: -1 | 1) => {
+    setSelectedModules((prev) => {
+      const index = prev.findIndex((entry) => entry.instanceId === instanceId);
+      if (index === -1) {
+        return prev;
+      }
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= prev.length) {
+        return prev;
+      }
+      const next = [...prev];
+      const [moved] = next.splice(index, 1);
+      next.splice(targetIndex, 0, moved);
+      return next;
+    });
+  }, []);
+
   const handleModuleDragEnd = () => {
     setDraggingModuleId(null);
     setDraggingCatalogModuleId(null);
@@ -1776,6 +2270,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
       name: workflowName.trim(),
       description: workflowDescription.trim(),
       modules: selectedModules.map((item) => item.module),
+      tags: [],
     });
 
     setSnackbar({ message: `Workflow "${workflowName}" created with ${selectedModules.length} module(s)`, severity: 'success' });
@@ -1787,6 +2282,37 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
 
   return (
     <Layout>
+      {deviceNotifications.length > 0 && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 96,
+            right: 24,
+            zIndex: 1400,
+            width: 320,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1,
+          }}
+        >
+          {deviceNotifications.map((notification) => (
+            <Alert
+              key={notification.id}
+              severity={notification.success ? 'success' : 'error'}
+              variant="filled"
+              sx={{ boxShadow: 3 }}
+              onClose={() =>
+                setDeviceNotifications((prev) => prev.filter((item) => item.id !== notification.id))
+              }
+            >
+              <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                {notification.moduleId} · {notification.deviceId}
+              </Typography>
+              <Typography variant="body2">{notification.message}</Typography>
+            </Alert>
+          ))}
+        </Box>
+      )}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, gap: 2 }}>
         <Typography variant="h1" sx={{
           fontSize: '28px',
@@ -1832,14 +2358,30 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
           </FormControl>
           <ToggleButtonGroup
             size="small"
-            value={moduleFilterMode}
+            value={
+              moduleFilterMode === 'favorites'
+                ? 'favorites'
+                : moduleFilterMode === 'recents'
+                  ? 'recents'
+                  : null
+            }
             exclusive
-            onChange={(_, value) => value && setModuleFilterMode(value)}
           >
-            <ToggleButton value="favorites" sx={{ gap: 0.5 }}>
+            <ToggleButton
+              value="favorites"
+              sx={{ gap: 0.5 }}
+              selected={moduleFilterMode === 'favorites'}
+              onClick={() => setModuleFilterMode((prev) => (prev === 'favorites' ? 'all' : 'favorites'))}
+            >
               <Star size={16} /> Favorites
             </ToggleButton>
-            <ToggleButton value="recents">Recents</ToggleButton>
+            <ToggleButton
+              value="recents"
+              selected={moduleFilterMode === 'recents'}
+              onClick={() => setModuleFilterMode((prev) => (prev === 'recents' ? 'all' : 'recents'))}
+            >
+              Recents
+            </ToggleButton>
           </ToggleButtonGroup>
         <Chip
           label={
@@ -1964,28 +2506,62 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
                 transition: 'border-color 0.2s ease, background-color 0.2s ease',
               }}
             >
-              {selectedModules.map((entry, index) => (
-                <Box
-                  key={entry.instanceId}
-                  draggable
-                  onDragStart={(event) => handleModuleDragStart(event, entry.instanceId)}
-                  onDragOver={(event) => handleModuleDragOver(event, entry.instanceId)}
-                  onDrop={(event) => handleModuleDrop(event, entry.instanceId)}
-                  onDragEnd={handleModuleDragEnd}
-                  sx={{ cursor: 'grab', display: 'inline-flex' }}
-                >
-                  <Chip
-                    label={`${index + 1}. ${entry.module.name}`}
-                    onDelete={() => handleRemoveModule(entry.instanceId)}
-                    sx={{
-                      backgroundColor: draggingModuleId === entry.instanceId ? '#DBEAFE' : '#EEF2FF',
-                      color: '#2563EB',
-                      borderRadius: '8px',
-                      border: draggingModuleId === entry.instanceId ? '1px dashed #2563EB' : 'none'
-                    }}
-                  />
-                </Box>
-              ))}
+              {selectedModules.map((entry, index) => {
+                const isFirst = index === 0;
+                const isLast = index === selectedModules.length - 1;
+                const running = moduleRunStatuses[entry.module.id] === 'running';
+                return (
+                  <Box
+                    key={entry.instanceId}
+                    draggable
+                    onDragStart={(event) => handleModuleDragStart(event, entry.instanceId)}
+                    onDragOver={(event) => handleModuleDragOver(event, entry.instanceId)}
+                    onDrop={(event) => handleModuleDrop(event, entry.instanceId)}
+                    onDragEnd={handleModuleDragEnd}
+                    sx={{ cursor: 'grab', display: 'inline-flex' }}
+                  >
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      gap={0.5}
+                      sx={{
+                        backgroundColor: draggingModuleId === entry.instanceId ? '#DBEAFE' : '#EEF2FF',
+                        borderRadius: '12px',
+                        padding: '4px 6px',
+                        border: draggingModuleId === entry.instanceId ? '1px dashed #2563EB' : 'none'
+                      }}
+                    >
+                      <IconButton
+                        size="small"
+                        disabled={isFirst || running}
+                        onMouseDown={(event) => event.stopPropagation()}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          moveSelectedModule(entry.instanceId, -1);
+                        }}
+                      >
+                        <ArrowLeft size={16} />
+                      </IconButton>
+                      <Chip
+                        label={`${index + 1}. ${entry.module.name}`}
+                        onDelete={() => handleRemoveModule(entry.instanceId)}
+                        sx={{ color: '#2563EB', borderRadius: '8px' }}
+                      />
+                      <IconButton
+                        size="small"
+                        disabled={isLast || running}
+                        onMouseDown={(event) => event.stopPropagation()}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          moveSelectedModule(entry.instanceId, 1);
+                        }}
+                      >
+                        <ArrowRight size={16} />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                );
+              })}
               {selectedModules.length === 0 && (
                 <Typography sx={{ color: '#6B7280', fontStyle: 'italic' }}>
                   No modules selected. Click the + button on modules below to add them.
@@ -2003,9 +2579,40 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
       <Grid container spacing={3}>
         {filteredModules.map((module) => {
           const moduleRunning = moduleRunStatuses[module.id] === 'running';
+          const moduleStatusEntry = moduleStatusEntries[module.id];
           const isPingRunning = module.id === 'ping' && moduleRunning;
           const runButtonBackground = isPingRunning ? '#16A34A' : '#2563EB';
           const runButtonHover = isPingRunning ? '#15803D' : '#1E48C7';
+          const totalDevices = moduleStatusEntry?.device_ids.length ?? 0;
+          const pendingDevices = moduleStatusEntry?.pending_device_ids.length ?? 0;
+          const runningLabel =
+            totalDevices > 0 && pendingDevices > 0
+              ? `Running (${totalDevices - pendingDevices}/${totalDevices})`
+              : 'Running';
+          const statusLabel =
+            moduleStatusEntry?.state === 'running'
+              ? runningLabel
+              : moduleStatusEntry?.success
+                ? 'Last run OK'
+                : 'Last run failed';
+          const statusColor =
+            moduleStatusEntry?.state === 'running'
+              ? 'info'
+              : moduleStatusEntry?.success
+                ? 'success'
+                : 'error';
+          const statusDescription = moduleStatusEntry?.summary ?? moduleStatusEntry?.stage_message;
+          const statusChip = moduleStatusEntry ? (
+            <Tooltip title={statusDescription ?? ''} disableHoverListener={!statusDescription}>
+              <Chip
+                label={statusLabel}
+                size="small"
+                color={statusColor as 'success' | 'error' | 'info'}
+                sx={{ fontWeight: 600 }}
+              />
+            </Tooltip>
+          ) : null;
+          const moduleDurationLabel = module.duration_estimate ?? module.durationEstimate;
           return (
           <Grid item xs={12} sm={6} lg={4} key={module.id}>
             <Card
@@ -2026,14 +2633,20 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
               <CardContent sx={{ padding: '20px 24px' }}>
                 <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
                   <Box>
-                    <Typography variant="h6" sx={{ 
-                      fontWeight: 600, 
-                      color: '#0F172A',
-                      fontSize: '16px',
-                      lineHeight: '24px'
-                    }}>
-                      {module.name}
-                    </Typography>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      {(() => {
+                        const ModuleIcon = MODULE_ICON_MAP[module.id] || MODULE_ICON_MAP.default;
+                        return <ModuleIcon size={18} color="#2563EB" />;
+                      })()}
+                      <Typography variant="h6" sx={{ 
+                        fontWeight: 600, 
+                        color: '#0F172A',
+                        fontSize: '16px',
+                        lineHeight: '24px'
+                      }}>
+                        {module.name}
+                      </Typography>
+                    </Box>
                     <Chip
                       label={module.category}
                       size="small"
@@ -2045,6 +2658,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
                         fontSize: '10px'
                       }}
                     />
+                    {statusChip && <Box mt={0.5}>{statusChip}</Box>}
                   </Box>
                   <Stack direction="row" spacing={1}>
                     <IconButton
@@ -2086,18 +2700,30 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
                   </Typography>
                 )}
 
-                <Box display="flex" gap={2} mb={3}>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <Timer size={16} color="#6B7280" />
-                    <Typography variant="caption" sx={{ 
-                      color: '#6B7280',
-                      fontSize: '12px',
-                      lineHeight: '18px',
-                      fontWeight: 500
-                    }}>
-                      30-45s
-                    </Typography>
-                  </Box>
+                <Box display="flex" gap={2} flexDirection="column" mb={3}>
+                  {moduleDurationLabel && (
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Timer size={16} color="#6B7280" />
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: '#6B7280',
+                          fontSize: '12px',
+                          lineHeight: '18px',
+                          fontWeight: 500,
+                        }}
+                      >
+                        {moduleDurationLabel}
+                      </Typography>
+                    </Box>
+                  )}
+                  {(typeof moduleRunProgress[module.id] === 'number') && (
+                    <LinearProgress
+                      variant="determinate"
+                      value={moduleRunProgress[module.id]}
+                      sx={{ width: '100%', height: 6, borderRadius: 3, mt: 1 }}
+                    />
+                  )}
                 </Box>
 
                 <Box display="flex" gap={2}>
@@ -2130,18 +2756,20 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
                   </Tooltip>
                   <Tooltip
                     title={
-                      module.id === 'call_test'
-                        ? 'Edit parameters'
-                        : module.editable
-                          ? 'Edit script'
-                          : 'Not editable'
+                      moduleRunning
+                        ? 'Module running'
+                        : module.id === 'call_test'
+                          ? 'Edit parameters'
+                          : module.editable
+                            ? 'Edit script'
+                            : 'Not editable'
                     }
                   >
                     <span>
-                      <IconButton
-                        onClick={() => handleEdit(module)}
-                        disabled={!module.editable && module.id !== 'call_test'}
-                        sx={{
+                    <IconButton
+                      onClick={() => handleEdit(module)}
+                      disabled={moduleRunning || (!module.editable && module.id !== 'call_test')}
+                      sx={{
                           backgroundColor: '#F1F5F9',
                           color: '#475569',
                           border: '1px solid #E2E8F0',
@@ -2157,18 +2785,19 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
                           }
                         }}
                       >
-                        <Pencil size={16} />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                </Box>
+                      <Pencil size={16} />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              </Box>
               </CardContent>
             </Card>
           </Grid>
         );
         })}
-      </Grid>
+          </Grid>
       </Box>
+
 
 
       <Dialog open={waitingTimeDialogOpen} onClose={closeWaitingTimeDialog} fullWidth maxWidth="xs">
@@ -2321,32 +2950,50 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         <DialogTitle>Smart App Launcher</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ color: '#475569', mb: 2 }}>
-            Choisissez l'application cible : YouTube ouvre une vidéo aléatoire, Google lance une recherche aléatoire pour provoquer du trafic.
+            Choose the target to exercise: YouTube plays a random video, Maps opens navigation, and Chrome News opens a curated tab.
           </Typography>
-          <RadioGroup
-            value={appLauncherDialogSelection}
-            onChange={(event) => setAppLauncherDialogSelection(event.target.value as AppLauncherOption)}
-          >
-            <FormControlLabel
-              value="youtube"
-              control={<Radio />}
-              label="YouTube (lecture d'une vidéo tirée de la liste)"
-            />
-            <FormControlLabel
-              value="google"
-              control={<Radio />}
-              label="Google (recherche aléatoire)"
-            />
-          </RadioGroup>
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel id="app-launcher-select-label">Target application</InputLabel>
+            <Select
+              labelId="app-launcher-select-label"
+              label="Target application"
+              value={appLauncherDialogSelection}
+              onChange={(event) => setAppLauncherDialogSelection(event.target.value as AppLauncherOption)}
+            >
+              {APP_LAUNCHER_OPTIONS.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {APP_LAUNCHER_DISPLAY[option]}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            label="Duration (seconds)"
+            type="number"
+            fullWidth
+            value={appLauncherDialogDuration}
+            onChange={(event) => {
+              const parsed = Number(event.target.value);
+              if (!Number.isFinite(parsed)) {
+                setAppLauncherDialogDuration(1);
+                return;
+              }
+              const normalized = Math.max(1, Math.min(120, Math.round(parsed)));
+              setAppLauncherDialogDuration(normalized);
+            }}
+            inputProps={{ min: 1, max: 120 }}
+            helperText="App stays open for the duration before being closed automatically."
+            sx={{ mb: 1 }}
+          />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={closeAppLauncherDialog} sx={{ textTransform: 'none' }}>
-            Annuler
-          </Button>
-          <Button variant="contained" onClick={handleAppLauncherDialogSave} sx={{ textTransform: 'none' }}>
-            Sauvegarder
-          </Button>
-        </DialogActions>
+          <DialogActions>
+            <Button onClick={closeAppLauncherDialog} sx={{ textTransform: 'none' }}>
+              Cancel
+            </Button>
+            <Button variant="contained" onClick={handleAppLauncherDialogSave} sx={{ textTransform: 'none' }}>
+              Save
+            </Button>
+          </DialogActions>
       </Dialog>
 
       <Dialog open={logPullDialogOpen} onClose={handleLogPullClose} fullWidth maxWidth="sm">

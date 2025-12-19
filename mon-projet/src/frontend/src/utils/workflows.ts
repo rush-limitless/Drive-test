@@ -13,6 +13,7 @@ export interface StoredWorkflow {
   status: WorkflowStatus;
   runCount: number;
   lastRunAt: string | null;
+  tags: string[];
 }
 
 const STORAGE_KEY = 'customWorkflows';
@@ -200,6 +201,26 @@ const normalizeModules = (value: unknown): ModuleMetadata[] => {
   return modules;
 };
 
+const normalizeTags = (value: unknown): string[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  const tags: string[] = [];
+  value.forEach((item) => {
+    if (typeof item !== 'string') {
+      return;
+    }
+    const trimmed = item.trim();
+    if (!trimmed) {
+      return;
+    }
+    if (!tags.includes(trimmed)) {
+      tags.push(trimmed);
+    }
+  });
+  return tags;
+};
+
 const sanitizeTimestamp = (value: unknown, fallback: string): string => {
   if (typeof value === 'string') {
     const trimmed = value.trim();
@@ -267,6 +288,8 @@ const hydrateWorkflow = (record: any, index: number): StoredWorkflow => {
     record?.last_run ??
     record?.lastRun;
 
+  const tags = normalizeTags(record?.tags ?? record?.tagList ?? []);
+
   const createdAt = sanitizeTimestamp(createdAtCandidate, now);
   const updatedAt = sanitizeTimestamp(updatedAtCandidate, createdAt);
   const runCount = sanitizeRunCount(runCountCandidate, 0);
@@ -283,6 +306,7 @@ const hydrateWorkflow = (record: any, index: number): StoredWorkflow => {
     status: derivedStatus,
     runCount,
     lastRunAt,
+    tags,
   };
 };
 
@@ -307,6 +331,7 @@ export const addStoredWorkflow = (
   workflow: Omit<StoredWorkflow, 'id' | 'createdAt' | 'updatedAt' | 'runCount' | 'lastRunAt' | 'status'> & {
     runCount?: number;
     lastRunAt?: string | null;
+    tags?: string[];
   }
 ): StoredWorkflow => {
   const workflows = getStoredWorkflows();
@@ -325,6 +350,7 @@ export const addStoredWorkflow = (
     status: 'draft',
     runCount: sanitizeRunCount(workflow.runCount, 0),
     lastRunAt,
+    tags: normalizeTags(workflow.tags ?? []),
   };
 
   workflows.push(newWorkflow);
@@ -368,6 +394,10 @@ export const updateStoredWorkflow = (
 
   if (Object.prototype.hasOwnProperty.call(updates, 'lastRunAt')) {
     next.lastRunAt = sanitizeOptionalTimestamp((updates as any).lastRunAt);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(updates, 'tags')) {
+    next.tags = normalizeTags((updates as any).tags ?? []);
   }
 
   if (typeof updates.updatedAt === 'string') {

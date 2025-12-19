@@ -83,6 +83,17 @@ python simple-server.py
 ```
 Leave this terminal running; it serves both the API and the static dashboard.
 
+### Multi-device backend (parallel mode)
+
+Pour déclencher des modules sur plusieurs téléphones *en parallèle* (start RF logging, workflows, etc.), utilise le script PowerShell qui lance `uvicorn` avec des workers simultanés et les logs d’accès :
+
+```powershell
+cd mon-projet
+.\scripts\start-backend-parallel.ps1 -Workers 2 -Port 8007
+```
+
+Ajoute le flag `-Reload` si tu modifies le backend pendant l’exploration (il passe `uvicorn --reload`). Chaque requête affiche son horodatage pour suivre instantanément l’exécution sur chaque `device_id`.
+
 ### 7. Launch the Electron shell
 ```bash
 cd mon-projet

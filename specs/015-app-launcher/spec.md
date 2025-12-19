@@ -31,6 +31,7 @@ Le même utilisateur veut pouvoir changer l'application cible depuis le bouton *
 **Acceptance Scenarios**:
 1. **Given** l'éditeur du module ouvert, **When** l'utilisateur choisit « YouTube » puis ferme l'éditeur, **Then** le module continue d'indiquer « Smart App Launcher (YouTube) » et les exécutions suivantes ouvrent YouTube.
 2. **Given** l'éditeur ouvert, **When** l'utilisateur choisit « Google » et sauvegarde, **Then** la prochaine exécution lance Google avec une recherche aléatoire et l'interface indique le choix actif.
+3. **Given** duration réglée dans l'éditeur, **When** on lance l'action, **Then** l'application sélectionnée s'arrête automatiquement après la durée définie et la réponse signale la fermeture.
 
 ---
 
@@ -60,6 +61,7 @@ L'utilisateur veut savoir si l'app est déjà ouverte ou si la commande n'a rien
 - **FR-004**: Lorsque `app=google`, l'API doit construire une recherche aléatoire (`android.intent.action.WEB_SEARCH`) avec une requête sélectionnée dans une liste de mot-clés.
 - **FR-005**: Le frontend doit proposer un module éditable avec un dialogue qui permet de choisir et persister le paramètre `app`.
 - **FR-006**: Le backend doit signaler `already_on`/`already_off` pour éviter des exécutions redondantes et alimenter le bandeau d'état.
+- **FR-007**: L'éditeur doit aussi permettre de définir une durée (en secondes) pendant laquelle l'application reste ouverte, et l'API doit fermer l'app une fois ce délai écoulé tout en reportant `duration_seconds` + `closed_after_duration`.
 
 ### Key Entities
 - **SmartAppLaunchConfig**: {app: 'google' | 'youtube'} retenu côté frontend.

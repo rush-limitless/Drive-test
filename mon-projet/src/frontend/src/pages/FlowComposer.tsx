@@ -21,6 +21,7 @@ import {
   Snackbar,
   Alert,
   Stack,
+  Menu,
 } from '@mui/material';
 import {
   Search,
@@ -39,6 +40,8 @@ import {
   X,
   StopCircle,
   Copy,
+  Download,
+  Tag,
 } from 'lucide-react';
 
 import Layout from '../components/Layout';
@@ -62,6 +65,37 @@ type WorkflowEditorData = {
   description: string;
   modules: ModuleMetadata[];
   repeatSettings: RepeatDurationSettings;
+  tags: string[];
+};
+
+type WorkflowExecutionDeviceResult = {
+  deviceId: string;
+  success: boolean;
+  message?: string;
+};
+
+type WorkflowExecutionStep = {
+  step: number;
+  module: string | null;
+  success: boolean;
+  deviceResults: WorkflowExecutionDeviceResult[];
+};
+
+type WorkflowExecutionReport = {
+  executionId: string;
+  timestamp: string;
+  status: string;
+  workflowName: string;
+  deviceIds: string[];
+  successCount: number;
+  failureCount: number;
+  results: WorkflowExecutionStep[];
+};
+
+type WorkflowPreflightReport = {
+  timestamp: string;
+  success: boolean;
+  deviceResults: WorkflowExecutionDeviceResult[];
 };
 
 interface FlowComposerProps {
@@ -224,7 +258,7 @@ const describeCallTestModule = (module: ModuleMetadata): string => {
   const numberLabel = formatCallTestNumber(values);
   const attempts = Math.max(1, values.callCount ?? 1);
   const attemptLabel = attempts > 1 ? `${attempts} appels` : '1 appel';
-  return `Appel vers ${numberLabel} • ${attemptLabel}`;
+  return `Appel vers ${numberLabel} â€¢ ${attemptLabel}`;
 };
 
 const describeWaitingModule = (module: ModuleMetadata): string =>
@@ -358,6 +392,11 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
   const [scheduleDeviceIds, setScheduleDeviceIds] = useState<string[]>([]);
   const [workflowBackendMap, setWorkflowBackendMap] = useState<Record<string, string>>(() => readWorkflowBackendMap());
   const [backendWorkflowIds, setBackendWorkflowIds] = useState<string[]>([]);
+  const [workflowExecutionReports, setWorkflowExecutionReports] = useState<Record<string, WorkflowExecutionReport>>({});
+  const [preflightReports, setPreflightReports] = useState<Record<string, WorkflowPreflightReport | null>>({});
+  const [workflowTagFilter, setWorkflowTagFilter] = useState<string>('all');
+  const [exportMenuAnchor, setExportMenuAnchor] = useState<HTMLElement | null>(null);
+  const [exportMenuWorkflow, setExportMenuWorkflow] = useState<StoredWorkflow | null>(null);
   const moduleCatalogMap = useMemo(() => new Map(MODULE_CATALOG.map((m) => [m.id, m])), []);
   const normalizedBackendUrl = useMemo(() => (backendUrl ? backendUrl.replace(/\/$/, '') : ''), [backendUrl]);
   const schedulePreviewTime = useMemo(() => {
@@ -369,6 +408,18 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
     return future.toLocaleString([], { hour: '2-digit', minute: '2-digit' });
   }, [scheduleDelayMinutes]);
 
+  const availableWorkflowTags = useMemo(() => {
+    const tagSet = new Set<string>();
+    workflows.forEach((workflow) => {
+      (workflow.tags ?? []).forEach((tag) => {
+        if (tag && tag.trim().length > 0) {
+          tagSet.add(tag.trim());
+        }
+      });
+    });
+    return Array.from(tagSet).sort((a, b) => a.localeCompare(b));
+  }, [workflows]);
+
   const handleCloneWorkflow = useCallback(
     (workflow: StoredWorkflow) => {
       const cloneName = `${workflow.name} (Copy)`;
@@ -378,6 +429,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
         modules: workflow.modules,
         runCount: 0,
         lastRunAt: null,
+        tags: workflow.tags ?? [],
       });
       setWorkflows(getStoredWorkflows());
       setSnackbar({ severity: 'success', message: `Workflow "${cloneName}" created.` });
@@ -948,6 +1000,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
         name: data.name.trim(),
         description,
         modules: data.modules,
+        tags: data.tags ?? [],
       });
       setWorkflowRepeatSettings((prev) => ({
         ...prev,
@@ -959,6 +1012,36 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
     setWorkflows(getStoredWorkflows());
     handleCloseEditor();
   };
+
+  const performPreflightCheck = useCallback(
+    async (workflowId: string, deviceIds: string[]) => {
+      if (!normalizedBackendUrl) {
+        throw new Error('Backend unavailable: no URL configured.');
+      }
+      const response = await fetch(`${normalizedBackendUrl}/api/modules/preflight_check/execute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_ids: deviceIds }),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || `Preflight check failed for workflow ${workflowId}.`);
+      }
+      const data = await response.json();
+      const deviceResults: WorkflowExecutionDeviceResult[] = (data.result?.device_results ?? []).map((entry: any) => ({
+        deviceId: entry.device_id,
+        success: Boolean(entry.success),
+        message: entry.result?.stage_message || entry.result?.summary || entry.result?.message || entry.error || '',
+      }));
+      const success = Boolean(data.success) && deviceResults.every((result) => result.success);
+      return {
+        timestamp: new Date().toISOString(),
+        success,
+        deviceResults,
+      };
+    },
+    [normalizedBackendUrl]
+  );
 
   const executeModuleForDevices = useCallback(
     async (
@@ -989,73 +1072,303 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
         };
       }
 
-      const results = await Promise.allSettled(
-        deviceIds.map(async (deviceId) => {
-          if (abortSignal?.aborted) {
-            throw { deviceId, message: 'Execution cancelled' };
-          }
-
+      const buildGroupedRequests = () => {
+        const groupedRequests = new Map<string, { parameters: Record<string, any>; deviceIds: string[] }>();
+        deviceIds.forEach((deviceId) => {
           const parameters = buildModuleParametersForDevice(module, deviceId) ?? {};
-          try {
-            const response = await fetch(`${normalizedBackendUrl}/api/modules/${apiModuleId}/execute`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                device_id: deviceId,
-                parameters,
-                workflow_id: workflow.id,
-                workflow_name: workflow.name,
-                module_id: module.id,
-                repeat_count: repeatCountMeta,
-                duration_seconds: durationSecondsMeta,
-                run_iteration: runIteration,
-              }),
-              signal: abortSignal,
-            });
+          const key = JSON.stringify(parameters);
+          const existing = groupedRequests.get(key);
+          if (existing) {
+            existing.deviceIds.push(deviceId);
+          } else {
+            groupedRequests.set(key, { parameters, deviceIds: [deviceId] });
+          }
+        });
+        return groupedRequests;
+      };
 
-            if (!response.ok) {
-              const text = await response.text();
-              throw { deviceId, message: text || `Backend failure (HTTP ${response.status})` };
+      const executeGroupedRequests = async () => {
+        const groupedRequests = buildGroupedRequests();
+        return Promise.allSettled(
+          Array.from(groupedRequests.values()).map(async ({ parameters, deviceIds: groupDeviceIds }) => {
+            if (abortSignal?.aborted) {
+              throw { deviceIds: groupDeviceIds, message: 'Execution cancelled' };
             }
 
-            const data = await response.json();
+            try {
+              const response = await fetch(`${normalizedBackendUrl}/api/modules/${apiModuleId}/execute`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  device_ids: groupDeviceIds,
+                  parameters,
+                  workflow_id: workflow.id,
+                  workflow_name: workflow.name,
+                  module_id: module.id,
+                  repeat_count: repeatCountMeta,
+                  duration_seconds: durationSecondsMeta,
+                  run_iteration: runIteration,
+                }),
+                signal: abortSignal,
+              });
+
+              if (!response.ok) {
+                const text = await response.text();
+                throw { deviceIds: groupDeviceIds, message: text || `Backend failure (HTTP ${response.status})` };
+              }
+
+              const data = await response.json();
+              const deviceResults = data?.result?.device_results;
+              if (Array.isArray(deviceResults)) {
+                return deviceResults.map((entry: any) => ({
+                  deviceId: entry.device_id ?? entry.deviceId ?? 'unknown',
+                  success: Boolean(entry.success),
+                  message:
+                    entry.result?.stage_message ||
+                    entry.result?.summary ||
+                    entry.result?.message ||
+                    entry.error ||
+                    '',
+                }));
+              }
+
+              const dataStatus = typeof data.status === 'string' ? data.status.toLowerCase() : 'completed';
+              const success =
+                typeof data.success === 'boolean' ? data.success : dataStatus !== 'failed' && dataStatus !== 'error';
+              const message = data.error || data.message || data.result?.stage_message || data.result?.summary || '';
+
+              return groupDeviceIds.map((deviceId) => ({
+                deviceId,
+                success,
+                message,
+              }));
+            } catch (error: any) {
+              if (error?.name === 'AbortError') {
+                throw { deviceIds: groupDeviceIds, message: 'Execution cancelled' };
+              }
+              throw error;
+            }
+          })
+        );
+      };
+
+      const parametersByDevice: Record<string, Record<string, any>> = {};
+      deviceIds.forEach((deviceId) => {
+        parametersByDevice[deviceId] = buildModuleParametersForDevice(module, deviceId) ?? {};
+      });
+
+      let results: PromiseSettledResult<{ deviceId: string; success: boolean; message?: string }[]>[] | null = null;
+      try {
+        const response = await fetch(`${normalizedBackendUrl}/api/modules/${apiModuleId}/execute`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            device_ids: deviceIds,
+            parameters_by_device: parametersByDevice,
+            workflow_id: workflow.id,
+            workflow_name: workflow.name,
+            module_id: module.id,
+            repeat_count: repeatCountMeta,
+            duration_seconds: durationSecondsMeta,
+            run_iteration: runIteration,
+          }),
+          signal: abortSignal,
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          if (response.status === 422 || (response.status === 400 && text.toLowerCase().includes('parameters_by_device'))) {
+            results = await executeGroupedRequests();
+          } else {
+            throw new Error(text || `Backend failure (HTTP ${response.status})`);
+          }
+        } else {
+          const data = await response.json();
+          const deviceResults = data?.result?.device_results;
+          if (Array.isArray(deviceResults)) {
+            results = [
+              {
+                status: 'fulfilled',
+                value: deviceResults.map((entry: any) => ({
+                  deviceId: entry.device_id ?? entry.deviceId ?? 'unknown',
+                  success: Boolean(entry.success),
+                  message:
+                    entry.result?.stage_message ||
+                    entry.result?.summary ||
+                    entry.result?.message ||
+                    entry.error ||
+                    '',
+                })),
+              },
+            ];
+          } else {
             const dataStatus = typeof data.status === 'string' ? data.status.toLowerCase() : 'completed';
             const success =
               typeof data.success === 'boolean' ? data.success : dataStatus !== 'failed' && dataStatus !== 'error';
-
-            if (!success) {
-              const reason = data.error || data.message || `Module "${module.name}" failed`;
-              throw { deviceId, message: reason };
-            }
-
-            return { deviceId, data };
-          } catch (error: any) {
-            if (error?.name === 'AbortError') {
-              throw { deviceId, message: 'Execution cancelled' };
-            }
-            throw error;
+            const message = data.error || data.message || data.result?.stage_message || data.result?.summary || '';
+            results = [
+              {
+                status: 'fulfilled',
+                value: deviceIds.map((deviceId) => ({
+                  deviceId,
+                  success,
+                  message,
+                })),
+              },
+            ];
           }
-        })
-      );
+        }
+      } catch (error: any) {
+        if (error?.name === 'AbortError') {
+          throw { deviceIds, message: 'Execution cancelled' };
+        }
+        results = await executeGroupedRequests();
+      }
 
       const successes: string[] = [];
       const failures: { deviceId: string; reason: string }[] = [];
 
       results.forEach((result) => {
         if (result.status === 'fulfilled') {
-          successes.push(result.value.deviceId);
+          result.value.forEach((entry: { deviceId: string; success: boolean; message?: string }) => {
+            if (entry.success) {
+              successes.push(entry.deviceId);
+            } else {
+              failures.push({
+                deviceId: entry.deviceId,
+                reason: entry.message || `Module "${module.name}" execution failed.`,
+              });
+            }
+          });
         } else {
-          const deviceId = (result.reason && result.reason.deviceId) || 'unknown';
+          const deviceIds = (result.reason && result.reason.deviceIds) || ['unknown'];
           const reason =
             (result.reason && result.reason.message) ||
             (result.reason instanceof Error ? result.reason.message : `Module "${module.name}" execution failed.`);
-          failures.push({ deviceId, reason });
+          deviceIds.forEach((deviceId: string) => {
+            failures.push({ deviceId, reason });
+          });
         }
       });
 
       return { successes, failures };
     },
     []
+  );
+
+  const executeBackendWorkflow = useCallback(
+    async (backendWorkflowId: string, deviceIds: string[], signal?: AbortSignal) => {
+      if (!normalizedBackendUrl) {
+        throw new Error('Backend unavailable: no URL configured.');
+      }
+      const response = await fetch(`${normalizedBackendUrl}/api/workflows/${backendWorkflowId}/execute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_ids: deviceIds }),
+        signal,
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || `Workflow execution failed (HTTP ${response.status}).`);
+      }
+      return response.json();
+    },
+    [normalizedBackendUrl]
+  );
+
+  const buildExecutionReport = useCallback(
+    (workflow: StoredWorkflow, result: any, deviceIds: string[]): WorkflowExecutionReport => {
+      const deviceOutcomes: Record<string, { success: boolean; reasons: string[] }> = {};
+      deviceIds.forEach((deviceId) => {
+        deviceOutcomes[deviceId] = { success: true, reasons: [] };
+      });
+      const resultsList: WorkflowExecutionStep[] = (result.results ?? []).map((step: any) => {
+        const deviceResults: WorkflowExecutionDeviceResult[] = (step.device_results ?? []).map((deviceResult: any) => {
+          const message = deviceResult.result?.stage_message || deviceResult.result?.summary || deviceResult.result?.message || deviceResult.result?.error || '';
+          if (!deviceResult.success && deviceOutcomes[deviceResult.device_id]) {
+            deviceOutcomes[deviceResult.device_id].success = false;
+            if (message) {
+              deviceOutcomes[deviceResult.device_id].reasons.push(message);
+            } else {
+              deviceOutcomes[deviceResult.device_id].reasons.push('Execution failed.');
+            }
+          }
+          return {
+            deviceId: deviceResult.device_id,
+            success: Boolean(deviceResult.success),
+            message,
+          };
+        });
+        return {
+          step: step.step ?? 0,
+          module: step.module ?? null,
+          success: Boolean(step.success),
+          deviceResults,
+        };
+      });
+      const successCount = deviceIds.filter((deviceId) => deviceOutcomes[deviceId]?.success !== false).length;
+      return {
+        executionId: result.execution_id,
+        timestamp: new Date().toISOString(),
+        status: result.status || 'unknown',
+        workflowName: workflow.name,
+        deviceIds,
+        successCount,
+        failureCount: deviceIds.length - successCount,
+        results: resultsList,
+      };
+    },
+    []
+  );
+
+  const openExportMenu = (event: React.MouseEvent<HTMLElement>, workflow: StoredWorkflow) => {
+    setExportMenuAnchor(event.currentTarget);
+    setExportMenuWorkflow(workflow);
+  };
+
+  const closeExportMenu = () => {
+    setExportMenuAnchor(null);
+    setExportMenuWorkflow(null);
+  };
+
+  const handleExportWorkflowReport = useCallback(
+    async (format: 'csv' | 'pdf') => {
+      if (!exportMenuWorkflow || !normalizedBackendUrl) {
+        closeExportMenu();
+        if (!normalizedBackendUrl) {
+          setSnackbar({ severity: 'error', message: 'Backend unavailable: no URL configured.' });
+        }
+        return;
+      }
+      try {
+        let backendWorkflowId = workflowBackendMap[exportMenuWorkflow.id];
+        if (!backendWorkflowId) {
+          backendWorkflowId = await ensureBackendWorkflow(exportMenuWorkflow);
+        }
+        const response = await fetch(
+          `${normalizedBackendUrl}/api/workflows/${backendWorkflowId}/runs/latest/export/${format}`
+        );
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || 'Unable to export workflow run.');
+        }
+        const blob = await response.blob();
+        const extension = format === 'csv' ? 'csv' : 'pdf';
+        const filename = `${exportMenuWorkflow.name.replace(/\\s+/g, '_').toLowerCase()}_latest.${extension}`;
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = filename;
+        anchor.click();
+        window.setTimeout(() => URL.revokeObjectURL(url), 5000);
+        setSnackbar({ severity: 'success', message: `Downloaded ${format.toUpperCase()} report.` });
+      } catch (error) {
+        setSnackbar({ severity: 'error', message: error instanceof Error ? error.message : 'Unable to export report.' });
+      } finally {
+        closeExportMenu();
+      }
+    },
+    [exportMenuWorkflow, ensureBackendWorkflow, normalizedBackendUrl, workflowBackendMap]
   );
 
   const handleRunWorkflow = async (workflow: StoredWorkflow) => {
@@ -1074,7 +1387,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
     }
 
     const workflowSummary =
-      workflow.modules.map((module) => module.name).filter(Boolean).join(' → ') || workflow.name;
+      workflow.modules.map((module) => module.name).filter(Boolean).join(' â†’ ') || workflow.name;
     const repeatSettings = getRepeatSettingsForWorkflow(workflow.id);
     const normalizedRepeatCount = Number.isFinite(repeatSettings.repeatCount)
       ? Math.max(1, Math.trunc(repeatSettings.repeatCount))
@@ -1098,7 +1411,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
     setWorkflowCompletedModules((prev) => ({ ...prev, [workflow.id]: [] }));
     setWorkflowRunStatus((prev) => ({
       ...prev,
-      [workflow.id]: `Planning workflow (${workflowSummary}) for ${deviceIds.length} device${deviceIds.length === 1 ? '' : 's'}…`,
+      [workflow.id]: `Planning workflow (${workflowSummary}) for ${deviceIds.length} device${deviceIds.length === 1 ? '' : 's'}â€¦`,
     }));
     setSnackbar({
       severity: 'info',
@@ -1124,7 +1437,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
       }
       setWorkflowRunStatus((prev) => ({
         ...prev,
-        [workflow.id]: `Resuming workflow "${workflow.name}"…`,
+        [workflow.id]: `Resuming workflow "${workflow.name}"â€¦`,
       }));
     };
 
@@ -1146,7 +1459,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
         }));
         setWorkflowRunStatus((prev) => ({
           ...prev,
-          [workflow.id]: `Starting ${runLabel} (${workflowSummary}) on ${deviceIds.length} device${deviceIds.length === 1 ? '' : 's'}…`,
+          [workflow.id]: `Starting ${runLabel} (${workflowSummary}) on ${deviceIds.length} device${deviceIds.length === 1 ? '' : 's'}â€¦`,
         }));
 
         const deviceOutcomes: Record<string, { success: boolean; reasons: string[] }> = {};
@@ -1164,7 +1477,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
           setWorkflowActiveModuleIndex((prev) => ({ ...prev, [workflow.id]: index }));
           setWorkflowRunStatus((prev) => ({
             ...prev,
-            [workflow.id]: `${runLabel}: running "${module.name}" on ${deviceIds.length} device${deviceIds.length === 1 ? '' : 's'}…`,
+            [workflow.id]: `${runLabel}: running "${module.name}" on ${deviceIds.length} device${deviceIds.length === 1 ? '' : 's'}â€¦`,
           }));
 
         const { failures } = await executeModuleForDevices(
@@ -1287,7 +1600,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
 
         setWorkflowRunStatus((prev) => ({
           ...prev,
-          [workflow.id]: `${runLabel} completed. Preparing next run…`,
+          [workflow.id]: `${runLabel} completed. Preparing next runâ€¦`,
         }));
         await sleep(1200);
       }
@@ -1582,7 +1895,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
                 const base = moduleCatalogMap.get(module.id);
                 const label = base?.name || module.name || module.id;
                 const paramCount = module.callTestParams ? Object.keys(module.callTestParams).length : 0;
-                const suffix = paramCount > 0 ? ` · ${paramCount} param${paramCount > 1 ? 's' : ''}` : '';
+                const suffix = paramCount > 0 ? ` Â· ${paramCount} param${paramCount > 1 ? 's' : ''}` : '';
                 return `${index + 1}. ${label}${suffix}`;
               });
               const extraModules = workflow.modules.length - modulePreview.length;
@@ -1648,7 +1961,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
                             }}
                           >
                             <Typography sx={{ fontSize: '13px', color: '#0369A1', flex: 1 }}>
-                              Scheduled for {formatScheduleLabel(scheduleSummaries[workflow.id].nextRunAt)} •{' '}
+                              Scheduled for {formatScheduleLabel(scheduleSummaries[workflow.id].nextRunAt)} â€¢{' '}
                               {scheduleSummaries[workflow.id].deviceIds.length} device
                               {scheduleSummaries[workflow.id].deviceIds.length === 1 ? '' : 's'}
                             </Typography>
@@ -2099,6 +2412,7 @@ const WorkflowEditorDialog: React.FC<WorkflowEditorDialogProps> = ({
         name: name.trim(),
         description: descriptionValue,
         modules: selectedModules.map((module) => cloneModuleForWorkflow(module)),
+        tags: workflow?.tags ?? [],
         repeatSettings: {
           repeatCount: normalizedRepeat,
           durationValue: normalizedDuration,

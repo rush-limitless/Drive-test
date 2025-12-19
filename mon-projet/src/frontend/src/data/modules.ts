@@ -8,6 +8,8 @@ export interface ModuleMetadata {
   category: string;
   editable: boolean;
   waitDurationSeconds?: number;
+  duration_estimate?: string;
+  durationEstimate?: string;
   hiddenInModulesPage?: boolean;
   callTestParams?: CallTestValues;
 }

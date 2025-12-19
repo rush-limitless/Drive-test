@@ -8,8 +8,10 @@ import time
 import math
 import random
 import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Dict, Any, Optional, List, Tuple
+from typing import Callable, Dict, Any, Optional, List, Tuple
+from urllib.parse import quote
 from .adb_executor import ADBExecutor, ExecutionResult
 
 # Support both import styles (modules.* when backend is the working dir, and src.backend.* when launched from project root)
@@ -74,9 +76,31 @@ APP_LAUNCHER_QUERIES = [
     "android adb automation tips",
     "live streaming quality test",
 ]
+APP_LAUNCHER_MAP_LOCATIONS = [
+    "Paris, France",
+    "New York, NY",
+    "San Francisco, CA",
+    "Berlin, Germany",
+    "Tokyo, Japan",
+]
+APP_LAUNCHER_MAP_TRAFFIC_QUERY_LOCATIONS = [
+    "Paris, France",
+    "New York, NY",
+    "San Francisco, CA",
+]
+APP_LAUNCHER_CHROME_NEWS_SITES = [
+    "https://news.google.com/topstories?hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNR1F3T1dJQ0FtVnVNREZqYldFa0Vn?hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNR3R1YlRjQkFtVnVNREZqYldFa0Vn?hl=en-US&gl=US&ceid=US:en",
+    "https://www.bloomberg.com",
+    "https://www.ft.com",
+]
 APP_LAUNCHER_PACKAGE_MAP = {
     "youtube": "com.google.android.youtube",
     "google": "com.google.android.googlequicksearchbox",
+    "maps": "com.google.android.apps.maps",
+    "maps_traffic": "com.google.android.apps.maps",
+    "chrome_news": "com.android.chrome",
 }
 APP_LAUNCHER_DEFAULT = "youtube"
 
@@ -716,21 +740,21 @@ class TelcoModules(ADBExecutor):
         attempts.append({'command': ' '.join(broadcast_cmd), 'success': res_bc.success, 'error': res_bc.error.strip() if res_bc.error else None})
         time.sleep(0.8)
 
-        # 2) Vérifier si l'écran SysDump est présent avant de naviguer (sinon éviter de taper dans le dialer)
+        # 2) Vérifier si l'écran Silent log est présent avant de naviguer (sinon éviter de taper dans le dialer)
         root = self._ui_dump()
 
         def _has_sysdump_markers(r: ET.Element) -> bool:
             for node in r.iter():
                 txt = (node.attrib.get('text') or node.attrib.get('content-desc') or '').strip().lower()
-                if any(tag in txt for tag in ('sysdump', 'silent log', 'silentlog', 'copy kernel log', 'cp based log')):
+                if 'silent log' in txt or 'silentlog' in txt:
                     return True
             return False
 
-        has_sysdump = _has_sysdump_markers(root) if root is not None else False
+        has_silent_log = _has_sysdump_markers(root) if root is not None else False
 
         # 3) Tentative UI : rechercher "Silent log" et "RF"
         ui_success = False
-        if has_sysdump:
+        if has_silent_log:
             for _ in range(6):
                 if self._tap_by_text('Silent log') or self._tap_by_text('SilentLog') or self._tap_by_text('Silent logging'):
                     time.sleep(0.5)
@@ -755,7 +779,7 @@ class TelcoModules(ADBExecutor):
 
         # 4) Statut : on considère succès si la séquence dial/broadcast a été envoyée,
         # et on ajoute un warning si la présence de SysDump n'est pas confirmée.
-        state_confirmed = has_sysdump
+        state_confirmed = has_silent_log
         success = any(a['success'] for a in attempts)  # ne bloque pas sur l'absence de dump/ls
         return {
             'module': 'start_rf_logging',
@@ -763,7 +787,7 @@ class TelcoModules(ADBExecutor):
             'already_active': False,
             'state_confirmed': state_confirmed,
             'attempts': attempts,
-            'warning': None if state_confirmed else 'SysDump not confirmed; open menu manually if needed, then rerun.',
+            'warning': None if state_confirmed else 'Silent log screen not confirmed; open menu manually if needed, then rerun.',
         }
 
     def stop_rf_logging(self) -> Dict[str, Any]:
@@ -792,21 +816,21 @@ class TelcoModules(ADBExecutor):
         attempts.append({'command': ' '.join(broadcast_cmd), 'success': res_bc.success, 'error': res_bc.error.strip() if res_bc.error else None})
         time.sleep(0.8)
 
-        # 2) Vérifier SysDump
+        # 2) Vérifier la présence du menu Silent log
         root = self._ui_dump()
 
         def _has_sysdump_markers(r: ET.Element) -> bool:
             for node in r.iter():
                 txt = (node.attrib.get('text') or node.attrib.get('content-desc') or '').strip().lower()
-                if any(tag in txt for tag in ('sysdump', 'silent log', 'silentlog', 'copy kernel log', 'cp based log')):
+                if 'silent log' in txt or 'silentlog' in txt:
                     return True
             return False
 
-        has_sysdump = _has_sysdump_markers(root) if root is not None else False
+        has_silent_log = _has_sysdump_markers(root) if root is not None else False
 
         # 3) UI : taper Silent log et désactiver
         ui_success = False
-        if has_sysdump:
+        if has_silent_log:
             for _ in range(6):
                 if self._tap_by_text('Silent log') or self._tap_by_text('SilentLog') or self._tap_by_text('Silent logging'):
                     time.sleep(0.5)
@@ -829,14 +853,14 @@ class TelcoModules(ADBExecutor):
                     break
                 self._scroll_down()
 
-        state_confirmed = has_sysdump
+        state_confirmed = has_silent_log
         success = any(a['success'] for a in attempts)
         return {
             'module': 'stop_rf_logging',
             'success': success,
             'state_confirmed': state_confirmed,
             'attempts': attempts,
-            'warning': None if state_confirmed else 'SysDump not confirmed; stop RF manually if still active.',
+            'warning': None if state_confirmed else 'Silent log menu not confirmed; stop RF manually if still active.',
             'ui_success': ui_success,
         }
 
@@ -1079,16 +1103,20 @@ class TelcoModules(ADBExecutor):
         result['module'] = 'test_data_connection'
         return result
 
-    def launch_app(self, app: Optional[str]) -> Dict[str, Any]:
-        normalized = (str(app or APP_LAUNCHER_DEFAULT)).strip().lower()
+    def _verify_app_front(self, package: str) -> bool:
+        result = self.execute_command([ADB_EXECUTABLE, 'shell', 'dumpsys', 'activity', 'activities'])
+        if not result or not result.success or not result.output:
+            return False
+        return package in result.output
+
+    def _start_app_intent(self, normalized: str) -> Dict[str, Any]:
         package = APP_LAUNCHER_PACKAGE_MAP.get(normalized)
         if not package:
             return {
-                'module': 'launch_app',
                 'success': False,
+                'error': f'Unsupported app "{normalized}"',
+                'package': normalized,
                 'duration': 0.0,
-                'app': normalized,
-                'error': f'Unsupported app "{app or ""}"',
             }
 
         already_running = self._is_app_running(package)
@@ -1104,6 +1132,51 @@ class TelcoModules(ADBExecutor):
                 'android.intent.action.VIEW',
                 '-d',
                 target_url,
+            ]
+        elif normalized == 'maps':
+            location = random.choice(APP_LAUNCHER_MAP_LOCATIONS)
+            target_url = f"geo:0,0?q={quote(location)}"
+            cmd = [
+                ADB_EXECUTABLE,
+                'shell',
+                'am',
+                'start',
+                '-a',
+                'android.intent.action.VIEW',
+                '-d',
+                target_url,
+                '-n',
+                'com.google.android.apps.maps/com.google.android.maps.MapsActivity',
+            ]
+        elif normalized == 'chrome_news':
+            target_url = random.choice(APP_LAUNCHER_CHROME_NEWS_SITES)
+            cmd = [
+                ADB_EXECUTABLE,
+                'shell',
+                'am',
+                'start',
+                '-a',
+                'android.intent.action.VIEW',
+                '-d',
+                target_url,
+                '-n',
+                'com.android.chrome/com.google.android.apps.chrome.Main',
+            ]
+        elif normalized == 'maps_traffic':
+            location = random.choice(APP_LAUNCHER_MAP_TRAFFIC_QUERY_LOCATIONS)
+            query = quote(f"traffic {location}")
+            target_url = f"https://www.google.com/maps/search/{query}"
+            cmd = [
+                ADB_EXECUTABLE,
+                'shell',
+                'am',
+                'start',
+                '-a',
+                'android.intent.action.VIEW',
+                '-d',
+                target_url,
+                '-n',
+                'com.google.android.apps.maps/com.google.android.maps.MapsActivity',
             ]
         else:
             query = random.choice(APP_LAUNCHER_QUERIES)
@@ -1123,17 +1196,84 @@ class TelcoModules(ADBExecutor):
             ]
 
         cmd_result = self.execute_command(cmd)
-        success = cmd_result.success
+        success = bool(cmd_result.success)
+        verification = self._verify_app_front(package) if success else False
         return {
-            'module': 'launch_app',
+            'package': package,
             'success': success,
             'duration': cmd_result.duration,
-            'app': normalized,
-            'app_package': package,
             'target': target_url,
             'already_on': already_running,
             'already_off': not already_running,
-            'error': None if success else cmd_result.error,
+            'command_error': cmd_result.error,
+            'foreground_verified': verification,
+        }
+
+    def launch_app(
+        self,
+        app: Optional[str],
+        duration_seconds: Optional[int] = None,
+        targets: Optional[List[Dict[str, Any]]] = None,
+    ) -> Dict[str, Any]:
+        entries = []
+        if targets:
+            entries.extend(targets)
+        else:
+            entries.append({'app': app or APP_LAUNCHER_DEFAULT, 'duration_seconds': duration_seconds})
+
+        results = []
+        total_duration = 0.0
+        stage_messages = []
+        overall_success = True
+
+        for entry in entries:
+            normalized = (str(entry.get('app') or APP_LAUNCHER_DEFAULT)).strip().lower()
+            duration_target = entry.get('duration_seconds')
+            launch_result = self._start_app_intent(normalized)
+            if not launch_result['success']:
+                overall_success = False
+                results.append({
+                    'app': normalized,
+                    'success': False,
+                    'error': launch_result.get('command_error'),
+                })
+                stage_messages.append(f'{normalized} failed')
+                continue
+
+            requested_duration = None
+            closed_after_duration = False
+            if duration_target and duration_target > 0:
+                requested_duration = duration_target
+                time.sleep(duration_target)
+                close_result = self.force_close_app(launch_result['package'])
+                closed_after_duration = bool(close_result.get('success'))
+            total_duration += launch_result.get('duration', 0.0)
+            results.append({
+                'app': normalized,
+                'success': launch_result['success'],
+                'duration': launch_result.get('duration'),
+                'duration_seconds': requested_duration,
+                'app_package': launch_result['package'],
+                'target': launch_result.get('target'),
+                'already_on': launch_result.get('already_on'),
+                'already_off': launch_result.get('already_off'),
+                'foreground_verified': launch_result.get('foreground_verified'),
+                'closed_after_duration': closed_after_duration,
+                'error': None if launch_result['success'] else launch_result.get('command_error'),
+            })
+            overall_success = overall_success and launch_result['success']
+            stage_messages.append(
+                f"{normalized} {'closed' if closed_after_duration else 'launched'}"
+            )
+
+        stage_message = f"Launching apps: {', '.join(stage_messages)}"
+        return {
+            'module': 'launch_app',
+            'success': overall_success,
+            'duration': total_duration,
+            'results': results,
+            'stage_message': stage_message,
+            'target_sequence': entries,
         }
 
     # -----------------------------
@@ -1184,13 +1324,34 @@ class TelcoModules(ADBExecutor):
     # -----------------------------
     # Mobile Data
     # -----------------------------
+    def _is_mobile_data_enabled(self) -> Optional[bool]:
+        result = self.execute_command(
+            [ADB_EXECUTABLE, 'shell', 'settings', 'get', 'global', 'mobile_data']
+        )
+        if not result.success or result.output is None:
+            return None
+        value = result.output.strip()
+        return value == '1'
+
     def enable_mobile_data(self) -> Dict[str, Any]:
+        already_enabled = self._is_mobile_data_enabled()
+        if already_enabled:
+            return {
+                'module': 'enable_mobile_data',
+                'success': True,
+                'duration': 0.1,
+                'already_on': True,
+                'error': None,
+                'message': 'Mobile data is already enabled',
+            }
         result = self.execute_command([ADB_EXECUTABLE, 'shell', 'svc', 'data', 'enable'])
         return {
             'module': 'enable_mobile_data',
             'success': result.success,
             'duration': result.duration,
-            'error': result.error if not result.success else None
+            'already_on': bool(already_enabled),
+            'error': None if result.success else result.error,
+            'message': 'Mobile data enabled' if result.success else 'Failed to enable mobile data',
         }
 
     def disable_mobile_data(self) -> Dict[str, Any]:
@@ -1310,6 +1471,35 @@ class TelcoModules(ADBExecutor):
             'rtt': rtt or None,
             'output': result.output,
             'error': result.error if not success else None,
+        }
+
+    def preflight_check(self) -> Dict[str, Any]:
+        start = time.time()
+        checks: List[Dict[str, Any]] = []
+
+        def _run_check(name: str, command: List[str]) -> bool:
+            result = self.execute_command(command)
+            entry = {
+                'name': name,
+                'success': bool(result.success),
+                'duration': result.duration,
+                'output': result.output or '',
+                'error': result.error if not result.success else None,
+            }
+            checks.append(entry)
+            return entry['success']
+
+        overall_success = True
+        overall_success = overall_success and _run_check('adb_version', [ADB_EXECUTABLE, 'version'])
+        overall_success = overall_success and _run_check('wifi_service', [ADB_EXECUTABLE, 'shell', 'dumpsys', 'wifi'])
+        overall_success = overall_success and _run_check('connectivity_service', [ADB_EXECUTABLE, 'shell', 'dumpsys', 'connectivity'])
+
+        return {
+            'module': 'preflight_check',
+            'success': overall_success,
+            'duration': time.time() - start,
+            'checks': {check['name']: check for check in checks},
+            'message': 'Preflight checks completed successfully' if overall_success else 'Preflight checks detected issues',
         }
 
     # -----------------------------
@@ -1432,3 +1622,70 @@ class TelcoModules(ADBExecutor):
     def force_close_app(self, package_name: str) -> Dict[str, Any]:
         result = self.execute_command([ADB_EXECUTABLE, 'shell', 'am', 'force-stop', package_name])
         return {'module': 'force_close_app', 'success': result.success, 'duration': result.duration, 'package_name': package_name, 'error': result.error if not result.success else None}
+
+    @classmethod
+    def execute_on_multiple_devices(
+        cls,
+        device_ids: List[str],
+        worker: Callable[['TelcoModules'], Dict[str, Any]],
+        *,
+        module_name: Optional[str] = None,
+        max_workers: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Run the same worker callable concurrently on multiple devices."""
+        targets = [device_id for device_id in device_ids if device_id]
+        resolved_name = module_name or getattr(worker, '__name__', 'module')
+        if not targets:
+            return {
+                'module': resolved_name,
+                'success': False,
+                'device_results': [],
+                'error': 'No device IDs provided',
+            }
+
+        results: List[Dict[str, Any]] = []
+        pool_size = max_workers or len(targets)
+        with ThreadPoolExecutor(max_workers=pool_size) as executor:
+            future_to_device = {
+                executor.submit(cls._run_worker_for_device, worker, device_id): device_id
+                for device_id in targets
+            }
+            for future in as_completed(future_to_device):
+                device_id = future_to_device[future]
+                try:
+                    value = future.result()
+                    results.append(
+                        {
+                            'device_id': device_id,
+                            'success': bool(value.get('success', True)),
+                            'result': value,
+                        }
+                    )
+                except Exception as exc:
+                    results.append(
+                        {
+                            'device_id': device_id,
+                            'success': False,
+                            'error': str(exc),
+                        }
+                    )
+
+        overall_success = all(entry.get('success', False) for entry in results)
+        return {
+            'module': resolved_name,
+            'success': overall_success,
+            'device_results': results,
+        }
+
+    @staticmethod
+    def _run_worker_for_device(
+        worker: Callable[['TelcoModules'], Dict[str, Any]],
+        device_id: str,
+    ) -> Dict[str, Any]:
+        """Invoke the worker with a dedicated TelcoModules instance for a device."""
+        executor = TelcoModules(device_id)
+        result = worker(executor)
+        if not isinstance(result, dict):
+            result = {'result': result}
+        result.setdefault('success', True)
+        return result

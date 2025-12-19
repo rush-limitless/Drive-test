@@ -3,8 +3,10 @@ Workflows API endpoints for ADB Framework
 """
 from fastapi import APIRouter, HTTPException, Response
 from typing import List, Dict, Any, Optional, Tuple
-from pydantic import BaseModel
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pydantic import BaseModel, Field
 import json
+import csv
 from datetime import datetime
 import time
 import threading
@@ -30,12 +32,14 @@ class WorkflowCreate(BaseModel):
     name: str
     description: Optional[str] = ""
     modules: List[str] = []
+    tags: List[str] = Field(default_factory=list)
 
 class WorkflowUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     modules: Optional[List[str]] = None
     status: Optional[str] = None
+    tags: Optional[List[str]] = None
 
 
 class WorkflowModuleEntry(BaseModel):
@@ -46,6 +50,7 @@ class WorkflowModuleEntry(BaseModel):
 
 class WorkflowRunRequest(BaseModel):
     device_id: Optional[str] = None
+    device_ids: List[str] = Field(default_factory=list)
     name: Optional[str] = None
     modules: List[WorkflowModuleEntry]
 
@@ -75,6 +80,7 @@ def _default_workflows() -> List[Dict[str, Any]]:
             "description": "Complete voice call testing workflow",
             "modules": voice_suite_modules,
             "steps_count": len(voice_suite_modules),
+            "tags": ["voice", "call"],
             "status": "active",
             "created_at": "2024-01-15T10:00:00Z",
             "last_run": "2024-01-20T14:30:00Z",
@@ -87,6 +93,7 @@ def _default_workflows() -> List[Dict[str, Any]]:
             "description": "Network connectivity and performance tests",
             "modules": network_suite_modules,
             "steps_count": len(network_suite_modules),
+            "tags": ["network", "performance"],
             "status": "active",
             "created_at": "2024-01-10T09:00:00Z",
             "last_run": "2024-01-20T13:15:00Z",
@@ -120,6 +127,110 @@ def _persist_workflows() -> None:
 
 
 workflows_db = _load_workflows()
+
+WORKFLOW_RUN_HISTORY_PATH = Path(__file__).resolve().parent.parent / "data" / "workflow_runs.json"
+MAX_WORKFLOW_RUN_HISTORY = 120
+
+
+def _load_workflow_run_history() -> List[Dict[str, Any]]:
+    WORKFLOW_RUN_HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
+    if not WORKFLOW_RUN_HISTORY_PATH.exists():
+        return []
+    try:
+        with WORKFLOW_RUN_HISTORY_PATH.open("r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+    except (OSError, json.JSONDecodeError):
+        return []
+    if isinstance(payload, list):
+        return payload
+    return []
+
+
+def _persist_workflow_run_history(entries: List[Dict[str, Any]]) -> None:
+    WORKFLOW_RUN_HISTORY_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with WORKFLOW_RUN_HISTORY_PATH.open("w", encoding="utf-8") as handle:
+        json.dump(entries[:MAX_WORKFLOW_RUN_HISTORY], handle, indent=2)
+
+
+def _record_workflow_run(workflow_id: str, workflow_name: str, payload: Dict[str, Any]) -> None:
+    history = _load_workflow_run_history()
+    entry = {
+        "execution_id": payload.get("execution_id"),
+        "workflow_id": workflow_id,
+        "workflow_name": workflow_name,
+        "timestamp": datetime.utcnow().isoformat(),
+        "status": payload.get("status") or payload.get("result", {}).get("stage"),
+        "success": bool(payload.get("success")),
+        "device_ids": payload.get("device_ids") or [],
+        "results": payload.get("results") or [],
+    }
+    history.insert(0, entry)
+    if len(history) > MAX_WORKFLOW_RUN_HISTORY:
+        history = history[:MAX_WORKFLOW_RUN_HISTORY]
+    _persist_workflow_run_history(history)
+
+
+def _get_latest_workflow_run(workflow_id: str) -> Optional[Dict[str, Any]]:
+    history = _load_workflow_run_history()
+    for entry in history:
+        if entry.get("workflow_id") == workflow_id:
+            return entry
+    return None
+
+
+def _generate_run_csv(entry: Dict[str, Any]) -> str:
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    writer.writerow(['Execution ID', 'Step', 'Module', 'Device ID', 'Status', 'Message'])
+    for step in entry.get('results', []):
+        module_label = step.get('module') or f"Step {step.get('step')}"
+        for device_result in step.get('device_results', []):
+            result_payload = device_result.get('result') or {}
+            message = result_payload.get('stage_message') or result_payload.get('summary') or result_payload.get('message') or ''
+            status = 'success' if device_result.get('success') else 'failure'
+            writer.writerow([
+                entry.get('execution_id'),
+                step.get('step'),
+                module_label,
+                device_result.get('device_id'),
+                status,
+                message,
+            ])
+    return buffer.getvalue()
+
+
+def _generate_run_pdf(entry: Dict[str, Any]) -> bytes:
+    if FPDF is None:  # pragma: no cover
+        raise HTTPException(status_code=400, detail="fpdf2 is required to generate PDF exports.")
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(True, margin=15)
+    pdf.set_font("Helvetica", size=14, style="B")
+    pdf.cell(0, 10, "Workflow Run Report", ln=1)
+    pdf.set_font("Helvetica", size=11)
+    pdf.cell(0, 8, f"Workflow: {entry.get('workflow_name', 'unknown')}", ln=1)
+    pdf.cell(0, 8, f"Execution: {entry.get('execution_id', 'n/a')}", ln=1)
+    pdf.cell(0, 8, f"Status: {entry.get('status', 'unknown')}", ln=1)
+    device_ids = entry.get('device_ids', [])
+    if device_ids:
+        pdf.cell(0, 8, f"Devices: {', '.join(device_ids)}", ln=1)
+    pdf.cell(0, 6, f"Timestamp: {entry.get('timestamp', '')}", ln=1)
+    pdf.ln(4)
+
+    for step in entry.get('results', []):
+        module_label = step.get('module') or f"Step {step.get('step')}"
+        step_status = "Success" if step.get('success') else "Failure"
+        pdf.set_font("Helvetica", size=12, style="B")
+        pdf.cell(0, 7, f"{step.get('step')}. {module_label} â€” {step_status}", ln=1)
+        pdf.set_font("Helvetica", size=10)
+        for device_result in step.get('device_results', []):
+            result_payload = device_result.get('result') or {}
+            message = result_payload.get('stage_message') or result_payload.get('summary') or result_payload.get('message') or ''
+            device_status = "OK" if device_result.get('success') else "Fail"
+            pdf.multi_cell(0, 6, f"  - {device_result.get('device_id')}: {device_status} {message}")
+        pdf.ln(2)
+
+    return pdf.output(dest="S").encode("latin-1")
 
 
 SCHEDULE_STORAGE_PATH = Path(__file__).resolve().parent.parent / "data" / "workflow_schedules.json"
@@ -394,6 +505,7 @@ async def create_workflow(workflow: WorkflowCreate):
         "name": workflow.name,
         "description": workflow.description,
         "modules": workflow.modules,
+        "tags": workflow.tags,
         "steps_count": len(workflow.modules),
         "status": "draft",
         "created_at": datetime.now().isoformat(),
@@ -421,6 +533,8 @@ async def update_workflow(workflow_id: str, workflow: WorkflowUpdate):
         existing["steps_count"] = len(workflow.modules)
     if workflow.status:
         existing["status"] = workflow.status
+    if workflow.tags is not None:
+        existing["tags"] = workflow.tags
     _persist_workflows()
     return existing
 
@@ -449,9 +563,11 @@ async def execute_workflow(workflow_id: str, request: WorkflowRunRequest):
         else:
             module_entries.append(WorkflowModuleEntry(id=str(entry)))
 
+    device_targets = _resolve_workflow_targets(request)
     return _run_workflow_modules(
         modules=module_entries,
         device_id=request.device_id,
+        device_ids=device_targets,
         workflow_name=workflow["name"],
         workflow_id=workflow_id,
     )
@@ -468,6 +584,7 @@ async def duplicate_workflow(workflow_id: str):
         "id": f"wf_{len(workflows_db) + 1:03d}",
         "name": f"{original['name']} (Copy)",
         "status": "draft",
+        "tags": original.get("tags", []),
         "created_at": datetime.now().isoformat(),
         "last_run": None,
         "success_rate": 0,
@@ -514,9 +631,11 @@ async def execute_custom_workflow(request: WorkflowRunRequest):
     if not request.modules:
         raise HTTPException(status_code=400, detail="No modules provided")
 
+    device_targets = _resolve_workflow_targets(request)
     return _run_workflow_modules(
         modules=request.modules,
         device_id=request.device_id,
+        device_ids=device_targets,
         workflow_name=request.name or "Custom Workflow",
         workflow_id="custom",
     )
@@ -543,6 +662,49 @@ async def export_workflow(workflow_id: str):
     }
 
 
+
+@router.get("/workflows/{workflow_id}/runs")
+def list_workflow_runs(workflow_id: str, limit: int = 10):
+    normalized_limit = max(1, min(limit, 50))
+    runs = [entry for entry in _load_workflow_run_history() if entry.get("workflow_id") == workflow_id]
+    return runs[:normalized_limit]
+
+
+@router.get("/workflows/{workflow_id}/runs/latest")
+def get_latest_workflow_run(workflow_id: str):
+    entry = _get_latest_workflow_run(workflow_id)
+    if not entry:
+        raise HTTPException(status_code=404, detail="No run history available")
+    return entry
+
+
+@router.get("/workflows/{workflow_id}/runs/latest/export/csv")
+def export_latest_workflow_run_csv(workflow_id: str):
+    entry = _get_latest_workflow_run(workflow_id)
+    if not entry:
+        raise HTTPException(status_code=404, detail="No run history available")
+    payload = _generate_run_csv(entry)
+    filename = f"{entry.get('workflow_name', 'workflow').replace(' ', '_').lower()}_latest.csv"
+    return Response(
+        content=payload,
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
+@router.get("/workflows/{workflow_id}/runs/latest/export/pdf")
+def export_latest_workflow_run_pdf(workflow_id: str):
+    entry = _get_latest_workflow_run(workflow_id)
+    if not entry:
+        raise HTTPException(status_code=404, detail="No run history available")
+    payload = _generate_run_pdf(entry)
+    filename = f"{entry.get('workflow_name', 'workflow').replace(' ', '_').lower()}_latest.pdf"
+    return Response(
+        content=payload,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
 @router.get("/workflows/export/pdf")
 def export_workflows_pdf() -> Response:
     """Export the current workflow catalog to PDF."""
@@ -564,18 +726,43 @@ def _resolve_module_entry(entry: WorkflowModuleEntry) -> Tuple[Optional[str], Di
     return module_id, params
 
 
+def _resolve_workflow_targets(request: WorkflowRunRequest) -> List[str]:
+    targets: List[str] = []
+    for device_id in request.device_ids or []:
+        cleaned = (device_id or "").strip()
+        if cleaned:
+            targets.append(cleaned)
+    if not targets and request.device_id:
+        cleaned = request.device_id.strip()
+        if cleaned:
+            targets.append(cleaned)
+    return targets
+
+
 def _run_workflow_modules(
     modules: List[WorkflowModuleEntry],
     device_id: Optional[str],
+    device_ids: List[str],
     workflow_name: str,
     workflow_id: str,
 ) -> Dict[str, Any]:
-    executor = TelcoModules(device_id)
     flow_executor = FlowExecutor()
 
     results = []
     success = True
     module_count = len(modules)
+    targets = [did.strip() for did in (device_ids or []) if did and did.strip()]
+    if not targets and device_id:
+        targets = [device_id]
+    # deduplicate while preserving order
+    seen = set()
+    device_targets = []
+    for did in targets:
+        if did not in seen:
+            seen.add(did)
+            device_targets.append(did)
+    if not device_targets:
+        raise HTTPException(status_code=400, detail="At least one device_id is required to run workflows.")
 
     for index, entry in enumerate(modules, start=1):
         module_id, params = _resolve_module_entry(entry)
@@ -589,33 +776,53 @@ def _run_workflow_modules(
             success = False
             continue
 
-        try:
-            step_result = flow_executor.execute_module(executor, module_id, params)
-            step_result.setdefault("success", True)
-        except Exception as exc:  # pragma: no cover - runtime safety
-            step_result = {
-                "module": module_id,
-                "success": False,
-                "error": str(exc),
-            }
+        device_results = []
 
-        step_result["step"] = index
-        step_result["module"] = module_id
+        def run_on_device(device_id: str) -> Dict[str, Any]:
+            executor_for_device = flow_executor.get_executor(device_id)
+            return flow_executor.execute_module(executor_for_device, module_id, params)
+
+        with ThreadPoolExecutor(max_workers=len(device_targets)) as executor_pool:
+            future_to_device = {
+                executor_pool.submit(run_on_device, device_id): device_id for device_id in device_targets
+            }
+            for future in as_completed(future_to_device):
+                device_id = future_to_device[future]
+                try:
+                    result = future.result()
+                except Exception as exc:
+                    result = {"module": module_id, "success": False, "error": str(exc)}
+                device_results.append({
+                    "device_id": device_id,
+                    "success": bool(result.get("success", False)),
+                    "result": result,
+                })
+
+        step_success = all(item["success"] for item in device_results)
+        step_result = {
+            "step": index,
+            "module": module_id,
+            "success": step_success,
+            "device_results": device_results,
+        }
         results.append(step_result)
 
-        if not step_result.get("success", True):
+        if not step_success:
             success = False
 
         if index < module_count:
             time.sleep(2)
 
     execution_id = f"exec_{workflow_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-
-    return {
+    run_payload = {
         "execution_id": execution_id,
         "workflow_id": workflow_id,
         "workflow_name": workflow_name,
         "device_id": device_id,
+        "device_ids": device_targets,
         "status": "completed" if success else "failed",
+        "success": success,
         "results": results,
     }
+    _record_workflow_run(workflow_id, workflow_name, run_payload)
+    return run_payload

@@ -4,7 +4,7 @@
 **Input**: Feature specification describing the editable module that launches Google or YouTube to generate data.
 
 ## Summary
-Expose a device-required legacy module `launch_app` that sends the appropriate adb intent based on a configurable `app` parameter. The feature touches the backend module execution path (`telco_modules`) plus the legacy catalog `modules.py`, and the React-based modules page for the editable UI that persists the selected target application.
+Expose a device-required legacy module `launch_app` that sends the appropriate adb intent based on a configurable `app` parameter and duration. The feature touches the backend module execution path (`telco_modules`) plus the legacy catalog `modules.py`, and the React-based modules page for the editable UI that persists the selected target application and how long it stays open.
 
 ## Technical Context
 

@@ -4,6 +4,7 @@ Privilégie le binaire bundlé (PyInstaller/electron), sinon celui du repo,
 puis retombe sur l'adb système.
 """
 import sys
+import os
 from pathlib import Path
 
 
@@ -56,4 +57,5 @@ def get_adb_path() -> str:
     return "adb"
 
 
-ADB_EXECUTABLE = get_adb_path()
+ADB_EXECUTABLE_OVERRIDE = os.environ.get("SPECIFY_ADB_EXECUTABLE")
+ADB_EXECUTABLE = ADB_EXECUTABLE_OVERRIDE or get_adb_path()

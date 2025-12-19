@@ -1,4 +1,5 @@
 """Unit tests for the enhanced Device API device manager."""
+import os
 from types import SimpleNamespace
 import pathlib
 import sys
@@ -11,6 +12,7 @@ BACKEND_ROOT = pathlib.Path(__file__).resolve().parents[1]
 if str(BACKEND_ROOT) not in sys.path:
     sys.path.append(str(BACKEND_ROOT))
 
+os.environ.setdefault("SPECIFY_ADB_EXECUTABLE", "adb")
 from api.devices_v2 import DeviceManager  # noqa: E402
 
 

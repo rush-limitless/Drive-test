@@ -781,5 +781,178 @@
     "last_run": null,
     "success_rate": 0,
     "total_runs": 0
+  },
+  {
+    "id": "wf_048",
+    "name": "fff",
+    "description": "fff",
+    "modules": [
+      "disable_airplane_mode",
+      "waiting_time",
+      "start_rf_logging",
+      "disable_airplane_mode",
+      "enable_airplane_mode"
+    ],
+    "steps_count": 5,
+    "status": "draft",
+    "created_at": "2025-12-18T18:23:23.588272",
+    "last_run": null,
+    "success_rate": 0,
+    "total_runs": 0
+  },
+  {
+    "id": "wf_049",
+    "name": "fff",
+    "description": "fff",
+    "modules": [
+      "disable_airplane_mode",
+      "waiting_time",
+      "start_rf_logging",
+      "disable_airplane_mode",
+      "enable_airplane_mode"
+    ],
+    "steps_count": 5,
+    "status": "draft",
+    "created_at": "2025-12-18T18:23:23.593266",
+    "last_run": null,
+    "success_rate": 0,
+    "total_runs": 0
+  },
+  {
+    "id": "wf_050",
+    "name": "fff",
+    "description": "fff",
+    "modules": [
+      "disable_airplane_mode",
+      "waiting_time",
+      "start_rf_logging",
+      "disable_airplane_mode",
+      "enable_airplane_mode"
+    ],
+    "steps_count": 5,
+    "status": "draft",
+    "created_at": "2025-12-18T18:23:23.596266",
+    "last_run": null,
+    "success_rate": 0,
+    "total_runs": 0
+  },
+  {
+    "id": "wf_051",
+    "name": "fff",
+    "description": "fff",
+    "modules": [
+      "disable_airplane_mode",
+      "waiting_time",
+      "start_rf_logging",
+      "disable_airplane_mode",
+      "enable_airplane_mode"
+    ],
+    "steps_count": 5,
+    "status": "draft",
+    "created_at": "2025-12-18T18:23:23.600268",
+    "last_run": null,
+    "success_rate": 0,
+    "total_runs": 0
+  },
+  {
+    "id": "wf_052",
+    "name": "fff",
+    "description": "fff",
+    "modules": [
+      "disable_airplane_mode",
+      "waiting_time",
+      "start_rf_logging",
+      "disable_airplane_mode",
+      "enable_airplane_mode"
+    ],
+    "steps_count": 5,
+    "status": "draft",
+    "created_at": "2025-12-18T18:23:23.604320",
+    "last_run": null,
+    "success_rate": 0,
+    "total_runs": 0
+  },
+  {
+    "id": "wf_053",
+    "name": "TEST",
+    "description": "",
+    "modules": [
+      "enable_airplane_mode",
+      "disable_airplane_mode",
+      "start_rf_logging",
+      "stop_rf_logging"
+    ],
+    "steps_count": 4,
+    "status": "draft",
+    "created_at": "2025-12-19T01:04:46.768505",
+    "last_run": null,
+    "success_rate": 0,
+    "total_runs": 0
+  },
+  {
+    "id": "wf_054",
+    "name": "TEST",
+    "description": "",
+    "modules": [
+      "enable_airplane_mode",
+      "disable_airplane_mode",
+      "start_rf_logging",
+      "stop_rf_logging"
+    ],
+    "steps_count": 4,
+    "status": "draft",
+    "created_at": "2025-12-19T01:04:46.785517",
+    "last_run": null,
+    "success_rate": 0,
+    "total_runs": 0
+  },
+  {
+    "id": "wf_055",
+    "name": "aza",
+    "description": "",
+    "modules": [
+      "activate_data",
+      "enable_airplane_mode",
+      "disable_airplane_mode",
+      "start_rf_logging"
+    ],
+    "steps_count": 4,
+    "status": "draft",
+    "created_at": "2025-12-19T01:19:08.635328",
+    "last_run": null,
+    "success_rate": 0,
+    "total_runs": 0
+  },
+  {
+    "id": "wf_056",
+    "name": "aza",
+    "description": "",
+    "modules": [
+      "activate_data",
+      "enable_airplane_mode",
+      "disable_airplane_mode",
+      "start_rf_logging"
+    ],
+    "steps_count": 4,
+    "status": "draft",
+    "created_at": "2025-12-19T01:19:08.639327",
+    "last_run": null,
+    "success_rate": 0,
+    "total_runs": 0
+  },
+  {
+    "id": "wf_057",
+    "name": "DDD",
+    "description": "",
+    "modules": [
+      "call_test"
+    ],
+    "tags": [],
+    "steps_count": 1,
+    "status": "draft",
+    "created_at": "2025-12-19T03:25:37.937280",
+    "last_run": null,
+    "success_rate": 0,
+    "total_runs": 0
   }
 ]
