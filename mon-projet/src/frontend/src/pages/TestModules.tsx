@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Typography,
@@ -57,7 +57,7 @@ import { readSelectedDeviceIds, SELECTED_DEVICES_EVENT } from '../utils/deviceSe
 import { useDevices } from '../hooks/useDevices';
 import { recordDeviceActivity } from '../utils/deviceActivity';
 import { CallTestValues } from '../types/callTest';
-import { resolveBaseUrl } from '../services/utils';
+import { resolveBaseUrl, fetchWithRetry } from '../services/utils';
 
 interface TestModulesProps {
   backendUrl: string;
@@ -198,7 +198,7 @@ const formatDeviceMessage = (result: DeviceModuleResult): string => {
   }
   if (payload && typeof payload === 'object') {
     const serialized = JSON.stringify(payload);
-    return serialized.length > 80 ? `${serialized.slice(0, 80)}…` : serialized;
+    return serialized.length > 80 ? `${serialized.slice(0, 80)}â€¦` : serialized;
   }
   return 'No details available';
 };
@@ -214,7 +214,10 @@ const buildDeviceNotificationMessage = (results: DeviceModuleResult[]): string =
 };
 
 const resolveApiKey = (): string | null => {
-  const envKey = process.env.REACT_APP_API_KEY || process.env.API_KEY;
+  const envKey =
+    (import.meta as any).env?.VITE_API_KEY ||
+    (import.meta as any).env?.VITE_REACT_APP_API_KEY ||
+    (typeof process !== 'undefined' ? process.env.REACT_APP_API_KEY || process.env.API_KEY : undefined);
   const stored = typeof window !== 'undefined' ? window.localStorage.getItem('API_KEY') : null;
   return (stored && stored.trim()) || (envKey && envKey.trim()) || null;
 };
@@ -948,7 +951,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
       connectExecutionSocket(module.id);
       const normalizedBackendUrl = backendUrl.replace(/\/$/, '');
       try {
-        const response = await fetch(`${normalizedBackendUrl}/api/modules/voice_call_test/execute`, {
+        const response = await fetchWithRetry(`${normalizedBackendUrl}/api/modules/voice_call_test/execute`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1060,7 +1063,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
       let results: PromiseSettledResult<unknown>[] | null = null;
       try {
         connectExecutionSocket('voice_call_test');
-        const response = await fetch(`${normalizedBackendUrl}/api/modules/voice_call_test/execute`, {
+        const response = await fetchWithRetry(`${normalizedBackendUrl}/api/modules/voice_call_test/execute`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1261,7 +1264,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
       return matchesSearch && matchesCategory && matchesFavorites && matchesRecents;
     });
 
-    // Tri : par ordre alphabétique (déjà trié dans sortedModules), sauf en mode "recents" où l'on trie par recency.
+    // Sort: alphabetical order (already sorted in sortedModules), except in "recents" mode where we sort by recency.
     if (moduleFilterMode === 'recents') {
       return [...filtered].sort((a, b) => recencyRank(a.id) - recencyRank(b.id));
     }
@@ -1304,7 +1307,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         return null;
       }
       try {
-        const response = await fetch(`${normalizedBackendUrl}/api/modules/status?${params.toString()}`, {
+        const response = await fetchWithRetry(`${normalizedBackendUrl}/api/modules/status?${params.toString()}`, {
           headers: {
             ...authHeaders(),
           },
@@ -1579,7 +1582,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         });
 
         const executeRequest = async (payload: Record<string, any>) => {
-          const response = await fetch(`${normalizedBackendUrl}/api/modules/${module.id}/execute`, {
+          const response = await fetchWithRetry(`${normalizedBackendUrl}/api/modules/${module.id}/execute`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1769,7 +1772,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
 
     if ((window as any).electronAPI?.runScript) {
       (window as any).electronAPI.runScript(scriptPath(module.script));
-      setSnackbar({ message: `Running ${module.name}…`, severity: 'success' });
+      setSnackbar({ message: `Running ${module.name}â€¦`, severity: 'success' });
       return;
     }
     console.info(`Run requested for ${module.script}`);
@@ -1858,7 +1861,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
 
     if ((window as any).electronAPI?.openFile) {
       (window as any).electronAPI.openFile(scriptPath(module.script));
-      setSnackbar({ message: `Opening ${module.name} in editor…`, severity: 'success' });
+      setSnackbar({ message: `Opening ${module.name} in editorâ€¦`, severity: 'success' });
       return;
     }
     setSnackbar({ message: `Script path: ${scriptPath(module.script)}`, severity: 'info' });
@@ -1998,7 +2001,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
     const rtt = response.rtt && typeof response.rtt === 'object' ? (response.rtt as Record<string, unknown>) : null;
     const rttSummary =
       rtt && typeof rtt.avg_ms === 'number'
-        ? `avg ${rtt.avg_ms.toFixed(2)} ms (min ${Number(rtt.min_ms ?? 0).toFixed(2)} • max ${Number(rtt.max_ms ?? 0).toFixed(2)})`
+        ? `avg ${rtt.avg_ms.toFixed(2)} ms (min ${Number(rtt.min_ms ?? 0).toFixed(2)} â€¢ max ${Number(rtt.max_ms ?? 0).toFixed(2)})`
         : null;
     return (
       <Stack spacing={0.5} sx={{ mt: 1 }}>
@@ -2009,7 +2012,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         )}
         {(packetsTx !== undefined || packetsRx !== undefined) && (
           <Typography variant="body2" sx={{ color: '#475569' }}>
-            Packets: {packetsTx ?? '—'} sent / {packetsRx ?? '—'} received
+            Packets: {packetsTx ?? 'â€”'} sent / {packetsRx ?? 'â€”'} received
           </Typography>
         )}
         {packetLoss && (
@@ -2208,7 +2211,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
               }
             >
               <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                {notification.moduleId} · {notification.deviceId}
+                {notification.moduleId} Â· {notification.deviceId}
               </Typography>
               <Typography variant="body2">{notification.message}</Typography>
             </Alert>
@@ -2317,11 +2320,11 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
               }}
               sx={{ textTransform: 'none', fontWeight: 600 }}
             >
-              Continuer
+              Continue
             </Button>
           }
         >
-          Un workflow en brouillon n&apos;a pas été enregistré. Cliquez sur Continuer pour reprendre l&apos;édition.
+          A draft workflow was not saved. Click Continue to resume editing.
         </Alert>
       )}
 
@@ -2652,7 +2655,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
                           }
                         }}
                       >
-                        {moduleRunning ? 'Running…' : 'Run'}
+                        {moduleRunning ? 'Runningâ€¦' : 'Run'}
                       </Button>
                     </span>
                   </Tooltip>
@@ -3006,3 +3009,4 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
 };
 
 export default TestModules;
+

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Box,
   Typography,
@@ -59,6 +59,7 @@ import { recordDeviceWorkflowRun } from '../utils/deviceHistory';
 import { recordDeviceActivity } from '../utils/deviceActivity';
 import { readSelectedDeviceIds, SELECTED_DEVICES_EVENT } from '../utils/deviceSelection';
 import { CallTestValues } from '../types/callTest';
+import { fetchWithRetry } from '../services/utils';
 
 type WorkflowEditorData = {
   name: string;
@@ -263,13 +264,13 @@ const formatCallTestNumber = (values: StoredCallTestValues): string => {
 const describeCallTestModule = (module: ModuleMetadata): string => {
   const values = resolveCallTestValuesForModule(module);
   const numberLabel = formatCallTestNumber(values);
-  const attempts = Math.max(1, values.callCount ?? 1);
-  const attemptLabel = attempts > 1 ? `${attempts} appels` : '1 appel';
-  return `Appel vers ${numberLabel} â€¢ ${attemptLabel}`;
+  const attempts = Math.max(1, values.callCount - 1);
+  const attemptLabel = attempts > 1 ? `${attempts} calls` : '1 call';
+  return `Call to ${numberLabel} - ${attemptLabel}`;
 };
 
 const describeWaitingModule = (module: ModuleMetadata): string =>
-  `Attente de ${module.waitDurationSeconds ?? DEFAULT_WAIT_DURATION_SECONDS} seconde(s)`;
+  `Wait ${module.waitDurationSeconds - DEFAULT_WAIT_DURATION_SECONDS} second(s)`;
 
 const getModuleTooltipLabel = (module: ModuleMetadata): string | undefined => {
   if (module.id === 'call_test') {
@@ -608,7 +609,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
         return;
       }
       try {
-        const response = await fetch(`${normalizedBackendUrl}/api/workflows/schedules`, { signal });
+        const response = await fetchWithRetry(`${normalizedBackendUrl}/api/workflows/schedules`, { signal });
         if (!response.ok) {
           const text = await response.text();
           throw new Error(text || `Failed to load schedules (HTTP ${response.status})`);
@@ -683,7 +684,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
       const existing = workflowBackendMap[workflow.id];
       if (existing) {
         try {
-          const response = await fetch(`${normalizedBackendUrl}/api/workflows/${existing}`);
+          const response = await fetchWithRetry(`${normalizedBackendUrl}/api/workflows/${existing}`);
           if (response.ok) {
             return existing;
           }
@@ -706,7 +707,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
         }
       }
 
-      const response = await fetch(`${normalizedBackendUrl}/api/workflows`, {
+      const response = await fetchWithRetry(`${normalizedBackendUrl}/api/workflows`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -740,7 +741,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
     const controller = new AbortController();
     const syncBackendState = async () => {
       try {
-        const response = await fetch(`${normalizedBackendUrl}/api/workflows`, { signal: controller.signal });
+        const response = await fetchWithRetry(`${normalizedBackendUrl}/api/workflows`, { signal: controller.signal });
         if (!response.ok) {
           const text = await response.text();
           throw new Error(text || `Failed to read backend workflows (HTTP ${response.status})`);
@@ -851,7 +852,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
     const runAtIso = new Date(Date.now() + parsedMinutes * 60 * 1000).toISOString();
     try {
       const attemptSchedule = async (workflowId: string) => {
-        const response = await fetch(`${normalizedBackendUrl}/api/workflows/${workflowId}/schedule`, {
+        const response = await fetchWithRetry(`${normalizedBackendUrl}/api/workflows/${workflowId}/schedule`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -921,7 +922,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
       try {
         await Promise.all(
           summary.scheduleIds.map((scheduleId) =>
-            fetch(`${normalizedBackendUrl}/api/workflows/schedules/${scheduleId}`, { method: 'DELETE' })
+            fetchWithRetry(`${normalizedBackendUrl}/api/workflows/schedules/${scheduleId}`, { method: 'DELETE' })
           )
         );
         setSnackbar({ severity: 'info', message: 'Scheduled workflow run cancelled.' });
@@ -1025,7 +1026,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
       if (!normalizedBackendUrl) {
         throw new Error('Backend unavailable: no URL configured.');
       }
-      const response = await fetch(`${normalizedBackendUrl}/api/modules/preflight_check/execute`, {
+      const response = await fetchWithRetry(`${normalizedBackendUrl}/api/modules/preflight_check/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ device_ids: deviceIds }),
@@ -1082,7 +1083,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
       const buildGroupedRequests = () => {
         const groupedRequests = new Map<string, { parameters: Record<string, any>; deviceIds: string[] }>();
         deviceIds.forEach((deviceId) => {
-          const parameters = buildModuleParametersForDevice(module, deviceId) ?? {};
+        const parameters = buildModuleParametersForDevice(module, deviceId) ?? {};
           const key = JSON.stringify(parameters);
           const existing = groupedRequests.get(key);
           if (existing) {
@@ -1103,7 +1104,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
             }
 
             try {
-              const response = await fetch(`${normalizedBackendUrl}/api/modules/${apiModuleId}/execute`, {
+              const response = await fetchWithRetry(`${normalizedBackendUrl}/api/modules/${apiModuleId}/execute`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -1166,7 +1167,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
 
       let results: PromiseSettledResult<{ deviceId: string; success: boolean; message?: string }[]>[] | null = null;
       try {
-        const response = await fetch(`${normalizedBackendUrl}/api/modules/${apiModuleId}/execute`, {
+        const response = await fetchWithRetry(`${normalizedBackendUrl}/api/modules/${apiModuleId}/execute`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1268,7 +1269,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
       if (!normalizedBackendUrl) {
         throw new Error('Backend unavailable: no URL configured.');
       }
-      const response = await fetch(`${normalizedBackendUrl}/api/workflows/${backendWorkflowId}/execute`, {
+      const response = await fetchWithRetry(`${normalizedBackendUrl}/api/workflows/${backendWorkflowId}/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ device_ids: deviceIds }),
@@ -1352,7 +1353,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
         if (!backendWorkflowId) {
           backendWorkflowId = await ensureBackendWorkflow(exportMenuWorkflow);
         }
-        const response = await fetch(
+        const response = await fetchWithRetry(
           `${normalizedBackendUrl}/api/workflows/${backendWorkflowId}/runs/latest/export/${format}`
         );
         if (!response.ok) {
@@ -1394,7 +1395,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
     }
 
     const workflowSummary =
-      workflow.modules.map((module) => module.name).filter(Boolean).join(' â†’ ') || workflow.name;
+      workflow.modules.map((module) => module.name).filter(Boolean).join(' -> ') || workflow.name;
     const repeatSettings = getRepeatSettingsForWorkflow(workflow.id);
     const normalizedRepeatCount = Number.isFinite(repeatSettings.repeatCount)
       ? Math.max(1, Math.trunc(repeatSettings.repeatCount))
@@ -1418,7 +1419,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
     setWorkflowCompletedModules((prev) => ({ ...prev, [workflow.id]: [] }));
     setWorkflowRunStatus((prev) => ({
       ...prev,
-      [workflow.id]: `Planning workflow (${workflowSummary}) for ${deviceIds.length} device${deviceIds.length === 1 ? '' : 's'}â€¦`,
+      [workflow.id]: `Planning workflow (${workflowSummary}) for ${deviceIds.length} device${deviceIds.length === 1 ? '' : 's'}...`,
     }));
     setSnackbar({
       severity: 'info',
@@ -1444,7 +1445,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
       }
       setWorkflowRunStatus((prev) => ({
         ...prev,
-        [workflow.id]: `Resuming workflow "${workflow.name}"â€¦`,
+        [workflow.id]: `Resuming workflow "${workflow.name}"...`,
       }));
     };
 
@@ -1466,7 +1467,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
         }));
         setWorkflowRunStatus((prev) => ({
           ...prev,
-          [workflow.id]: `Starting ${runLabel} (${workflowSummary}) on ${deviceIds.length} device${deviceIds.length === 1 ? '' : 's'}â€¦`,
+          [workflow.id]: `Starting ${runLabel} (${workflowSummary}) on ${deviceIds.length} device${deviceIds.length === 1 ? '' : 's'}...`,
         }));
 
         const deviceOutcomes: Record<string, { success: boolean; reasons: string[] }> = {};
@@ -1484,7 +1485,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
           setWorkflowActiveModuleIndex((prev) => ({ ...prev, [workflow.id]: index }));
           setWorkflowRunStatus((prev) => ({
             ...prev,
-            [workflow.id]: `${runLabel}: running "${module.name}" on ${deviceIds.length} device${deviceIds.length === 1 ? '' : 's'}â€¦`,
+            [workflow.id]: `${runLabel}: running "${module.name}" on ${deviceIds.length} device${deviceIds.length === 1 ? '' : 's'}...`,
           }));
 
         const { failures } = await executeModuleForDevices(
@@ -1607,7 +1608,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
 
         setWorkflowRunStatus((prev) => ({
           ...prev,
-          [workflow.id]: `${runLabel} completed. Preparing next runâ€¦`,
+          [workflow.id]: `${runLabel} completed. Preparing next run...`,
         }));
         await sleep(1200);
       }
@@ -1902,7 +1903,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
                 const base = moduleCatalogMap.get(module.id);
                 const label = base?.name || module.name || module.id;
                 const paramCount = module.callTestParams ? Object.keys(module.callTestParams).length : 0;
-                const suffix = paramCount > 0 ? ` Â· ${paramCount} param${paramCount > 1 ? 's' : ''}` : '';
+                const suffix = paramCount > 0 ? ` Ã‚Â· ${paramCount} param${paramCount > 1 ? 's' : ''}` : '';
                 return `${index + 1}. ${label}${suffix}`;
               });
               const extraModules = workflow.modules.length - modulePreview.length;
@@ -1968,7 +1969,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
                             }}
                           >
                             <Typography sx={{ fontSize: '13px', color: '#0369A1', flex: 1 }}>
-                              Scheduled for {formatScheduleLabel(scheduleSummaries[workflow.id].nextRunAt)} â€¢{' '}
+                              Scheduled for {formatScheduleLabel(scheduleSummaries[workflow.id].nextRunAt)} -{' '}
                               {scheduleSummaries[workflow.id].deviceIds.length} device
                               {scheduleSummaries[workflow.id].deviceIds.length === 1 ? '' : 's'}
                             </Typography>
@@ -2555,7 +2556,7 @@ const WorkflowEditorDialog: React.FC<WorkflowEditorDialogProps> = ({
                       </Typography>
                       {isWaitingModule(module) ? (
                         <Typography variant="caption" sx={{ color: '#475569' }}>
-                          Wait {module.waitDurationSeconds ?? DEFAULT_WAIT_DURATION_SECONDS} second(s)
+                          Wait {module.waitDurationSeconds - DEFAULT_WAIT_DURATION_SECONDS} second(s)
                         </Typography>
                       ) : null}
                     </Box>
@@ -2565,7 +2566,7 @@ const WorkflowEditorDialog: React.FC<WorkflowEditorDialogProps> = ({
                           size="small"
                           type="number"
                           label="Seconds"
-                          value={module.waitDurationSeconds ?? DEFAULT_WAIT_DURATION_SECONDS}
+                          value={module.waitDurationSeconds - DEFAULT_WAIT_DURATION_SECONDS}
                           onChange={(event) => {
                             const parsed = Number(event.target.value);
                             if (Number.isFinite(parsed)) {
@@ -2636,3 +2637,4 @@ const WorkflowEditorDialog: React.FC<WorkflowEditorDialogProps> = ({
 };
 
 export default FlowComposer;
+

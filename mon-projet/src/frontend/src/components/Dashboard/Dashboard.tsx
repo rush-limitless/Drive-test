@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Search, Smartphone, Wifi, Battery, Activity } from 'lucide-react';
-import DeviceCard from './DeviceCard';
+import DeviceSelectionCard from './DeviceSelectionCard';
 import KPICard from './KPICard';
-import { Device, KPIData } from '../../types';
+import { Device, KPIData } from '@types';
 import { deviceApi } from '../../services/deviceApi';
 
 const Dashboard: React.FC = () => {
@@ -53,7 +53,7 @@ const Dashboard: React.FC = () => {
             <span className="brand-pill">MOBIQ</span>
             <div>
               <h1 className="page-title">Command Center</h1>
-              <p className="page-subtitle">Automatisation mobile en direct</p>
+              <p className="page-subtitle">Live mobile automation</p>
             </div>
           </div>
           <select 
@@ -105,7 +105,7 @@ const Dashboard: React.FC = () => {
         <KPICard
           icon={<Battery />}
           label="Last Run Status"
-          value="✅"
+          value="OK"
           subtitle="Completed 2m ago"
         />
       </div>
@@ -129,13 +129,13 @@ const Dashboard: React.FC = () => {
             <h4>No devices connected</h4>
             <p>Connect an Android device via USB and enable USB debugging</p>
             <button className="btn btn-primary" onClick={fetchDevices}>
-              🔄 Scan Again
+              Scan Again
             </button>
           </div>
         ) : (
           <div className="devices-grid">
             {devices.map(device => (
-              <DeviceCard
+              <DeviceSelectionCard
                 key={device.id}
                 device={device}
                 onSelect={handleDeviceSelect}
@@ -158,3 +158,6 @@ const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
+
+
+

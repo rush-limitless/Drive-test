@@ -17,12 +17,12 @@ Ajouter une clé API obligatoire (`X-API-Key`) sur les endpoints devices (v1/v2)
 src/backend/core/config.py         # settings API_KEY, RATE_LIMIT_PER_MIN
 src/backend/api/security.py        # dépendances auth + rate limit
 src/backend/api/devices.py         # dépendances appliquées
-src/backend/api/devices_v2.py      # idem
+src/backend/api/devices_legacy.py      # idem
 src/backend/tests/test_security_api.py  # tests 401/429/200
 ```
 
 ## Tasks
 - Mettre à jour settings (API_KEY, RATE_LIMIT_PER_MIN).
 - Ajouter dépendances `require_api_key` + `enforce_rate_limit` (header + compteur mémoire).
-- Appliquer aux routers devices/devices_v2/report endpoint.
+- Appliquer aux routers devices/devices_legacy/report endpoint.
 - Tests pytest (401, 429, 200).

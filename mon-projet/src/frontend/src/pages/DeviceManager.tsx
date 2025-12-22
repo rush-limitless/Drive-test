@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -62,7 +62,7 @@ import {
   DEVICE_REGISTRY_STORAGE_KEY,
   DeviceRegistryEntry,
 } from '../utils/deviceRegistry';
-import { resolveBaseUrl } from '../services/utils';
+import { resolveBaseUrl, fetchWithRetry } from '../services/utils';
 import {
   getAllDeviceActivities,
   getDeviceActivity,
@@ -178,7 +178,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
           last_seen: new Date().toISOString(),
         });
       }
-      const response = await fetch(`${backendUrl}/api/v1/devices/${deviceId}/${action}`, {
+      const response = await fetchWithRetry(`${backendUrl}/api/v1/devices/${deviceId}/${action}`, {
         method: 'POST',
       });
       if (response.ok) {
@@ -665,7 +665,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
                   {displayName}
                 </Typography>
                 <Typography variant="body2" sx={{ color: '#6B7280', fontSize: '12px' }}>
-                  {device.model && device.model !== displayName ? `${device.model} • ` : ''}
+                  {device.model && device.model !== displayName ? `${device.model} â€¢ ` : ''}
                   {device.id}
                 </Typography>
               </Box>
@@ -736,11 +736,11 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
               sx={{ mb: 2 }}
             />
             <Typography variant="caption" sx={{ color: '#6B7280', fontSize: '12px' }}>
-              Last seen: {formatTimestamp(lastSeenDisplay)} • Connection: {connectionLabel}
+              Last seen: {formatTimestamp(lastSeenDisplay)} â€¢ Connection: {connectionLabel}
             </Typography>
             <Typography variant="caption" sx={{ color: '#475569', fontSize: '12px', display: 'block', mb: 2 }}>
-              {workflowRuns} workflow{workflowRuns === 1 ? '' : 's'} • {moduleRuns} module{moduleRuns === 1 ? '' : 's'}
-              {activityEntries[0]?.timestamp ? ` • Last activity: ${formatTimestamp(activityEntries[0].timestamp)}` : ''}
+              {workflowRuns} workflow{workflowRuns === 1 ? '' : 's'} â€¢ {moduleRuns} module{moduleRuns === 1 ? '' : 's'}
+              {activityEntries[0]?.timestamp ? ` â€¢ Last activity: ${formatTimestamp(activityEntries[0].timestamp)}` : ''}
             </Typography>
             <Stack direction="row" spacing={1} justifyContent="space-between" alignItems="center">
               <Stack direction="row" spacing={1}>
@@ -902,7 +902,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
                 <TableCell>{formatTimestamp(device.last_seen || registryMeta?.lastSeen)}</TableCell>
                 <TableCell>
                   {(deviceMeta.tags ?? []).length === 0
-                    ? '—'
+                    ? 'â€”'
                     : (deviceMeta.tags ?? []).map((tag) => `#${tag}`).join(', ')}
                 </TableCell>
                 <TableCell align="right">{workflowRuns}</TableCell>
@@ -1116,7 +1116,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
 
       <Dialog open={Boolean(activityDialog)} onClose={closeActivityDialog} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ fontWeight: 600, color: '#0F172A' }}>
-          Device History — {activityDialog?.name || ''}
+          Device History â€” {activityDialog?.name || ''}
         </DialogTitle>
         <DialogContent dividers>
           <Stack direction="row" spacing={2} mb={2} flexWrap="wrap" rowGap={2}>
@@ -1196,7 +1196,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
                   ];
                   let lastError: string | null = null;
                   for (const endpoint of endpoints) {
-                    const resp = await fetch(endpoint, {
+                    const resp = await fetchWithRetry(endpoint, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify(body),
@@ -1274,7 +1274,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
                         />
                       </Typography>
                       <Typography sx={{ fontSize: '12px', color: '#6B7280' }}>
-                        {event.type === 'workflow' ? 'Workflow' : 'Module'} • {formatTimestamp(event.timestamp)}
+                        {event.type === 'workflow' ? 'Workflow' : 'Module'} â€¢ {formatTimestamp(event.timestamp)}
                       </Typography>
                       {event.details ? (
                         <Typography sx={{ fontSize: '12px', color: '#475569' }}>{event.details}</Typography>
@@ -1322,3 +1322,4 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
 };
 
 export default DeviceManager;
+

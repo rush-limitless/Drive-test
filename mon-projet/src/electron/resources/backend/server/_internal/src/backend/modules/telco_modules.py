@@ -1,4 +1,4 @@
-"""Modules d'automatisation télécoms complets pour ADB."""
+"""Full telco automation modules for ADB."""
 
 import logging
 import os
@@ -196,7 +196,7 @@ def _parse_call_state(payload: str) -> Optional[int]:
 
 
 class TelcoModules(ADBExecutor):
-    """Modules d'automatisation télécoms étendus."""
+    """Extended telco automation modules."""
 
     _NETWORK_CACHE_TTL_SECONDS = 1.5
     _network_registration_cache: Dict[str, Dict[str, Any]] = {}
@@ -933,20 +933,20 @@ class TelcoModules(ADBExecutor):
         """Best-effort start of RF logging via SysDump/secret code (non-root, DPAD)."""
         attempts = []
 
-        # 1) Ouvrir dialer
+        # 1) Open dialer
         cmd = [ADB_EXECUTABLE, 'shell', 'am', 'start', '-a', 'android.intent.action.DIAL']
         res = self.execute_command(cmd, timeout=10)
         attempts.append({'command': ' '.join(cmd), 'success': res.success, 'error': res.error.strip() if res.error else None})
         time.sleep(0.5)
-        # Effacer toute saisie existante
+        # Clear any existing input
         for _ in range(12):
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DEL'])
             time.sleep(0.05)
-        # Saisir *#9900# via keyevents pour fiabilité
+        # Enter *#9900# via keyevents for reliability
         for key in ('KEYCODE_STAR', 'KEYCODE_POUND', 'KEYCODE_9', 'KEYCODE_9', 'KEYCODE_0', 'KEYCODE_0', 'KEYCODE_POUND'):
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', key])
             time.sleep(0.1)
-        # Validation alternative : ENTER puis broadcast secret code (évite les appels voix)
+        # Alternate validation: ENTER then broadcast secret code (avoids voice calls)
         enter_cmd = [ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_ENTER']
         res_enter = self.execute_command(enter_cmd, timeout=5)
         attempts.append({'command': ' '.join(enter_cmd), 'success': res_enter.success, 'error': res_enter.error.strip() if res_enter.error else None})
@@ -956,7 +956,7 @@ class TelcoModules(ADBExecutor):
         attempts.append({'command': ' '.join(broadcast_cmd), 'success': res_bc.success, 'error': res_bc.error.strip() if res_bc.error else None})
         time.sleep(0.8)
 
-        # 2) Vérifier si l'écran Silent log est présent avant de naviguer (sinon éviter de taper dans le dialer)
+        # 2) Check if the Silent log screen is present before navigating (avoid typing in the dialer otherwise)
         root = self._ui_dump()
 
         def _has_sysdump_markers(r: ET.Element) -> bool:
@@ -968,7 +968,7 @@ class TelcoModules(ADBExecutor):
 
         has_silent_log = _has_sysdump_markers(root) if root is not None else False
 
-        # 3) Tentative UI : rechercher "Silent log" et "RF"
+        # 3) UI attempt: search for "Silent log" and "RF"
         ui_success = False
         if has_silent_log:
             for _ in range(6):
@@ -982,9 +982,9 @@ class TelcoModules(ADBExecutor):
                     break
                 self._scroll_down()
 
-            # DPAD pour valider "OK" dans le dialogue RF (5 fois bas, droite, centre)
+            # DPAD to confirm "OK" in the RF dialog (down 6 times, right, center)
             dpad_ok = [
-                ('KEYCODE_DPAD_DOWN', 6),  # descendre jusqu'à OK
+                ('KEYCODE_DPAD_DOWN', 6),  # move down to OK
                 ('KEYCODE_DPAD_RIGHT', 1),
                 ('KEYCODE_DPAD_CENTER', 1),
             ]
@@ -993,10 +993,10 @@ class TelcoModules(ADBExecutor):
                     self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', key])
                     time.sleep(0.3)
 
-        # 4) Statut : on considère succès si la séquence dial/broadcast a été envoyée,
-        # et on ajoute un warning si la présence de SysDump n'est pas confirmée.
+        # 4) Status: consider it successful if the dial/broadcast sequence was sent,
+        # also add a warning if the presence of SysDump is not confirmed.
         state_confirmed = has_silent_log
-        success = any(a['success'] for a in attempts)  # ne bloque pas sur l'absence de dump/ls
+        success = any(a['success'] for a in attempts)  # do not block on missing dump/ls
         return {
             'module': 'start_rf_logging',
             'success': success,
@@ -1007,22 +1007,22 @@ class TelcoModules(ADBExecutor):
         }
 
     def stop_rf_logging(self) -> Dict[str, Any]:
-        """Best-effort stop of RF logging, même processus que start (keyevents + broadcast + DPAD)."""
+        """Best-effort stop of RF logging, same process as start (keyevents + broadcast + DPAD)."""
         attempts = []
-        # 1) Ouvrir dialer
+        # 1) Open dialer
         cmd = [ADB_EXECUTABLE, 'shell', 'am', 'start', '-a', 'android.intent.action.DIAL']
         res = self.execute_command(cmd, timeout=10)
         attempts.append({'command': ' '.join(cmd), 'success': res.success, 'error': res.error.strip() if res.error else None})
         time.sleep(0.5)
-        # Effacer toute saisie existante
+        # Clear any existing input
         for _ in range(12):
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DEL'])
             time.sleep(0.05)
-        # Saisir *#9900# via keyevents
+        # Enter *#9900# via keyevents
         for key in ('KEYCODE_STAR', 'KEYCODE_POUND', 'KEYCODE_9', 'KEYCODE_9', 'KEYCODE_0', 'KEYCODE_0', 'KEYCODE_POUND'):
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', key])
             time.sleep(0.1)
-        # Validation : ENTER + broadcast secret code (évite appel voix)
+        # Validation: ENTER + broadcast secret code (avoids voice calls)
         enter_cmd = [ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_ENTER']
         res_enter = self.execute_command(enter_cmd, timeout=5)
         attempts.append({'command': ' '.join(enter_cmd), 'success': res_enter.success, 'error': res_enter.error.strip() if res_enter.error else None})
@@ -1032,7 +1032,7 @@ class TelcoModules(ADBExecutor):
         attempts.append({'command': ' '.join(broadcast_cmd), 'success': res_bc.success, 'error': res_bc.error.strip() if res_bc.error else None})
         time.sleep(0.8)
 
-        # 2) Vérifier la présence du menu Silent log
+        # 2) Check for the Silent log menu
         root = self._ui_dump()
 
         def _has_sysdump_markers(r: ET.Element) -> bool:
@@ -1044,19 +1044,19 @@ class TelcoModules(ADBExecutor):
 
         has_silent_log = _has_sysdump_markers(root) if root is not None else False
 
-        # 3) UI : taper Silent log et désactiver
+        # 3) UI: type Silent log and disable it
         ui_success = False
         if has_silent_log:
             for _ in range(6):
                 if self._tap_by_text('Silent log') or self._tap_by_text('SilentLog') or self._tap_by_text('Silent logging'):
                     time.sleep(0.5)
-                    # on vise RF ou l’option active, puis DPAD pour OK
+                    # target RF or the active option, then DPAD to OK
                     for __ in range(6):
                         if self._tap_by_text('RF') or self._tap_by_text('CP') or self._tap_by_text('MODEM'):
                             ui_success = True
                             break
                         self._scroll_down()
-                    # DPAD pour aller sur OK après sélection
+                    # DPAD to reach OK after selection
                     dpad_ok = [
                         ('KEYCODE_DPAD_DOWN', 6),
                         ('KEYCODE_DPAD_RIGHT', 1),
@@ -1192,7 +1192,7 @@ class TelcoModules(ADBExecutor):
             return any(token in lower for token in (
                 'access point names',
                 "nom des points d'acc",
-                "nom du point d'acc",
+                "access point name",
                 'add',
                 'ajouter',
             ))
@@ -1298,7 +1298,7 @@ class TelcoModules(ADBExecutor):
             return any(token in lower for token in (
                 'access point names',
                 'nom des points d\'acc',
-                'nom du point d\'acc',
+                'access point name',
                 'add',
                 'ajouter',
             ))
@@ -1347,19 +1347,19 @@ class TelcoModules(ADBExecutor):
                 if not (self._tap_by_text('Connections') or self._tap_by_text('Connexions')):
                     return False
             time.sleep(1)
-            # 3) Mobile networks (descendre 6 fois puis valider)
+            # 3) Mobile networks (move down 6 times, then confirm)
             for _ in range(6):
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_DOWN'])
                 time.sleep(0.2)
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_CENTER'])
             time.sleep(1)
-            # 4) Access Point Names (descendre 3 fois puis valider)
+            # 4) Access Point Names (move down 3 times, then confirm)
             for _ in range(3):
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_DOWN'])
                 time.sleep(0.2)
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_CENTER'])
             time.sleep(1)
-            # Placer le focus sur le premier APN de la liste et entrer dans le détail
+            # Place focus on the first APN in the list and open details
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_DOWN'])
             time.sleep(0.2)
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_CENTER'])
@@ -1377,8 +1377,8 @@ class TelcoModules(ADBExecutor):
             time.sleep(1)
             if not selected:
                 return False
-            # 6) Dans le détail APN, cibler le champ "APN"
-            if not self._tap_by_text('APN') and not self._tap_by_text("Nom du point d'accès"):
+            # 6) In APN details, target the "APN" field
+            if not self._tap_by_text('APN') and not self._tap_by_text("Access point name"):
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_CENTER'])
             time.sleep(1)
             # Effacer et saisir la nouvelle valeur
@@ -1388,9 +1388,9 @@ class TelcoModules(ADBExecutor):
                 time.sleep(0.02)
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'text', apn])
             time.sleep(1)
-            # 6) Valider le champ via bouton OK si présent (dialog), sinon ENTER
+            # 6) Validate via OK button if present (dialog), otherwise ENTER
             if not self._tap_by_text('OK'):
-                # tap approximatif bas droite (évite Cancel)
+                # approximate tap bottom-right (avoid Cancel)
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'tap', '950', '1650'])
                 time.sleep(0.5)
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_ENTER'])

@@ -14,10 +14,17 @@ const BACKEND_HOST = process.env.TELCO_SIMPLE_HOST || '127.0.0.1';
 const RENDER_HOST = BACKEND_HOST === '0.0.0.0' ? '127.0.0.1' : BACKEND_HOST;
 
 const customUserData = path.join(app.getPath('userData'), 'mobiq-dev');
-if (!fs.existsSync(customUserData)) {
-  fs.mkdirSync(customUserData, { recursive: true });
+const customCache = path.join(customUserData, 'cache');
+const customTemp = path.join(customUserData, 'temp');
+for (const dir of [customUserData, customCache, customTemp]) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
 }
 app.setPath('userData', customUserData);
+app.setPath('cache', customCache);
+app.setPath('temp', customTemp);
+app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
 
 function resolveBackendExecutable(): { executable: string; args: string[]; cwd: string; env?: NodeJS.ProcessEnv } {
   const sharedEnv: NodeJS.ProcessEnv = {
@@ -28,7 +35,7 @@ function resolveBackendExecutable(): { executable: string; args: string[]; cwd: 
   };
 
   if (app.isPackaged) {
-    // backend packagé (PyInstaller) copié dans resources/backend/server
+  // Packaged backend (PyInstaller) copied into resources/backend/server
     const backendDir = path.join(process.resourcesPath, 'backend', 'server');
     const platformToolsDir = path.join(backendDir, '_internal', 'platform-tools');
     const packagedAdbDir = path.join(process.resourcesPath, 'adb');
@@ -46,7 +53,7 @@ function resolveBackendExecutable(): { executable: string; args: string[]; cwd: 
     };
   }
 
-  // Mode développement : lancer simple-server.py via python local
+  // Development mode: launch simple-server.py via local Python
   const projectRoot = path.join(__dirname, '..', '..', '..');
   const devPlatformTools = path.join(projectRoot, 'platform-tools');
   const devEmbeddedAdb = path.join(projectRoot, 'src', 'electron', 'resources', 'adb');
@@ -168,10 +175,30 @@ function checkBackendAlreadyRunning(): Promise<boolean> {
 
 function startBackendServer(): Promise<void> {
   return new Promise(async (resolve, reject) => {
+    let resolved = false;
+    let healthInterval: NodeJS.Timeout | null = null;
+    let readyTimeout: NodeJS.Timeout | null = null;
+
+    const markReady = () => {
+      if (resolved) {
+        return;
+      }
+      resolved = true;
+      if (healthInterval) {
+        clearInterval(healthInterval);
+        healthInterval = null;
+      }
+      if (readyTimeout) {
+        clearTimeout(readyTimeout);
+        readyTimeout = null;
+      }
+      resolve();
+    };
+
     if (process.env.SKIP_BACKEND && process.env.SKIP_BACKEND !== '0' && process.env.SKIP_BACKEND.toLowerCase() !== 'false') {
       backendManagedExternally = true;
       console.log(`[electron] SKIP_BACKEND set. Assuming backend already running at http://${RENDER_HOST}:${BACKEND_PORT}`);
-      resolve();
+      markReady();
       return;
     }
 
@@ -179,7 +206,7 @@ function startBackendServer(): Promise<void> {
     if (alreadyRunning) {
       backendManagedExternally = true;
       console.log(`[electron] Backend already running at http://${RENDER_HOST}:${BACKEND_PORT}, skipping spawn.`);
-      resolve();
+      markReady();
       return;
     }
 
@@ -199,16 +226,22 @@ function startBackendServer(): Promise<void> {
       stdio: ['pipe', 'pipe', 'pipe'],
     });
     backendManagedExternally = false;
+    const readyPattern = /Uvicorn running|Application startup complete/i;
 
     backendProcess.stdout?.on('data', (data) => {
-      console.log(`Backend: ${data}`);
-      if (data.toString().includes('Uvicorn running')) {
-        resolve();
+      const text = data.toString();
+      console.log(`Backend: ${text}`);
+      if (readyPattern.test(text)) {
+        markReady();
       }
     });
 
     backendProcess.stderr?.on('data', (data) => {
-      console.error(`Backend Error: ${data}`);
+      const text = data.toString();
+      console.error(`Backend Error: ${text}`);
+      if (readyPattern.test(text)) {
+        markReady();
+      }
     });
 
     backendProcess.on('error', (error) => {
@@ -221,9 +254,21 @@ function startBackendServer(): Promise<void> {
       backendProcess = null;
     });
 
-    setTimeout(() => {
-      resolve();
-    }, 3000);
+    healthInterval = setInterval(async () => {
+      try {
+        const healthy = await checkBackendAlreadyRunning();
+        if (healthy) {
+          markReady();
+        }
+      } catch {
+        // Ignore errors while the backend is still starting.
+      }
+    }, 1000);
+
+    readyTimeout = setTimeout(() => {
+      console.warn('[electron] Backend readiness timeout reached; continuing startup.');
+      markReady();
+    }, 15000);
   });
 }
 

@@ -1,4 +1,4 @@
-import { resolveBaseUrl } from './utils';
+import { resolveBaseUrl, fetchWithRetry } from './utils';
 
 export interface StatusBreakdown {
   pending: number;
@@ -35,11 +35,10 @@ export const reportApi = {
       url.searchParams.set('date_to', filters.date_to);
     }
 
-    const response = await fetch(url.toString());
+    const response = await fetchWithRetry(url.toString());
     if (!response.ok) {
       throw new Error(`Failed to fetch report summary: ${response.status} ${response.statusText}`);
     }
     return await response.json();
   },
 };
-

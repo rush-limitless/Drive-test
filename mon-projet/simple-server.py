@@ -17,11 +17,7 @@ from fastapi import BackgroundTasks, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-try:
-    from pydantic import BaseModel, field_validator
-except ImportError:  # Pydantic v1 fallback
-    from pydantic import BaseModel, validator
-    field_validator = None
+from pydantic import BaseModel, field_validator
 
 
 def _ensure_backend_on_path() -> Path:
@@ -41,7 +37,7 @@ def _ensure_backend_on_path() -> Path:
                 if path_str not in sys.path:
                     sys.path.insert(0, path_str)
             return backend_dir
-    raise RuntimeError("Impossible de localiser src/backend pour les imports dynamiques.")
+    raise RuntimeError("Unable to locate src/backend for dynamic imports.")
 
 
 _ensure_backend_on_path()
@@ -57,7 +53,7 @@ from src.backend.core.config import ensure_directories
 from src.backend.core.database import ensure_sql_schema
 
 # Import API routers
-from src.backend.api.devices_v2 import router as devices_router_v2
+from src.backend.api.devices_legacy import router as devices_router_legacy
 from src.backend.api.devices import router as devices_router_v1
 from src.backend.api.dashboard import router as dashboard_router
 from src.backend.api.workflows import (
@@ -126,8 +122,8 @@ app.add_middleware(
 
 def include_all_routes(prefix: str) -> None:
     """Mount every router under the provided prefix."""
-    # Expose both v2 (simple-server) and full devices router (includes PDF export)
-    app.include_router(devices_router_v2, prefix=prefix, tags=["devices"])
+    # Expose both legacy and full devices router (includes PDF export)
+    app.include_router(devices_router_legacy, prefix=prefix, tags=["devices_legacy"])
     app.include_router(devices_router_v1, prefix=prefix, tags=["devices"])
     app.include_router(dashboard_router, prefix=prefix, tags=["dashboard"])
     app.include_router(workflows_router, prefix=prefix, tags=["workflows"])
@@ -154,42 +150,23 @@ class FlowExecutionRequest(BaseModel):
     repeat_count: int = 1
     duration_seconds: int = 0
 
-    if field_validator:
-        @field_validator("repeat_count", mode="before")
-        def validate_repeat_count(cls, value):
-            try:
-                parsed = int(value)
-            except (TypeError, ValueError):
-                parsed = 1
-            return max(1, parsed)
+    @field_validator("repeat_count", mode="before")
+    def validate_repeat_count(cls, value):
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError):
+            parsed = 1
+        return max(1, parsed)
 
-        @field_validator("duration_seconds", mode="before")
-        def validate_duration_seconds(cls, value):
-            if value is None:
-                return 0
-            try:
-                parsed = int(value)
-            except (TypeError, ValueError):
-                parsed = 0
-            return max(0, parsed)
-    else:
-        @validator("repeat_count", pre=True, always=True)
-        def validate_repeat_count(cls, value):
-            try:
-                parsed = int(value)
-            except (TypeError, ValueError):
-                parsed = 1
-            return max(1, parsed)
-
-        @validator("duration_seconds", pre=True, always=True)
-        def validate_duration_seconds(cls, value):
-            if value is None:
-                return 0
-            try:
-                parsed = int(value)
-            except (TypeError, ValueError):
-                parsed = 0
-            return max(0, parsed)
+    @field_validator("duration_seconds", mode="before")
+    def validate_duration_seconds(cls, value):
+        if value is None:
+            return 0
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError):
+            parsed = 0
+        return max(0, parsed)
 
 # Serve static files
 static_dir = os.path.join(os.path.dirname(__file__), "src", "backend", "static")

@@ -27,10 +27,10 @@ import {
 } from '@mui/material';
 import { Refresh as RefreshIcon } from '@mui/icons-material';
 
-import DeviceCard from './DeviceCard';
+import DeviceManagerCard from './DeviceManagerCard';
 import { deviceApi } from '../../services/deviceApi';
 import { webSocketService } from '../../services/websocket';
-import { Device } from '../../types';
+import { Device } from '@types';
 import {
   DEVICE_HISTORY_EVENT,
   DeviceWorkflowRun,
@@ -152,7 +152,7 @@ function DeviceManager({ backendUrl }: DeviceManagerProps) {
         from: fromIso,
         to: toIso,
       });
-      setInfoMessage(`Téléchargement terminé pour ${selectedDevice.id}`);
+      setInfoMessage(`Download completed for ${selectedDevice.id}`);
       const cleared = new Set(nextSet);
       cleared.delete(selectedDevice.id);
       setDownloadingIds(cleared);
@@ -180,7 +180,7 @@ function DeviceManager({ backendUrl }: DeviceManagerProps) {
     const toIso = new Date(reportTo).toISOString();
     const ids = devices.slice(0, BATCH_LIMIT).map((d) => d.id);
     if (devices.length > BATCH_LIMIT) {
-      setInfoMessage(`Batch limité à ${BATCH_LIMIT} devices (sur ${devices.length}).`);
+      setInfoMessage(`Batch limited to ${BATCH_LIMIT} devices (out of ${devices.length}).`);
     } else {
       setInfoMessage(null);
     }
@@ -199,7 +199,7 @@ function DeviceManager({ backendUrl }: DeviceManagerProps) {
         setDownloadingIds(cleared);
       }
     }
-    setInfoMessage('Batch terminé');
+    setInfoMessage('Batch completed');
   };
 
   const formatTimestamp = (value?: string) => {
@@ -408,7 +408,7 @@ function DeviceManager({ backendUrl }: DeviceManagerProps) {
           <Grid container spacing={2}>
             {sortedDevices.map((device) => (
               <Grid item xs={12} sm={6} md={4} key={device.id}>
-                <DeviceCard
+                <DeviceManagerCard
                   device={device}
                   onRefresh={() => handleDeviceRefresh(device.id)}
                   onScreenshot={() => handleScreenshot(device.id)}
@@ -540,14 +540,14 @@ function DeviceManager({ backendUrl }: DeviceManagerProps) {
             onClick={handleDownloadReport}
             disabled={!selectedDevice || downloadingIds.has(selectedDevice.id)}
           >
-            {downloadingIds.has(selectedDevice?.id || '') ? 'Téléchargement...' : 'Télécharger le PDF'}
+            {downloadingIds.has(selectedDevice?.id || '') ? 'Downloading...' : 'Download PDF'}
           </Button>
           <Button
             variant="outlined"
             onClick={handleBatchDownload}
             disabled={devices.length === 0 || downloadingIds.size > 0}
           >
-            Télécharger tous (séquentiel)
+            Download all (sequential)
           </Button>
           <Button onClick={handleCloseDetails}>Close</Button>
         </DialogActions>

@@ -1,4 +1,4 @@
-import { resolveBaseUrl } from './utils';
+﻿import { resolveBaseUrl, fetchWithRetry } from './utils';
 
 export interface DashboardScope {
   id: string;
@@ -41,7 +41,8 @@ export interface SearchResult {
 const handleResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(`HTTP ${response.status}: ${response.statusText} — ${text || 'No body'}`);
+    const detail = text || 'No body';
+    throw new Error(`HTTP ${response.status}: ${response.statusText} - ${detail}`);
   }
   return response.json() as Promise<T>;
 };
@@ -53,7 +54,7 @@ export const dashboardApi = {
     if (scope) {
       url.searchParams.set('scope', scope);
     }
-    const response = await fetch(url.toString());
+    const response = await fetchWithRetry(url.toString());
     return handleResponse<DashboardSummary>(response);
   },
 
@@ -61,7 +62,7 @@ export const dashboardApi = {
     const resolvedBase = resolveBaseUrl(baseUrl);
     const url = new URL(`${resolvedBase}/api/v1/activity/recent`);
     url.searchParams.set('limit', String(limit));
-    const response = await fetch(url.toString());
+    const response = await fetchWithRetry(url.toString());
     const payload = await handleResponse<{ items: ActivityItem[] }>(response);
     return payload.items ?? [];
   },
@@ -71,8 +72,11 @@ export const dashboardApi = {
     const url = new URL(`${resolvedBase}/api/v1/search`);
     url.searchParams.set('q', query);
     url.searchParams.set('limit', String(limit));
-    const response = await fetch(url.toString());
+    const response = await fetchWithRetry(url.toString());
     const payload = await handleResponse<{ results: SearchResult[] }>(response);
     return payload.results ?? [];
   },
 };
+
+
+

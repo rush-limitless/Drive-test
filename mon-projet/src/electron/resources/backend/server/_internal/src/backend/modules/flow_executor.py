@@ -116,8 +116,7 @@ class FlowExecutor:
             result = executor.network_perf(server_ip)
             result['success'] = result['ping_success']
             return result
-            
-        # Nouveaux modules télécoms
+# New telco modules
         elif module_name == 'enable_airplane_mode':
             return executor.enable_airplane_mode()
         elif module_name == 'disable_airplane_mode':

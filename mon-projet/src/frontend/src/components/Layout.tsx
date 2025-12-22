@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Box, Typography, Chip, IconButton, Menu, MenuItem } from '@mui/material';
 import { Grid3X3, Smartphone, Zap, Puzzle, Info, ChevronLeft, ChevronRight } from 'lucide-react';
-import { resolveBaseUrl } from '../services/utils';
+import { resolveBaseUrl, fetchWithRetry } from '../services/utils';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,7 +10,11 @@ interface LayoutProps {
 
 type AppMenuAction = 'about' | 'faq' | 'updates' | 'manual';
 type BackendStatus = 'checking' | 'online' | 'offline';
-const DEFAULT_VERSION_LABEL = process.env.REACT_APP_APP_VERSION ?? '';
+const DEFAULT_VERSION_LABEL =
+  (import.meta as any).env?.VITE_APP_VERSION ??
+  (import.meta as any).env?.VITE_REACT_APP_APP_VERSION ??
+  (typeof process !== 'undefined' ? process.env.REACT_APP_APP_VERSION : undefined) ??
+  '';
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();
@@ -59,7 +63,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (action === 'about') {
       const versionLabel = appVersion ? `v${appVersion}` : 'development build';
       window.alert(
-        `MOBIQ ${versionLabel}\n\nUnified console for mobile automation.\n• Bundled FastAPI backend + React dashboard + Electron shell\n• Live device telemetry and diagnostics\n• One-click telco modules and workflow composer\n• Offline Windows installer built with PyInstaller\n\nBuild: ${versionLabel} (Electron 28 • React 18 • Python 3.x)`
+        `MOBIQ ${versionLabel}\n\nUnified console for mobile automation.\nâ€¢ Bundled FastAPI backend + React dashboard + Electron shell\nâ€¢ Live device telemetry and diagnostics\nâ€¢ One-click telco modules and workflow composer\nâ€¢ Offline Windows installer built with PyInstaller\n\nBuild: ${versionLabel} (Electron 28 â€¢ React 18 â€¢ Python 3.x)`
       );
       return;
     }
@@ -104,7 +108,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       for (const url of candidates) {
         try {
-          const response = await fetch(url, {
+          const response = await fetchWithRetry(url, {
             method: 'GET',
             headers: headers(),
           });
@@ -335,3 +339,4 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 };
 
 export default Layout;
+

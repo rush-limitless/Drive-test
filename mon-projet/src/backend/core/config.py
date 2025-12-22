@@ -13,15 +13,14 @@ def _determine_runtime_root() -> Path:
         return Path(override).expanduser()
 
     if getattr(sys, "frozen", False):
-        # Frozen/packaged executable – default to user-specific AppData.
+# Frozen/packaged executable: default to user-specific AppData.
         base_dir = (
             os.environ.get("LOCALAPPDATA")
             or os.environ.get("APPDATA")
             or str(Path.home())
         )
         return Path(base_dir) / "TelcoADB"
-
-    # Source/development mode – keep using the repository root.
+# Source/development mode: keep using the repository root.
     return Path(__file__).resolve().parents[3]
 
 
@@ -47,7 +46,7 @@ class Settings(BaseSettings):
     
     # Database configuration
     DATABASE_URL: str = "sqlite:///./data/app_new.db"
-    # Définir sur "" ou "disabled" pour désactiver totalement Mongo côté backend
+# Set to "" or "disabled" to fully disable Mongo on the backend.
     MONGODB_URL: str = ""
     MONGODB_DATABASE: str = "telco_automation"
     MONGODB_SERVER_SELECTION_TIMEOUT_MS: int = 2000

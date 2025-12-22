@@ -7,6 +7,7 @@ import {
 } from '../utils/workflows';
 import { recordDeviceWorkflowRun } from '../utils/deviceHistory';
 import { recordDeviceActivity } from '../utils/deviceActivity';
+import { fetchWithRetry } from '../services/utils';
 import {
   buildModuleParametersForDevice,
   resolveModuleExecutionId,
@@ -138,7 +139,7 @@ export const WorkflowEngineProvider: React.FC<{ children: React.ReactNode }> = (
 
           const parameters = buildModuleParametersForDevice(module, deviceId) ?? {};
           try {
-            const response = await fetch(`${normalizedBackendUrl}/api/modules/${apiModuleId}/execute`, {
+            const response = await fetchWithRetry(`${normalizedBackendUrl}/api/modules/${apiModuleId}/execute`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({

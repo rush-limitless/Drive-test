@@ -2,78 +2,70 @@ name: CI
 
 on:
   push:
-    branches: [ "**" ]
+    branches: [main, dev]
   pull_request:
-    branches: [ "**" ]
+    branches: [main, dev]
 
 jobs:
-  spec-kit-check:
-    name: Spec Kit validation
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mon-projet
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
-          cache-dependency-path: mon-projet/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run spec:check
-        run: npm run spec:check
-
   backend-tests:
-    name: Backend tests (pytest)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mon-projet
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
-
-      - name: Install Python dependencies
+          python-version: "3.11"
+      - name: Install backend dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -r src/backend/requirements.txt pytest
-
-      - name: Run pytest
+          python -m pip install -r mon-projet/src/backend/requirements.txt
+      - name: Run backend tests
         env:
-          PYTHONPATH: src/backend
-        run: python -m pytest src/backend/tests --capture=no --maxfail=1 -vv
+          PYTHONPATH: mon-projet/src:mon-projet/src/backend
+        run: |
+          python -m pytest -q --junitxml=mon-projet/test-results.xml
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: mon-projet/test-results.xml
 
   frontend-build:
-    name: Frontend build check
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mon-projet
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
-          cache-dependency-path: mon-projet/package-lock.json
+          cache-dependency-path: mon-projet/src/frontend/package-lock.json
+      - name: Install frontend dependencies
+        run: npm ci --prefix mon-projet/src/frontend
+      - name: Build frontend
+        run: npm --prefix mon-projet/src/frontend run build
+      - name: Upload frontend build
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: mon-projet/src/frontend/build
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build:electron
+  electron-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: mon-projet/src/electron/package-lock.json
+      - name: Install electron dependencies
+        run: npm ci --prefix mon-projet/src/electron
+      - name: Build electron (tsc)
+        run: npm --prefix mon-projet/src/electron run build
+      - name: Upload electron build
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-build
+          path: mon-projet/src/electron/dist

@@ -14,7 +14,7 @@ async def require_api_key(x_api_key: str = Header(None)):
 
 
 async def enforce_rate_limit(request: Request, x_api_key: str = Header(None)):
-    # Rate limiting désactivé pour l'appli desktop (polling fréquent).
+# Rate limiting disabled for the desktop app (frequent polling).
     return
 
 

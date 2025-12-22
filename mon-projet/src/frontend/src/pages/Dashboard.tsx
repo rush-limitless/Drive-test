@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
@@ -59,7 +59,7 @@ import {
   toggleSelectedDeviceId,
   SELECTED_DEVICES_EVENT,
 } from '../utils/deviceSelection';
-import { resolveBaseUrl } from '../services/utils';
+import { resolveBaseUrl, fetchWithRetry } from '../services/utils';
 import { deviceApi } from '../services/deviceApi';
 import { Device } from '../types';
 import { MODULE_CATALOG } from '../data/modules';
@@ -264,7 +264,7 @@ const buildLocalSearchResults = (
       return {
         type: 'device',
         id: device.id,
-        label: alias ? `${alias} • ${baseLabel} (${statusLabel})` : `${baseLabel} (${statusLabel})`,
+        label: alias ? `${alias} â€¢ ${baseLabel} (${statusLabel})` : `${baseLabel} (${statusLabel})`,
         href: `/devices/${device.id}`,
       };
     });
@@ -548,7 +548,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
         return null;
       }
       try {
-        const response = await fetch(`${normalizedBackendUrl}/api/dashboard/activity/recent`, {
+        const response = await fetchWithRetry(`${normalizedBackendUrl}/api/dashboard/activity/recent`, {
           signal: controller.signal,
         });
         if (!response.ok) {
@@ -569,7 +569,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
         return null;
       }
       try {
-        const response = await fetch(`${normalizedBackendUrl}/api/v1/executions`, {
+        const response = await fetchWithRetry(`${normalizedBackendUrl}/api/v1/executions`, {
           signal: controller.signal,
         });
         if (!response.ok) {
@@ -675,7 +675,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
 
     searchTimeoutRef.current = window.setTimeout(async () => {
       try {
-        const response = await fetch(
+        const response = await fetchWithRetry(
           `${normalizedBackendUrl}/api/dashboard/search?q=${encodeURIComponent(trimmed)}&limit=8`,
           { signal: controller.signal }
         );
@@ -763,7 +763,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
       const slotName = `SIM${slotIndex + 1}`;
       const operator = sanitizeOperatorValue(slot.operator) || slot.operator_numeric || 'Unknown';
       const tech = slot.network_technology ? formatNetworkTechnology(slot.network_technology) : null;
-      return tech ? `${slotName}: ${operator} • ${tech}` : `${slotName}: ${operator}`;
+      return tech ? `${slotName}: ${operator} â€¢ ${tech}` : `${slotName}: ${operator}`;
     });
   };
 
@@ -1095,7 +1095,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
     if (statusHints.some((value) => value.includes('offline'))) {
       reasons.push('Reconnect the device');
     }
-    return reasons.length > 0 ? reasons.join(' • ') : 'Device not ready';
+    return reasons.length > 0 ? reasons.join(' â€¢ ') : 'Device not ready';
   };
 
   const formatBatteryLevel = (value: Device['battery_level']) => {
@@ -1467,7 +1467,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box ref={searchContainerRef} sx={{ position: 'relative', width: 460 }}>
               <TextField
-                placeholder="Search devices…"
+                placeholder="Search devicesâ€¦"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => searchQuery.trim() && setShowSearchResults(true)}
@@ -1509,7 +1509,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                   {searchLoading ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, padding: '12px 16px' }}>
                       <CircularProgress size={18} />
-                      <Typography sx={{ fontSize: '14px', color: '#475569' }}>Searching…</Typography>
+                      <Typography sx={{ fontSize: '14px', color: '#475569' }}>Searchingâ€¦</Typography>
                     </Box>
                   ) : searchResults.length === 0 ? (
                     <Box sx={{ padding: '12px 16px' }}>
@@ -1560,7 +1560,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                 }
               }}
             >
-              {refreshingDevices ? 'Refreshing…' : 'Refresh'}
+              {refreshingDevices ? 'Refreshingâ€¦' : 'Refresh'}
             </Button>
 
             <Button
@@ -1812,7 +1812,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                       }
                     }}
                   >
-                    {refreshingDevices ? 'Scanning…' : 'Scan Again'}
+                    {refreshingDevices ? 'Scanningâ€¦' : 'Scan Again'}
                   </Button>
                 </Box>
               ) : (
@@ -2233,7 +2233,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                     }}
                   >
                     <CircularProgress size={18} />
-                    <Typography sx={{ fontSize: '14px', color: tokens.colors.subtext }}>Loading activity…</Typography>
+                    <Typography sx={{ fontSize: '14px', color: tokens.colors.subtext }}>Loading activityâ€¦</Typography>
                   </ListItem>
                 ) : activityItems.length === 0 ? (
                   <ListItem
@@ -2403,7 +2403,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                         '&:hover': { backgroundColor: '#1E40AF' }
                       }}
                     >
-                      {deviceSetupLoading === device.id ? 'Configuring…' : 'Configure automatically'}
+                      {deviceSetupLoading === device.id ? 'Configuringâ€¦' : 'Configure automatically'}
                     </Button>
                     <Button
                       variant="outlined"
@@ -2467,7 +2467,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
             variant="contained"
             sx={{ textTransform: 'none' }}
           >
-            {aliasSaving ? 'Saving…' : 'Save'}
+            {aliasSaving ? 'Savingâ€¦' : 'Save'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -2591,7 +2591,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
             <Box>
               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>Build information</Typography>
               <Typography variant="body2">
-                Version 1.0.0 • Electron 28 • React 18 • Python 3.12. Documentation and updates live in the project wiki and
+                Version 1.0.0 â€¢ Electron 28 â€¢ React 18 â€¢ Python 3.12. Documentation and updates live in the project wiki and
                 release notes. For incidents or feature requests, open an issue in the repository or contact the support channel.
               </Typography>
             </Box>
@@ -2608,3 +2608,4 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
 };
 
 export default Dashboard;
+

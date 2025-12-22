@@ -221,7 +221,7 @@ def _generate_run_pdf(entry: Dict[str, Any]) -> bytes:
         module_label = step.get('module') or f"Step {step.get('step')}"
         step_status = "Success" if step.get('success') else "Failure"
         pdf.set_font("Helvetica", size=12, style="B")
-        pdf.cell(0, 7, f"{step.get('step')}. {module_label} â€” {step_status}", ln=1)
+        pdf.cell(0, 7, f"{step.get('step')}. {module_label} - {step_status}", ln=1)
         pdf.set_font("Helvetica", size=10)
         for device_result in step.get('device_results', []):
             result_payload = device_result.get('result') or {}

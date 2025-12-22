@@ -1,7 +1,7 @@
 """
-Configuration du chemin ADB pour version autonome.
-Privilégie le binaire bundlé (PyInstaller/electron), sinon celui du repo,
-puis retombe sur l'adb système.
+ADB path resolution for standalone builds.
+Prefer the bundled binary (PyInstaller/Electron), then the repo copy,
+and finally fall back to the system adb.
 """
 import sys
 import os
@@ -52,8 +52,7 @@ def get_adb_path() -> str:
     for candidate in candidates:
         if candidate.exists():
             return str(candidate)
-
-    # Fallback vers adb système
+# Fallback to system adb
     return "adb"
 
 

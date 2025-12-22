@@ -9,10 +9,7 @@ import io
 import os
 
 from fpdf import FPDF, XPos, YPos
-try:
-    from pydantic import BaseModel
-except ImportError:  # Compat Pydantic v1
-    from pydantic.v1 import BaseModel  # type: ignore
+from pydantic import BaseModel
 
 from services.device_manager import device_manager
 from services.adb_manager import adb_manager

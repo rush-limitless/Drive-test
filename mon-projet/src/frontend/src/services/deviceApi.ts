@@ -1,9 +1,12 @@
-import { Device } from '../types';
-import { resolveBaseUrl } from './utils';
+﻿import { Device } from '../types';
+import { resolveBaseUrl, fetchWithRetry } from './utils';
 
 const resolveApiKey = (): string | null => {
   // Prefer env (build-time) then localStorage override if set by user/admin
-  const envKey = process.env.REACT_APP_API_KEY || process.env.API_KEY;
+  const envKey =
+    (import.meta as any).env?.VITE_API_KEY ||
+    (import.meta as any).env?.VITE_REACT_APP_API_KEY ||
+    (typeof process !== 'undefined' ? process.env.REACT_APP_API_KEY || process.env.API_KEY : undefined);
   const stored = typeof window !== 'undefined' ? window.localStorage.getItem('API_KEY') : null;
   return (stored && stored.trim()) || (envKey && envKey.trim()) || null;
 };
@@ -93,7 +96,7 @@ export const deviceApi = {
       if (scopeId && scopeId !== 'all') {
         url.searchParams.set('scope', scopeId);
       }
-      const response = await fetch(url.toString(), { headers: authHeaders() });
+      const response = await fetchWithRetry(url.toString(), { headers: authHeaders() });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -104,7 +107,7 @@ export const deviceApi = {
       // Fallback to legacy endpoint
       try {
         const resolvedBase = resolveBaseUrl(baseUrl);
-        const response = await fetch(`${resolvedBase}/api/devices/`, { headers: authHeaders() });
+        const response = await fetchWithRetry(`${resolvedBase}/api/devices/`, { headers: authHeaders() });
         if (response.ok) {
           const payload = await response.json();
           return normalizeDevices(payload);
@@ -122,14 +125,14 @@ export const deviceApi = {
     if (scopeId && scopeId !== 'all') {
       url.searchParams.set('scope', scopeId);
     }
-    await fetch(url.toString(), { method: 'POST', headers: authHeaders() }).catch((error) => {
+    await fetchWithRetry(url.toString(), { method: 'POST', headers: authHeaders() }).catch((error) => {
       console.error('Error scanning devices:', error);
     });
   },
 
   async refreshDevice(baseUrl: string | undefined, deviceId: string): Promise<void> {
     const resolvedBase = resolveBaseUrl(baseUrl);
-    await fetch(`${resolvedBase}/api/v1/devices/${deviceId}/refresh`, { method: 'POST', headers: authHeaders() }).catch((error) => {
+    await fetchWithRetry(`${resolvedBase}/api/v1/devices/${deviceId}/refresh`, { method: 'POST', headers: authHeaders() }).catch((error) => {
       console.error('Error refreshing device:', error);
     });
   },
@@ -137,7 +140,7 @@ export const deviceApi = {
   async captureScreenshot(baseUrl: string | undefined, deviceId: string): Promise<any> {
     try {
       const resolvedBase = resolveBaseUrl(baseUrl);
-      const response = await fetch(`${resolvedBase}/api/v1/devices/${deviceId}/screenshot`, { method: 'POST', headers: authHeaders() });
+      const response = await fetchWithRetry(`${resolvedBase}/api/v1/devices/${deviceId}/screenshot`, { method: 'POST', headers: authHeaders() });
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
@@ -150,7 +153,7 @@ export const deviceApi = {
 
   async testDevice(deviceId: string, baseUrl?: string): Promise<{ success: boolean; message: string }> {
     const resolvedBase = resolveBaseUrl(baseUrl);
-    const response = await fetch(`${resolvedBase}/api/v1/devices/${deviceId}/test`, {
+    const response = await fetchWithRetry(`${resolvedBase}/api/v1/devices/${deviceId}/test`, {
       method: 'POST',
       headers: authHeaders(),
     });
@@ -159,7 +162,7 @@ export const deviceApi = {
 
   async rebootDevice(deviceId: string, baseUrl?: string): Promise<{ success: boolean; message: string }> {
     const resolvedBase = resolveBaseUrl(baseUrl);
-    const response = await fetch(`${resolvedBase}/api/v1/devices/${deviceId}/reboot`, {
+    const response = await fetchWithRetry(`${resolvedBase}/api/v1/devices/${deviceId}/reboot`, {
       method: 'POST',
       headers: authHeaders(),
     });
@@ -168,7 +171,7 @@ export const deviceApi = {
 
   async disconnectDevice(deviceId: string, baseUrl?: string): Promise<{ success: boolean; message: string }> {
     const resolvedBase = resolveBaseUrl(baseUrl);
-    const response = await fetch(`${resolvedBase}/api/v1/devices/${deviceId}/disconnect`, {
+    const response = await fetchWithRetry(`${resolvedBase}/api/v1/devices/${deviceId}/disconnect`, {
       method: 'POST',
       headers: authHeaders(),
     });
@@ -177,7 +180,7 @@ export const deviceApi = {
 
   async configureDevice(deviceId: string, baseUrl?: string): Promise<any> {
     const resolvedBase = resolveBaseUrl(baseUrl);
-    const response = await fetch(`${resolvedBase}/api/v1/devices/${deviceId}/setup`, {
+    const response = await fetchWithRetry(`${resolvedBase}/api/v1/devices/${deviceId}/setup`, {
       method: 'POST',
       headers: authHeaders(),
     });
@@ -200,7 +203,7 @@ export const deviceApi = {
     if (opts.to) {
       url.searchParams.set('to_ts', opts.to);
     }
-    const response = await fetch(url.toString(), { headers: authHeaders() });
+    const response = await fetchWithRetry(url.toString(), { headers: authHeaders() });
     if (!response.ok) {
       const text = await response.text();
       throw new Error(text || `HTTP ${response.status}`);
@@ -221,3 +224,4 @@ export const deviceApi = {
     return filename;
   }
 };
+

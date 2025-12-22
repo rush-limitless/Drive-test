@@ -11,7 +11,7 @@ if str(BACKEND_ROOT) not in sys.path:
     sys.path.append(str(BACKEND_ROOT))
 
 from api import devices as devices_api  # noqa: E402
-from api import devices_v2 as devices_v2_api  # noqa: E402
+from api import devices_legacy as devices_legacy_api  # noqa: E402
 from api.security import _rate_store  # noqa: E402
 from core.config import settings  # noqa: E402
 
@@ -29,7 +29,7 @@ def reset_rate_store():
 def client():
     app = FastAPI()
     app.include_router(devices_api.router, prefix="/api/v1")
-    app.include_router(devices_v2_api.router, prefix="/api")
+    app.include_router(devices_legacy_api.router, prefix="/api")
     return TestClient(app)
 
 

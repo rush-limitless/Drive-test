@@ -10,6 +10,7 @@ dist/
 build/*
 !build/simple-server.spec
 !build/build-exe.ps1
+src/frontend/build/
 *.egg-info/
 target/
 
@@ -25,6 +26,10 @@ target/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+artifacts/
+Desktop/
+src/src/
+.pytest_cache/
 
 # Runtime data
 pids
@@ -63,3 +68,5 @@ app/
 # Temporary files
 *.tmp
 *.temp
+~$*.docx
+~$*.pdf
