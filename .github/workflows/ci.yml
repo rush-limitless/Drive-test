@@ -63,6 +63,8 @@ jobs:
           cache-dependency-path: mon-projet/src/electron/package-lock.json
       - name: Install electron dependencies
         run: npm ci --prefix mon-projet/src/electron
+      - name: Run electron tests
+        run: npm --prefix mon-projet/src/electron run test
       - name: Build electron (tsc)
         run: npm --prefix mon-projet/src/electron run build
       - name: Upload electron build

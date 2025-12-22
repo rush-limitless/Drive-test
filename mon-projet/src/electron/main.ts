@@ -6,7 +6,8 @@ import { app, BrowserWindow, BrowserWindowConstructorOptions, ipcMain } from 'el
 import * as path from 'path';
 import { spawn, ChildProcess } from 'child_process';
 import * as fs from 'fs';
-import * as http from 'http';
+import { checkBackendAlreadyRunning } from './backend-health';
+import { resolveBackendExecutable } from './backend-utils';
 
 const parsedPort = Number(process.env.TELCO_SIMPLE_PORT);
 const BACKEND_PORT = Number.isFinite(parsedPort) && parsedPort > 0 ? parsedPort : 8007;
@@ -25,55 +26,6 @@ app.setPath('userData', customUserData);
 app.setPath('cache', customCache);
 app.setPath('temp', customTemp);
 app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
-
-function resolveBackendExecutable(): { executable: string; args: string[]; cwd: string; env?: NodeJS.ProcessEnv } {
-  const sharedEnv: NodeJS.ProcessEnv = {
-    ...process.env,
-    TELCO_SIMPLE_PORT: String(BACKEND_PORT),
-    TELCO_SIMPLE_HOST: BACKEND_HOST,
-    LOG_LEVEL: process.env.LOG_LEVEL || 'DEBUG',
-  };
-
-  if (app.isPackaged) {
-  // Packaged backend (PyInstaller) copied into resources/backend/server
-    const backendDir = path.join(process.resourcesPath, 'backend', 'server');
-    const platformToolsDir = path.join(backendDir, '_internal', 'platform-tools');
-    const packagedAdbDir = path.join(process.resourcesPath, 'adb');
-    const mergedPath = [platformToolsDir, packagedAdbDir, sharedEnv.PATH || process.env.PATH || '']
-      .filter(Boolean)
-      .join(path.delimiter);
-    return {
-      executable: path.join(backendDir, 'TelcoADBServer.exe'),
-      args: [],
-      cwd: backendDir,
-      env: {
-        ...sharedEnv,
-        PATH: mergedPath,
-      },
-    };
-  }
-
-  // Development mode: launch simple-server.py via local Python
-  const projectRoot = path.join(__dirname, '..', '..', '..');
-  const devPlatformTools = path.join(projectRoot, 'platform-tools');
-  const devEmbeddedAdb = path.join(projectRoot, 'src', 'electron', 'resources', 'adb');
-  const mergedDevPath = [devPlatformTools, devEmbeddedAdb, sharedEnv.PATH || process.env.PATH || '']
-    .filter(Boolean)
-    .join(path.delimiter);
-  const scriptPath = path.join(projectRoot, 'simple-server.py');
-  return {
-    executable: 'python',
-    args: [scriptPath],
-    cwd: projectRoot,
-    env: {
-      ...sharedEnv,
-      PYTHONPATH: `${projectRoot}\\src;${projectRoot}\\src\\backend`,
-      PATH: mergedDevPath,
-    },
-  };
-}
-
-
 
 let mainWindow: BrowserWindow;
 let backendProcess: ChildProcess | null = null;
@@ -140,39 +92,6 @@ function createWindow(): void {
   });
 }
 
-function checkBackendAlreadyRunning(): Promise<boolean> {
-  const healthEndpoints = [
-    `/api/v1/health/adb`,
-    `/api/health/adb`,
-    `/health`,
-  ].map((suffix) => `http://${RENDER_HOST}:${BACKEND_PORT}${suffix}`);
-
-  return new Promise((resolve) => {
-    const tryEndpoint = (index: number) => {
-      if (index >= healthEndpoints.length) {
-        resolve(false);
-        return;
-      }
-      const url = healthEndpoints[index];
-      const req = http.get(url, (res) => {
-        res.resume();
-        const status = res.statusCode ?? 500;
-        if (status === 404) {
-          tryEndpoint(index + 1);
-        } else {
-          resolve(true);
-        }
-      });
-      req.on('error', () => tryEndpoint(index + 1));
-      req.setTimeout(1500, () => {
-        req.destroy();
-        tryEndpoint(index + 1);
-      });
-    };
-    tryEndpoint(0);
-  });
-}
-
 function startBackendServer(): Promise<void> {
   return new Promise(async (resolve, reject) => {
     let resolved = false;
@@ -202,7 +121,7 @@ function startBackendServer(): Promise<void> {
       return;
     }
 
-    const alreadyRunning = await checkBackendAlreadyRunning();
+    const alreadyRunning = await checkBackendAlreadyRunning(RENDER_HOST, BACKEND_PORT);
     if (alreadyRunning) {
       backendManagedExternally = true;
       console.log(`[electron] Backend already running at http://${RENDER_HOST}:${BACKEND_PORT}, skipping spawn.`);
@@ -210,7 +129,15 @@ function startBackendServer(): Promise<void> {
       return;
     }
 
-    const backend = resolveBackendExecutable();
+    const projectRoot = path.join(__dirname, '..', '..', '..');
+    const backend = resolveBackendExecutable({
+      isPackaged: app.isPackaged,
+      resourcesPath: process.resourcesPath,
+      projectRoot,
+      env: process.env,
+      port: BACKEND_PORT,
+      host: BACKEND_HOST,
+    });
 
     if (!fs.existsSync(backend.cwd)) {
       console.error('Backend path not found:', backend.cwd);
@@ -256,7 +183,7 @@ function startBackendServer(): Promise<void> {
 
     healthInterval = setInterval(async () => {
       try {
-        const healthy = await checkBackendAlreadyRunning();
+        const healthy = await checkBackendAlreadyRunning(RENDER_HOST, BACKEND_PORT);
         if (healthy) {
           markReady();
         }
