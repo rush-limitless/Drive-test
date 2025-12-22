@@ -1,7 +1,8 @@
 export const DEFAULT_API_BASE_URL = 'http://127.0.0.1:8007';
 
 export const resolveBaseUrl = (baseUrl?: string): string => {
-  const resolved = baseUrl && baseUrl.trim().length > 0 ? baseUrl : DEFAULT_API_BASE_URL;
+  const trimmed = baseUrl?.trim() ?? '';
+  const resolved = trimmed.length > 0 ? trimmed : DEFAULT_API_BASE_URL;
   return resolved.endsWith('/') ? resolved.slice(0, -1) : resolved;
 };
 

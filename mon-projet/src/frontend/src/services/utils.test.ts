@@ -57,9 +57,9 @@ describe('fetchWithRetry', () => {
     fetchMock.mockRejectedValue(new Error('network'));
 
     const promise = fetchWithRetry('https://example.test', undefined, { retries: 1 });
+    const assertion = expect(promise).rejects.toThrow('network');
     await vi.runAllTimersAsync();
-
-    await expect(promise).rejects.toThrow('network');
+    await assertion;
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });
