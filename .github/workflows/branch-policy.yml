@@ -14,9 +14,9 @@ jobs:
         run: |
           ref="${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}"
 
-          # Allow main and tags (handled outside)
-          if [ "$ref" = "main" ]; then
-            echo "Branch 'main' allowed."
+          # Allow main and dev (tags handled outside)
+          if [ "$ref" = "main" ] || [ "$ref" = "dev" ]; then
+            echo "Branch '$ref' allowed."
             exit 0
           fi
 
