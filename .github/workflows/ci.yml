@@ -41,6 +41,8 @@ jobs:
           cache-dependency-path: mon-projet/src/frontend/package-lock.json
       - name: Install frontend dependencies
         run: npm ci --prefix mon-projet/src/frontend
+      - name: Run frontend tests
+        run: npm --prefix mon-projet/src/frontend run test
       - name: Build frontend
         run: npm --prefix mon-projet/src/frontend run build
       - name: Upload frontend build

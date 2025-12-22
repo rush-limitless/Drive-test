@@ -12,4 +12,8 @@ export default defineConfig({
     port: 3000,
     strictPort: true,
   },
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+  },
 });
