@@ -22,7 +22,7 @@ jobs:
         env:
           PYTHONPATH: mon-projet/src:mon-projet/src/backend
         run: |
-          python -m pytest -q --junitxml=mon-projet/test-results.xml
+          python -m pytest -q -c pytest.ini --junitxml=mon-projet/test-results.xml
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
