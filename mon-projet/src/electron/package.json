@@ -67,7 +67,7 @@
             "deleteAppDataOnUninstall": false,
             "runAfterFinish": true,
             "menuCategory": "F2G Telco\\MOBIQ",
-            "artifactName": "MOBIQ-Setup-2.2.0.exe",
+            "artifactName": "MOBIQ-Setup-${version}.exe",
             "guid": "F2G-TELCO-ADB-2025",
             "warningsAsErrors": false,
             "removeDefaultUninstallWelcomePage": false,
