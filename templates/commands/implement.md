@@ -28,9 +28,9 @@ You **MUST** consider the user input before proceeding (if not empty).
      ```text
      | Checklist | Total | Completed | Incomplete | Status |
      |-----------|-------|-----------|------------|--------|
-     | ux.md     | 12    | 12        | 0          | ✓ PASS |
-     | test.md   | 8     | 5         | 3          | ✗ FAIL |
-     | security.md | 6   | 6         | 0          | ✓ PASS |
+     | ux.md     | 12    | 12        | 0          | PASS PASS |
+     | test.md   | 8     | 5         | 3          | FAIL FAIL |
+     | security.md | 6   | 6         | 0          | PASS PASS |
      ```
 
    - Calculate overall status:
@@ -39,7 +39,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
    - **If any checklist is incomplete**:
      - Display the table with incomplete item counts
-     - **STOP** and ask: "Some checklists are incomplete. Do you want to proceed with implementation anyway? (yes/no)"
+     - **STOP** and ask: "Some checklists are incomplete. Do you want to proceed with implementation anyway (yes/no)"
      - Wait for user response before continuing
      - If user says "no" or "wait" or "stop", halt execution
      - If user says "yes" or "proceed" or "continue", proceed to step 3
@@ -66,12 +66,12 @@ You **MUST** consider the user input before proceeding (if not empty).
      git rev-parse --git-dir 2>/dev/null
      ```
 
-   - Check if Dockerfile* exists or Docker in plan.md → create/verify .dockerignore
-   - Check if .eslintrc*or eslint.config.* exists → create/verify .eslintignore
-   - Check if .prettierrc* exists → create/verify .prettierignore
-   - Check if .npmrc or package.json exists → create/verify .npmignore (if publishing)
-   - Check if terraform files (*.tf) exist → create/verify .terraformignore
-   - Check if .helmignore needed (helm charts present) → create/verify .helmignore
+   - Check if Dockerfile* exists or Docker in plan.md -> create/verify .dockerignore
+   - Check if .eslintrc*or eslint.config.* exists -> create/verify .eslintignore
+   - Check if .prettierrc* exists -> create/verify .prettierignore
+   - Check if .npmrc or package.json exists -> create/verify .npmignore (if publishing)
+   - Check if terraform files (*.tf) exist -> create/verify .terraformignore
+   - Check if .helmignore needed (helm charts present) -> create/verify .helmignore
 
    **If ignore file already exists**: Verify it contains essential patterns, append missing critical patterns only
    **If ignore file missing**: Create with full pattern set for detected technology
@@ -107,7 +107,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 6. Execute implementation following the task plan:
    - **Phase-by-phase execution**: Complete each phase before moving to the next
-   - **Respect dependencies**: Run sequential tasks in order, parallel tasks [P] can run together  
+   - **Respect dependencies**: Run sequential tasks in order, parallel tasks [P] can run together
    - **Follow TDD approach**: Execute test tasks before their corresponding implementation tasks
    - **File-based coordination**: Tasks affecting the same files must run sequentially
    - **Validation checkpoints**: Verify each phase completion before proceeding

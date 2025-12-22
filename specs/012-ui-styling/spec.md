@@ -1,9 +1,17 @@
-# Feature Specification: Chakra UI + Tailwind Enablement
+﻿# Feature Specification: Chakra UI + Tailwind Enablement
 
-**Feature Branch**: `[012-ui-styling-upgrade]`  
-**Created**: 2025-11-05  
+**Feature Branch**: `[012-ui-styling-upgrade]`
+**Created**: 2025-11-05
 **Status**: Draft  
 **Input**: User description: "Add Chakra UI and Tailwind CSS so the dashboard looks better."
+
+## 1. Background & Context
+
+The UI needs a consistent styling system that supports both component-level and utility-based styling.
+
+## 2. Problem Statement
+
+Current styling lacks a unified approach, slowing down UI iteration and consistency.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -51,9 +59,9 @@ As a build engineer, I want CRA builds (and Electron packaging) to continue work
 
 ### Edge Cases
 
-- Ensure Chakra and MUI coexist (both rely on Emotion). ChakraProvider must not override the existing Emotion cache used by MUI.  
-- Tailwind must not conflict with existing global styles; ensure `index.css` still imports our custom styles alongside Tailwind directives.  
-- Purge config should include `.ts` and `.tsx` files in both `src` and sibling directories we import from (e.g. `../components` if any shared path).  
+- Ensure Chakra and MUI coexist (both rely on Emotion). ChakraProvider must not override the existing Emotion cache used by MUI.
+- Tailwind must not conflict with existing global styles; ensure `index.css` still imports our custom styles alongside Tailwind directives.
+- Purge config should include `.ts` and `.tsx` files in both `src` and sibling directories we import from (e.g. `../components` if any shared path).
 - Confirm server-side themes (dark mode) default correctly and no flash of unstyled content occurs during initial render.
 
 ## Requirements *(mandatory)*
@@ -77,6 +85,14 @@ As a build engineer, I want CRA builds (and Electron packaging) to continue work
 ### Measurable Outcomes
 
 - **SC-001**: Local dev server (`npm start`) boot time remains under 3 seconds after enabling Tailwind (baseline CRA performance).
-- **SC-002**: Production build completes with no new warnings and CSS bundle size stays within ±10% of baseline after Purge.
+- **SC-002**: Production build completes with no new warnings and CSS bundle size stays within +/-10% of baseline after Purge.
 - **SC-003**: Dashboard renders at least one Chakra component and uses Tailwind utility classes without runtime warnings.
 - **SC-004**: Lint/test commands (where available) continue to pass without additional configuration errors.
+
+## 8. Acceptance Criteria
+
+- Chakra and Tailwind are configured and usable in the UI.
+- Production builds complete without styling regressions.
+- Electron renders the frontend without missing styles.
+
+

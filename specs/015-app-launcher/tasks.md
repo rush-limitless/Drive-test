@@ -1,4 +1,4 @@
----
+﻿---
 
 description: "Task list for implementing the Smart App Launcher module"
 
@@ -21,7 +21,7 @@ description: "Task list for implementing the Smart App Launcher module"
 - [ ] T003 [US1] In `backend/modules/telco_modules.py`, add `launch_app` logic: pick a random video ID/query list, send the correct adb intent, and return the structured response with `already_on`/`already_off` flags plus the chosen URL.
 - [ ] T004 [US1] Document the allowed `app` values and sample video/query lists in code comments (and optionally update docs if needed).
 
-## Phase 4: User Story 2 - Configuration accessible via l'éditeur (Priority: P2)
+## Phase 4: User Story 2 - Configuration accessible via l'Ã©diteur (Priority: P2)
 
 **Goal**: Let operators choose the target app from the dashboard editor; persist the choice in UI state and send it on execution.
 
@@ -50,3 +50,4 @@ description: "Task list for implementing the Smart App Launcher module"
 
 - [ ] T010 [P] Add or update any necessary docs (specifies, release notes, README) that mention the new module.
 - [ ] T011 [P] Run `npm run spec:check` to validate the triad of spec/plan/tasks and ensure compliance with Spec Kit.
+
