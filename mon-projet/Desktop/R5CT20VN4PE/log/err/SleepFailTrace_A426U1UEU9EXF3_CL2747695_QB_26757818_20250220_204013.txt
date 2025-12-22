@@ -1,0 +1,11 @@
+Start : 5145424, 157.025884sec
+
+Interval : 2929.687500sec
+
+Time sclk	Time sec	Data
+0000000235	   23.500000	RES:/core/cpu/latency[/node/core/cpu/latency/usec(3840(ticks))]	RES:[(200(-))]	MCPM:00000000	CLOCK:0x00000000 0x00000000 0x0000000C 0x00000000 0x00000000 0x00000000 0x00000000 0x00000000 	mss_cc_bus_timeout_clk(bSup=1,76800000Hz)	mss_cc_bus_uim0_clk(bSup=1,76800000Hz)	
+0000000285	   28.500000	RES:/core/cpu/latency[/node/core/cpu/latency/usec(3840(ticks))]	RES:[(200(-))]	MCPM:00000000	CLOCK:0x00000000 0x00000000 0x0000000C 0x00000000 0x00000000 0x00000000 0x00000000 0x00000000 	mss_cc_bus_timeout_clk(bSup=1,76800000Hz)	mss_cc_bus_uim0_clk(bSup=1,76800000Hz)	
+0000000395	   39.500000	RES:/core/cpu/latency[/node/core/cpu/latency/usec(3840(ticks))]	RES:[(200(-))]	MCPM:00000000	CLOCK:0x00000000 0x00000000 0x0000000C 0x00000000 0x00000000 0x00000000 0x00000000 0x00000000 	mss_cc_bus_timeout_clk(bSup=1,76800000Hz)	mss_cc_bus_uim0_clk(bSup=1,76800000Hz)	
+0000000445	   44.500000	RES:/core/cpu/latency[/node/core/cpu/latency/usec(3840(ticks))]	RES:[(200(-))]	MCPM:00000000	CLOCK:0x00000000 0x00000000 0x0000000C 0x00000000 0x00000000 0x00000000 0x00000000 0x00000000 	mss_cc_bus_timeout_clk(bSup=1,76800000Hz)	mss_cc_bus_uim0_clk(bSup=1,76800000Hz)	
+
+End : 5145525, 157.028962sec

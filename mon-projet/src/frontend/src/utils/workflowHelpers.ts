@@ -79,10 +79,17 @@ const resolveCallTestValuesForDevice = (deviceId?: string | null): StoredCallTes
 };
 
 const resolveCallTestValuesForModule = (module: ModuleMetadata, deviceId?: string | null): StoredCallTestValues => {
+  const map = readCallTestStorageMap();
+  if (deviceId && map[deviceId]) {
+    return map[deviceId];
+  }
   if (module.id === 'call_test' && module.callTestParams) {
     return sanitizeCallTestValues(module.callTestParams);
   }
-  return resolveCallTestValuesForDevice(deviceId);
+  if (map[GLOBAL_CALL_TEST_KEY]) {
+    return map[GLOBAL_CALL_TEST_KEY];
+  }
+  return CALL_TEST_DEFAULTS;
 };
 
 export const buildModuleParametersForDevice = (module: ModuleMetadata, deviceId?: string | null): Record<string, any> | undefined => {

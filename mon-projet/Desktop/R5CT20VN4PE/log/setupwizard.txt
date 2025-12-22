@@ -1,0 +1,575 @@
+06-14 05:13:20:316 SetupWizardPreActionActivity : onCreate
+06-14 05:13:20:323 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+06-14 05:13:20:324 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+06-14 05:13:20:332 Utils : getSharedPreferences() : SharedPreferences(pref) is created.
+06-14 05:13:20:333 Utils : getSharedPreferencesEdit() : SharedPreferences.Editor is created.
+06-14 05:13:20:336 Utils : put Boolean in SharedPreferences [UseWizardScript] : true
+06-14 05:13:20:338 Utils : put Int in SharedPreferences [ACCELEROMETER_ROTATION] : 1
+06-14 05:13:20:339 Utils : put Boolean in SharedPreferences [isBackupOrientation] : true
+06-14 05:13:20:343 Utils : backupDefaultScreenOrientation, set auto rotate 0
+06-14 05:13:20:351 WizardSystemBarHelper : disableNotifications disable : 61276160
+06-14 05:13:29:033 SetupWizardPreActionActivity : maybeNext : run processSetupWizardPreAction
+06-14 05:13:29:038 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <VZW> : false
+06-14 05:13:29:070 SetupWizardPreActionActivity : [SET] disable com.sec.android.app.setupwizard.OemPostSetupActivity
+06-14 05:13:29:078 Utils : [SET] Component is enable : com.sec.android.app.SecSetupWizard.SecureInterceptActivity
+06-14 05:13:29:099 Utils : [SET] Component is disable : com.sec.android.app.SecSetupWizard.wrapper.SecOperatorSetupWrapper
+06-14 05:13:29:108 SetupWizardPreActionActivity : [DB] get mobile_data : true
+06-14 05:13:29:108 SetupWizardPreActionActivity : [DB] set device_provisioning_mobile_data to 1
+06-14 05:13:29:110 TSSutils : getTssGlobalCarriers: strCarriers [EUX, EUY, EEX, EEY, TSE]. feature is empty
+06-14 05:13:29:110 SetupWizardPreActionActivity : processSetupWizardPreAction, isActivatedServerAID false, isSupportLanguageSelection false, isSupportCountrySelectionStep false
+06-14 05:13:29:202 SetupWizardPreActionActivity : For smart switch - action  : com.sec.android.easyMover.Agent.ACTION_SSM_POST_POSITION
+06-14 05:13:29:492 SetupWizardPreActionActivity : call com.android.wizard.NEXT and finish
+06-14 05:13:29:495 WizardScriptManager : getNextIntentFromWizardScript : [Current] actionId oem_pre_setup, mIsSetupFlow true, mIsSetupComplete false
+06-14 05:13:29:497 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <VZW> : false
+06-14 05:13:29:498 TSSutils : getActivationStatus: 0
+06-14 05:13:29:499 TSSutils : ActivationRebootFlow: 0
+06-14 05:13:29:500 TSSutils : isSupportCountrySelectionActivationRebootFlow: false
+06-14 05:13:29:501 WizardScriptManager : getNextIntentFromWizardScript : [Next] actionId sec_welcome, resultCode 1
+06-14 05:13:29:502 SetupWizardPreActionActivity : SettingsObserverService start
+06-14 05:13:29:560 SettingsObserverService : onCreate
+06-14 05:13:29:561 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <VZW> : false
+06-14 05:13:30:151 IntroLanguageActivity : start Intro page
+06-14 05:13:30:151 c : initialize LocaleManager
+06-14 05:13:30:152 IntroLanguageActivity : Call from SecSetupWizard false
+06-14 05:13:30:253 Utils : [INFO] Timeout alarm pending event setted
+06-14 05:13:30:255 IntroLanguageActivity : initViews : in first boot, set background color to 2131099778
+06-14 05:13:30:257 ReactivationUtils : isSupportGoogleFRP : result 2, GoogleFRPSupported 2
+06-14 05:13:30:258 ReactivationUtils : isSupportGoogleFRP : true
+06-14 05:13:30:264 ReactivationUtils : readGoogleFrpFlag : flag 0
+06-14 05:13:30:265 ReactivationUtils : readGoogleFrpFlag : false
+06-14 05:13:30:265 ReactivationUtils : isSupportLMM : result : 2, SamsungReactiveSupported 1, SamsungGoogleReactiveSupported 3
+06-14 05:13:30:266 ReactivationUtils : isSupportLMM : false
+06-14 05:13:30:372 c : getLocales() called, size : 12
+06-14 05:13:30:373 IntroLanguageActivity : initViews : mCurrentLocale en_US, mCurrentLocaleIndex 1, localeMatchDetection true
+06-14 05:13:30:375 Utils : isSupportRecommendMainDisplay : false
+06-14 05:13:30:375 IntroLanguageActivity : initViews : mWelcomeTitle Welcome!
+06-14 05:13:30:380 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <RemoveEmergency> : false
+06-14 05:13:30:381 Utils : SetupWizard isSupportEmergencyButton : true
+06-14 05:13:30:432 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DTVariantNoSimLock> : false
+06-14 05:13:30:433 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <IntroNoSimLock> : false
+06-14 05:13:30:449 IntroLanguageActivity : onResume : IsStartedAnimation false
+06-14 05:13:30:463 IntroLanguageActivity : DevicePolicyManager getUserProvisioningState : 0
+06-14 05:13:30:464 IntroLanguageActivity : startAnimation
+06-14 05:13:30:513 IntroLanguageActivity : startSpreadingCircleAnimation
+06-14 05:13:30:516 IntroLanguageActivity : startSpreadingCircleAnimation : display size getting from WindowMetrics is (720, 1600)
+06-14 05:13:30:516 IntroBackgroundDrawable : IntroBackgroundDrawable()
+06-14 05:13:30:517 IntroBackgroundDrawable : initializeAnimator : fromRadius 15.9375, toRadius 877.2685
+06-14 05:13:30:517 IntroBackgroundDrawable : startAnimation
+06-14 05:13:32:024 IntroBackgroundDrawable : startAnimation : onAnimationEnd
+06-14 05:13:32:457 IntroSpreadingCircleAnimation : onAnimationEnd : isPlayingAnimation true
+06-14 05:13:33:992 KmeManager :  checkDeviceSupportsKme true
+06-14 05:13:33:993 IntroLanguageActivity : Initializing Plus Gesture Detector
+06-14 05:13:33:993 SetupWiwzardApplication : setSALoggingConfiguration
+06-14 05:14:21:311 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <VZW> : false
+06-14 05:14:25:097 IntroLanguageActivity : onPause
+06-14 05:50:27:340 SecSetupWizardIntentReceiver : setupwizard shutdown due to setupwizard timeout
+06-14 05:50:27:637 IntroLanguageActivity : onResume : IsStartedAnimation true
+06-14 05:50:27:641 IntroLanguageActivity : DevicePolicyManager getUserProvisioningState : 0
+06-14 05:50:27:678 IntroLanguageActivity : onPause
+06-14 05:50:27:824 IntroLanguageActivity : onResume : IsStartedAnimation true
+06-14 05:50:27:827 IntroLanguageActivity : DevicePolicyManager getUserProvisioningState : 0
+06-14 05:50:28:750 IntroLanguageActivity : onPause
+06-16 08:59:51:509 SetupWizardPreActionActivity : onCreate
+06-16 08:59:51:514 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+06-16 08:59:51:514 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+06-16 08:59:51:531 Utils : getSharedPreferences() : SharedPreferences(pref) is created.
+06-16 08:59:51:533 Utils : getSharedPreferencesEdit() : SharedPreferences.Editor is created.
+06-16 08:59:51:546 Utils : put Boolean in SharedPreferences [UseWizardScript] : true
+06-16 08:59:51:554 WizardSystemBarHelper : disableNotifications disable : 61276160
+06-16 08:59:56:449 SetupWizardPreActionActivity : maybeNext : run processSetupWizardPreAction
+06-16 08:59:56:457 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <VZW> : false
+06-16 08:59:56:484 SetupWizardPreActionActivity : [SET] disable com.sec.android.app.setupwizard.OemPostSetupActivity
+06-16 08:59:56:489 Utils : [SET] Component is enable : com.sec.android.app.SecSetupWizard.SecureInterceptActivity
+06-16 08:59:56:494 Utils : [SET] Component is disable : com.sec.android.app.SecSetupWizard.wrapper.SecOperatorSetupWrapper
+06-16 08:59:56:512 SetupWizardPreActionActivity : [DB] get mobile_data : true
+06-16 08:59:56:512 SetupWizardPreActionActivity : [DB] set device_provisioning_mobile_data to 1
+06-16 08:59:56:514 TSSutils : getTssGlobalCarriers: strCarriers [EUX, EUY, EEX, EEY, TSE]. feature is empty
+06-16 08:59:56:514 SetupWizardPreActionActivity : processSetupWizardPreAction, isActivatedServerAID false, isSupportLanguageSelection false, isSupportCountrySelectionStep false
+06-16 08:59:56:527 SetupWizardPreActionActivity : For smart switch - action  : com.sec.android.easyMover.Agent.ACTION_SSM_POST_POSITION
+06-16 08:59:56:824 SetupWizardPreActionActivity : call com.android.wizard.NEXT and finish
+06-16 08:59:56:826 WizardScriptManager : getNextIntentFromWizardScript : [Current] actionId oem_pre_setup, mIsSetupFlow true, mIsSetupComplete false
+06-16 08:59:56:827 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <VZW> : false
+06-16 08:59:56:827 TSSutils : getActivationStatus: 0
+06-16 08:59:56:828 TSSutils : ActivationRebootFlow: 0
+06-16 08:59:56:828 TSSutils : isSupportCountrySelectionActivationRebootFlow: false
+06-16 08:59:56:828 WizardScriptManager : getNextIntentFromWizardScript : [Next] actionId sec_welcome, resultCode 1
+06-16 08:59:56:829 SetupWizardPreActionActivity : SettingsObserverService start
+06-16 08:59:56:853 SettingsObserverService : onCreate
+06-16 08:59:56:854 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <VZW> : false
+06-16 08:59:57:032 IntroLanguageActivity : start Intro page
+06-16 08:59:57:034 c : initialize LocaleManager
+06-16 08:59:57:036 IntroLanguageActivity : Call from SecSetupWizard false
+06-16 08:59:57:331 Utils : [INFO] Timeout alarm pending event setted
+06-16 08:59:57:333 IntroLanguageActivity : initViews : in first boot, set background color to 2131099778
+06-16 08:59:57:339 ReactivationUtils : isSupportGoogleFRP : result 2, GoogleFRPSupported 2
+06-16 08:59:57:339 ReactivationUtils : isSupportGoogleFRP : true
+06-16 08:59:57:362 ReactivationUtils : readGoogleFrpFlag : flag 0
+06-16 08:59:57:363 ReactivationUtils : readGoogleFrpFlag : false
+06-16 08:59:57:367 ReactivationUtils : isSupportLMM : result : 2, SamsungReactiveSupported 1, SamsungGoogleReactiveSupported 3
+06-16 08:59:57:367 ReactivationUtils : isSupportLMM : false
+06-16 08:59:57:431 c : getLocales() called, size : 12
+06-16 08:59:57:432 IntroLanguageActivity : initViews : mCurrentLocale en_US, mCurrentLocaleIndex 1, localeMatchDetection true
+06-16 08:59:57:439 Utils : isSupportRecommendMainDisplay : false
+06-16 08:59:57:439 IntroLanguageActivity : initViews : mWelcomeTitle Welcome!
+06-16 08:59:57:441 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <RemoveEmergency> : false
+06-16 08:59:57:442 Utils : SetupWizard isSupportEmergencyButton : true
+06-16 08:59:57:462 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DTVariantNoSimLock> : false
+06-16 08:59:57:463 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <IntroNoSimLock> : false
+06-16 08:59:57:500 IntroLanguageActivity : onResume : IsStartedAnimation false
+06-16 08:59:57:504 IntroLanguageActivity : DevicePolicyManager getUserProvisioningState : 0
+06-16 08:59:57:504 IntroLanguageActivity : startAnimation
+06-16 08:59:57:541 IntroLanguageActivity : startSpreadingCircleAnimation
+06-16 08:59:57:542 IntroLanguageActivity : startSpreadingCircleAnimation : display size getting from WindowMetrics is (720, 1600)
+06-16 08:59:57:543 IntroBackgroundDrawable : IntroBackgroundDrawable()
+06-16 08:59:57:543 IntroBackgroundDrawable : initializeAnimator : fromRadius 15.9375, toRadius 877.2685
+06-16 08:59:57:544 IntroBackgroundDrawable : startAnimation
+06-16 08:59:59:058 IntroBackgroundDrawable : startAnimation : onAnimationEnd
+06-16 08:59:59:489 IntroSpreadingCircleAnimation : onAnimationEnd : isPlayingAnimation true
+06-16 09:00:00:216 KmeManager :  checkDeviceSupportsKme true
+06-16 09:00:00:216 IntroLanguageActivity : Initializing Plus Gesture Detector
+06-16 09:00:00:217 SetupWiwzardApplication : setSALoggingConfiguration
+06-16 09:00:28:271 IntroLanguageActivity : onPause
+06-16 09:00:30:852 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <VZW> : false
+06-16 09:01:51:272 IntroLanguageActivity : onResume : IsStartedAnimation true
+06-16 09:01:51:280 IntroLanguageActivity : DevicePolicyManager getUserProvisioningState : 0
+06-16 09:01:55:679 IntroLanguageActivity : onPause
+06-16 09:01:56:722 IntroLanguageActivity : onResume : IsStartedAnimation true
+06-16 09:01:56:725 IntroLanguageActivity : DevicePolicyManager getUserProvisioningState : 0
+06-16 09:01:56:746 IntroLanguageActivity : onPause
+06-16 09:01:57:710 IntroLanguageActivity : onResume : IsStartedAnimation true
+06-16 09:01:57:711 IntroLanguageActivity : DevicePolicyManager getUserProvisioningState : 0
+06-16 09:01:57:927 IntroLanguageActivity : onPause
+06-16 09:01:58:165 IntroLanguageActivity : onResume : IsStartedAnimation true
+06-16 09:01:58:166 IntroLanguageActivity : DevicePolicyManager getUserProvisioningState : 0
+06-16 09:02:21:502 IntroLanguageActivity : onPause
+07-26 09:13:16:435 SetupWizardPreActionActivity : onCreate
+07-26 09:13:16:438 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+07-26 09:13:16:438 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+07-26 09:13:16:449 Utils : getSharedPreferences() : SharedPreferences(pref) is created.
+07-26 09:13:16:451 Utils : getSharedPreferencesEdit() : SharedPreferences.Editor is created.
+07-26 09:13:16:497 Utils : put Boolean in SharedPreferences [UseWizardScript] : true
+07-26 09:13:16:510 WizardSystemBarHelper : disableNotifications disable : 61276160
+07-26 09:13:21:150 SetupWizardPreActionActivity : maybeNext : run processSetupWizardPreAction
+07-26 09:13:21:175 SetupWizardPreActionActivity : [SET] disable com.sec.android.app.setupwizard.OemPostSetupActivity
+07-26 09:13:21:180 Utils : [SET] Component is enable : com.sec.android.app.SecSetupWizard.SecureInterceptActivity
+07-26 09:13:21:182 Utils : [SET] Component is disable : com.sec.android.app.SecSetupWizard.wrapper.SecOperatorSetupWrapper
+07-26 09:13:21:185 SetupWizardPreActionActivity : [DB] get mobile_data : true
+07-26 09:13:21:186 SetupWizardPreActionActivity : [DB] set device_provisioning_mobile_data to 1
+07-26 09:13:21:188 TSSutils : getTssGlobalCarriers: strCarriers [EUX, EUY, EEX, EEY, TSE]. feature is empty
+07-26 09:13:21:188 SetupWizardPreActionActivity : processSetupWizardPreAction, isActivatedServerAID false, isSupportLanguageSelection false, isSupportCountrySelectionStep false
+07-26 09:13:21:216 SetupWizardPreActionActivity : For smart switch - action  : com.sec.android.easyMover.Agent.ACTION_SSM_POST_POSITION
+07-26 09:13:21:508 SetupWizardPreActionActivity : call com.android.wizard.NEXT and finish
+07-26 09:13:21:509 WizardScriptManager : getNextIntentFromWizardScript : [Current] actionId oem_pre_setup, mIsSetupFlow true, mIsSetupComplete false
+07-26 09:13:21:510 TSSutils : getActivationStatus: 0
+07-26 09:13:21:510 TSSutils : ActivationRebootFlow: 0
+07-26 09:13:21:511 TSSutils : isSupportCountrySelectionActivationRebootFlow: false
+07-26 09:13:21:511 WizardScriptManager : getNextIntentFromWizardScript : [Next] actionId sec_welcome, resultCode 1
+07-26 09:13:21:512 SetupWizardPreActionActivity : SettingsObserverService start
+07-26 09:13:21:614 SettingsObserverService : onCreate
+07-26 09:13:21:785 IntroLanguageActivity : start Intro page
+07-26 09:13:21:786 c : initialize LocaleManager
+07-26 09:13:21:786 IntroLanguageActivity : Call from SecSetupWizard false
+07-26 09:13:22:126 Utils : [INFO] Timeout alarm pending event setted
+07-26 09:13:22:128 IntroLanguageActivity : initViews : in first boot, set background color to 2131099778
+07-26 09:13:22:132 ReactivationUtils : isSupportGoogleFRP : result 2, GoogleFRPSupported 2
+07-26 09:13:22:132 ReactivationUtils : isSupportGoogleFRP : true
+07-26 09:13:22:141 ReactivationUtils : readGoogleFrpFlag : flag 0
+07-26 09:13:22:141 ReactivationUtils : readGoogleFrpFlag : false
+07-26 09:13:22:142 ReactivationUtils : isSupportLMM : result : 2, SamsungReactiveSupported 1, SamsungGoogleReactiveSupported 3
+07-26 09:13:22:142 ReactivationUtils : isSupportLMM : false
+07-26 09:13:22:229 c : getLocales() called, size : 12
+07-26 09:13:22:229 IntroLanguageActivity : initViews : mCurrentLocale en_US, mCurrentLocaleIndex 1, localeMatchDetection true
+07-26 09:13:22:271 Utils : isSupportRecommendMainDisplay : false
+07-26 09:13:22:272 IntroLanguageActivity : initViews : mWelcomeTitle Welcome!
+07-26 09:13:22:274 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <RemoveEmergency> : false
+07-26 09:13:22:274 Utils : SetupWizard isSupportEmergencyButton : true
+07-26 09:13:22:286 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DTVariantNoSimLock> : false
+07-26 09:13:22:287 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <IntroNoSimLock> : false
+07-26 09:13:22:293 IntroLanguageActivity : onResume : IsStartedAnimation false
+07-26 09:13:22:296 IntroLanguageActivity : DevicePolicyManager getUserProvisioningState : 0
+07-26 09:13:22:296 IntroLanguageActivity : startAnimation
+07-26 09:13:22:362 IntroLanguageActivity : startSpreadingCircleAnimation
+07-26 09:13:22:370 IntroLanguageActivity : startSpreadingCircleAnimation : display size getting from WindowMetrics is (720, 1600)
+07-26 09:13:22:371 IntroBackgroundDrawable : IntroBackgroundDrawable()
+07-26 09:13:22:371 IntroBackgroundDrawable : initializeAnimator : fromRadius 15.9375, toRadius 877.2685
+07-26 09:13:22:372 IntroBackgroundDrawable : startAnimation
+07-26 09:13:23:891 IntroBackgroundDrawable : startAnimation : onAnimationEnd
+07-26 09:13:24:325 IntroSpreadingCircleAnimation : onAnimationEnd : isPlayingAnimation true
+07-26 09:13:25:031 KmeManager :  checkDeviceSupportsKme true
+07-26 09:13:25:032 IntroLanguageActivity : Initializing Plus Gesture Detector
+07-26 09:13:25:032 SetupWiwzardApplication : setSALoggingConfiguration
+07-26 09:14:02:908 IntroLanguageActivity : onPause
+07-26 09:15:10:069 IntroLanguageActivity : onResume : IsStartedAnimation true
+07-26 09:15:10:075 IntroLanguageActivity : DevicePolicyManager getUserProvisioningState : 0
+07-26 09:15:19:662 IntroLanguageActivity : onPause
+08-16 15:29:02:373 SetupWizardPreActionActivity : onCreate
+08-16 15:29:02:378 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+08-16 15:29:02:379 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+08-16 15:29:02:387 Utils : getSharedPreferences() : SharedPreferences(pref) is created.
+08-16 15:29:02:388 Utils : getSharedPreferencesEdit() : SharedPreferences.Editor is created.
+08-16 15:29:02:392 Utils : put Boolean in SharedPreferences [UseWizardScript] : true
+08-16 15:29:02:401 WizardSystemBarHelper : disableNotifications disable : 61276160
+08-16 15:29:07:216 SetupWizardPreActionActivity : maybeNext : run processSetupWizardPreAction
+08-16 15:29:07:241 SetupWizardPreActionActivity : [SET] disable com.sec.android.app.setupwizard.OemPostSetupActivity
+08-16 15:29:07:249 Utils : [SET] Component is enable : com.sec.android.app.SecSetupWizard.SecureInterceptActivity
+08-16 15:29:07:251 Utils : [SET] Component is disable : com.sec.android.app.SecSetupWizard.wrapper.SecOperatorSetupWrapper
+08-16 15:29:07:258 SetupWizardPreActionActivity : [DB] get mobile_data : true
+08-16 15:29:07:259 SetupWizardPreActionActivity : [DB] set device_provisioning_mobile_data to 1
+08-16 15:29:07:261 TSSutils : getTssGlobalCarriers: strCarriers [EUX, EUY, EEX, EEY, TSE]. feature is empty
+08-16 15:29:07:262 SetupWizardPreActionActivity : processSetupWizardPreAction, isActivatedServerAID false, isSupportLanguageSelection false, isSupportCountrySelectionStep false
+08-16 15:29:07:297 SetupWizardPreActionActivity : For smart switch - action  : com.sec.android.easyMover.Agent.ACTION_SSM_POST_POSITION
+08-16 15:29:07:590 SetupWizardPreActionActivity : call com.android.wizard.NEXT and finish
+08-16 15:29:07:592 WizardScriptManager : getNextIntentFromWizardScript : [Current] actionId oem_pre_setup, mIsSetupFlow true, mIsSetupComplete false
+08-16 15:29:07:592 TSSutils : getActivationStatus: 0
+08-16 15:29:07:593 TSSutils : ActivationRebootFlow: 0
+08-16 15:29:07:593 TSSutils : isSupportCountrySelectionActivationRebootFlow: false
+08-16 15:29:07:596 WizardScriptManager : getNextIntentFromWizardScript : [Next] actionId sec_welcome, resultCode 1
+08-16 15:29:07:596 SetupWizardPreActionActivity : SettingsObserverService start
+08-16 15:29:07:666 SettingsObserverService : onCreate
+08-16 15:29:08:241 IntroLanguageActivity : start Intro page
+08-16 15:29:08:242 c : initialize LocaleManager
+08-16 15:29:08:242 IntroLanguageActivity : Call from SecSetupWizard false
+08-16 15:29:08:353 Utils : [INFO] Timeout alarm pending event setted
+08-16 15:29:08:357 IntroLanguageActivity : initViews : in first boot, set background color to 2131099778
+08-16 15:29:08:390 ReactivationUtils : isSupportGoogleFRP : result 2, GoogleFRPSupported 2
+08-16 15:29:08:391 ReactivationUtils : isSupportGoogleFRP : true
+08-16 15:29:08:403 ReactivationUtils : readGoogleFrpFlag : flag 0
+08-16 15:29:08:404 ReactivationUtils : readGoogleFrpFlag : false
+08-16 15:29:08:405 ReactivationUtils : isSupportLMM : result : 2, SamsungReactiveSupported 1, SamsungGoogleReactiveSupported 3
+08-16 15:29:08:406 ReactivationUtils : isSupportLMM : false
+08-16 15:29:08:538 c : getLocales() called, size : 12
+08-16 15:29:08:539 IntroLanguageActivity : initViews : mCurrentLocale en_US, mCurrentLocaleIndex 1, localeMatchDetection true
+08-16 15:29:08:540 Utils : isSupportRecommendMainDisplay : false
+08-16 15:29:08:540 IntroLanguageActivity : initViews : mWelcomeTitle Welcome!
+08-16 15:29:08:543 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <RemoveEmergency> : false
+08-16 15:29:08:543 Utils : SetupWizard isSupportEmergencyButton : true
+08-16 15:29:08:568 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DTVariantNoSimLock> : false
+08-16 15:29:08:568 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <IntroNoSimLock> : false
+08-16 15:29:08:635 IntroLanguageActivity : onResume : IsStartedAnimation false
+08-16 15:29:08:638 IntroLanguageActivity : DevicePolicyManager getUserProvisioningState : 0
+08-16 15:29:08:642 IntroLanguageActivity : startAnimation
+08-16 15:29:08:723 IntroLanguageActivity : startSpreadingCircleAnimation
+08-16 15:29:08:734 IntroLanguageActivity : startSpreadingCircleAnimation : display size getting from WindowMetrics is (720, 1600)
+08-16 15:29:08:734 IntroBackgroundDrawable : IntroBackgroundDrawable()
+08-16 15:29:08:735 IntroBackgroundDrawable : initializeAnimator : fromRadius 15.9375, toRadius 877.2685
+08-16 15:29:08:735 IntroBackgroundDrawable : startAnimation
+08-16 15:29:10:255 IntroBackgroundDrawable : startAnimation : onAnimationEnd
+08-16 15:29:10:688 IntroSpreadingCircleAnimation : onAnimationEnd : isPlayingAnimation true
+08-16 15:29:11:295 KmeManager :  checkDeviceSupportsKme true
+08-16 15:29:11:295 IntroLanguageActivity : Initializing Plus Gesture Detector
+08-16 15:29:11:296 SetupWiwzardApplication : setSALoggingConfiguration
+08-16 15:29:26:040 Utils : Package not found : com.samsung.android.activation
+08-16 15:29:26:119 Utils : telephonyManager.getSimState() : 1
+08-16 15:29:26:120 Utils : isSimMissing : true
+08-16 15:29:26:120 Utils : INFO : isSimMissingToastRequired : true
+08-16 15:29:26:190 Utils : Timeout alarm pending event canceled
+08-16 15:29:26:191 WizardScriptManager : getNextIntentFromWizardScript : [Current] actionId sec_welcome, mIsSetupFlow true, mIsSetupComplete false
+08-16 15:29:26:191 WizardScriptManager : getNextIntentFromWizardScript : [Next] actionId sec_eula, resultCode -1
+08-16 15:29:26:302 Utils : [SET] persist.sys.knox.provisioning_in_progress : 0
+08-16 15:29:26:305 IntroLanguageActivity : onPause
+08-16 15:29:26:575 Utils : Package not found : com.samsung.android.activation
+08-16 15:29:26:575 EULAPPMainActivity : Call from setupWizard false
+08-16 15:29:26:607 EULAPPMainActivity : The sentence of 'I agree to samsung TnC' is used in North America.
+08-16 15:29:26:608 EULAPPMainActivity : NorthAmericaOperator : change eulaTitle.
+08-16 15:29:27:773 EULAPPMainActivity : If Auto Update is supported or not : true
+08-16 15:29:27:776 TnCutils : getTncSummaryType: TNC summaryType 0
+08-16 15:29:27:778 TnCutils : DMA version code :910701000
+08-16 15:29:27:779 TnCutils : isSupportAntiMalware : false
+08-16 15:29:27:780 KmeManager :  checkDeviceSupportsKme already mKmeInitialized=true
+08-16 15:29:27:781 EULAPPMainActivity : IntroLanguageSpinnerActivity  KME bindToKmeService
+08-16 15:29:27:781 KmeManager : KME_Analysis: Binding to KmeService Elapsed Time: 51727 mIsBoundToKmeService = false
+08-16 15:29:27:787 KmeManager : Binding to KmeService: true
+08-16 15:29:27:975 KmeManager : KME_Analysis: Connected to IEnrollmentCheckService Elapsed Time: 51921 mCurrentKmeStatus = CHECK_NOT_STARTED
+08-16 15:29:30:159 EULAPPMainActivity : EULA is saved
+08-16 15:29:30:175 EULAPPMainActivity : PP is saved
+08-16 15:29:30:177 EULAPPMainActivity : [DB-LOG] put samsung_eula_agree_hqm DB to 1
+08-16 15:29:30:220 EULAPPMainActivity : DIAG is saved
+08-16 15:29:30:226 TnCutils : sendBroadcastForEulaAgreement is Done
+08-16 15:29:30:227 Utils : put Boolean in SharedPreferences [ppValue] : true
+08-16 15:29:30:228 TnCutils : isSupportAntiMalware : false
+08-16 15:29:30:229 Utils : [GET] persist.sys.knox.provisioning_in_progress : 0
+08-16 15:29:30:230 WizardScriptManager : getNextIntentFromWizardScript : [Current] actionId sec_eula, mIsSetupFlow true, mIsSetupComplete false
+08-16 15:29:30:231 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <VZW_ACT> : false
+08-16 15:29:30:231 CustomerRegionChecker : isVzwActivationStepOnlyDevice:false
+08-16 15:29:30:232 KmeManager :  checkDeviceSupportsKme already mKmeInitialized=true
+08-16 15:29:30:234 WizardScriptManager : getNextIntentFromWizardScript : [Next] actionId sec_wifi_setup, resultCode 203
+08-16 15:29:30:337 SecWifiSetupWrapper : isQuickStart=false, isWifiConnected = false
+08-16 15:29:30:337 SecWifiSetupWrapper : Start WIFI...
+08-16 15:29:30:338 KmeManager :  checkDeviceSupportsKme already mKmeInitialized=true
+08-16 15:29:30:338 KmeManager :  checkDeviceSupportsKme already mKmeInitialized=true
+08-16 15:29:30:346 KmeManager :  isB2bDeviceBeforeFactoryReset false
+08-16 15:29:30:347 ReactivationUtils : isSupportGoogleFRP : result 2, GoogleFRPSupported 2
+08-16 15:29:30:348 ReactivationUtils : isSupportGoogleFRP : true
+08-16 15:29:30:354 ReactivationUtils : readGoogleFrpFlag : flag 0
+08-16 15:29:30:355 ReactivationUtils : readGoogleFrpFlag : false
+08-16 15:29:30:355 SecWifiSetupWrapper : [googleFRPFlag] = false
+08-16 15:29:30:355 Utils : put Boolean in SharedPreferences [frp_init_value] : false
+08-16 15:29:30:673 WifiSetupWizard : onCreate
+08-16 15:29:30:813 WifiSetupWizard : isKmeSupported = true, isNetworkRequiredBySetupWizard = false, isNetworkRequiredByKme = false, mIsUsedSprintNewSetupWizard = false
+08-16 15:29:30:813 WifiSetupWizard : isVendorSupportTSS : false SalesCode : XAA
+08-16 15:29:30:867 WifiSetupWizard : isVendorSupportTSS : false SalesCode : XAA
+08-16 15:29:30:868 WifiSetupWizard : updateButton isNext:false, viewEnable:true
+08-16 15:29:30:868 WifiSetupWizard : Network required by Customer : false
+08-16 15:29:30:891 WifiSetupWizard : isVendorSupportTSS : false SalesCode : XAA
+08-16 15:29:32:303 WifiSetupWizard : onClick MainAction isWifiNetworkConnected() = false isNetworkAvailable() = false mIsSkipButtonEnabled = true
+08-16 15:29:33:651 WifiSetupWizard : onClick MainAction isWifiNetworkConnected() = false isNetworkAvailable() = false mIsSkipButtonEnabled = true
+08-16 15:29:33:653 WifiSetupWizard : finish with RESULT_SKIP
+08-16 15:29:33:718 SecWifiSetupWrapper : onActivityResult : 20
+08-16 15:29:33:719 SecWifiSetupWrapper : onActivityResult finishAction
+08-16 15:29:33:720 Utils : put Boolean in SharedPreferences [skipSelectedInWifi] : true
+08-16 15:29:33:726 SecWifiSetupWrapper : start Service - com.sec.android.easyMover.Agent.UpdatePackageOnSuwService
+08-16 15:29:33:730 SecWifiSetupWrapper : call com.android.wizard.NEXT and finish
+08-16 15:29:33:732 WizardScriptManager : getNextIntentFromWizardScript : [Current] actionId sec_wifi_setup, mIsSetupFlow true, mIsSetupComplete false
+08-16 15:29:33:733 KmeManager :  checkDeviceSupportsKme already mKmeInitialized=true
+08-16 15:29:33:737 KmeManager : KME_Analysis: Binding to KmeService Elapsed Time: 57683 mIsBoundToKmeService = true
+08-16 15:29:33:740 TSSutils : getActivationStatus: 0
+08-16 15:29:34:008 TSSutils : This device is not Network based TSS.
+08-16 15:29:34:009 Utils : Package not found : com.samsung.android.app.deviceownersetup
+08-16 15:29:34:009 WizardScriptManager : getNextIntentFromWizardScript : [Next] actionId sec_esim_setup, resultCode 105
+08-16 15:29:34:124 SecEsimSetupWrapper : onCreate
+08-16 15:29:34:130 SecEsimSetupWrapper : This model supports eSIM slot (SEC_FLOATING_FEATURE_COMMON_SUPPORT_EMBEDDED_SIM) : false
+08-16 15:29:34:131 SecEsimSetupWrapper : This carrier supports eSIM (CscFeature_RIL_SupportEsim) : false
+08-16 15:29:34:131 WizardScriptManager : getNextIntentFromWizardScript : [Current] actionId sec_esim_setup, mIsSetupFlow true, mIsSetupComplete false
+08-16 15:29:34:132 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <VZW_ACT> : false
+08-16 15:29:34:132 CustomerRegionChecker : isVzwActivationStepOnlyDevice:false
+08-16 15:29:34:132 WizardScriptManager : getNextIntentFromWizardScript : [Next] actionId sec_esim_post_setup, resultCode 1
+08-16 15:29:34:233 PostESimSetup : call com.android.wizard.NEXT and finish
+08-16 15:29:34:234 WizardScriptManager : getNextIntentFromWizardScript : [Current] actionId sec_esim_post_setup, mIsSetupFlow true, mIsSetupComplete false
+08-16 15:29:34:235 ReactivationUtils : isSupportGoogleFRP : result 2, GoogleFRPSupported 2
+08-16 15:29:34:235 ReactivationUtils : isSupportGoogleFRP : true
+08-16 15:29:34:241 ReactivationUtils : readGoogleFrpFlag : flag 0
+08-16 15:29:34:242 ReactivationUtils : readGoogleFrpFlag : false
+08-16 15:29:34:243 WizardScriptManager : getNextIntentFromWizardScript : [Next] actionId no_network_flow, resultCode 201
+08-16 15:29:34:351 SmartSwitchConditionCheckActivity : call com.android.wizard.NEXT and finish
+08-16 15:29:34:352 WizardScriptManager : getNextIntentFromWizardScript : [Current] actionId check_smart_switch_condition, mIsSetupFlow true, mIsSetupComplete false
+08-16 15:29:34:352 Utils : SetupWizard hasSmartSwitchFeature true
+08-16 15:29:34:354 Utils : put Boolean in SharedPreferences [checkCurrentRestoreFlow] : true
+08-16 15:29:34:354 WizardScriptManager : getNextIntentFromWizardScript : [Next] actionId unified_restore_flow, resultCode 204
+08-16 15:29:39:050 NewDeviceSelectionActivity : call com.android.wizard.NEXT and finish
+08-16 15:29:39:052 WizardScriptManager : getNextIntentFromWizardScript : [Current] actionId new_device_selection, mIsSetupFlow true, mIsSetupComplete false
+08-16 15:29:39:057 WizardScriptManager : getNextIntentFromWizardScript : [Next] actionId no_network_flow, resultCode 201
+08-16 15:29:39:058 Utils : put Boolean in SharedPreferences [Select_NewDevice] : true
+08-16 11:29:45:568 SecLockSetupWrapper : onCreate() SecLockSetupWrapper
+08-16 11:29:45:568 SecLockSetupWrapper : Start LockScreen...
+08-16 11:29:49:137 SecLockSetupWrapper : onActivityResult : 11
+08-16 11:29:49:141 SecLockSetupWrapper : onActivityResult finishAction
+08-16 11:29:49:142 SecLockSetupWrapper : call com.android.wizard.NEXT and finish
+08-16 11:29:49:153 WizardScriptManager : getNextIntentFromWizardScript : [Current] actionId Default, mIsSetupFlow true, mIsSetupComplete false
+08-16 11:29:49:156 WizardScriptManager : getNextIntentFromWizardScript : [Next] use default intent
+08-16 11:29:49:248 SequenceList : SequenceList()
+08-16 11:29:49:249 SequenceList : sequence list is made
+08-16 11:29:49:260 WizardFlowManager : ===== start WizardFlowManager =====
+08-16 11:29:49:263 SecSetupWizardActivity : onCreate: User is Unlocked
+08-16 11:29:49:268 SecSetupWizardActivity : ===== start with directboot or WizardFlowManager =====
+08-16 11:29:49:268 SecSetupWizardActivity : startSecSetupWizard: SetupWizard_ConfigStepSequenceType : VanillaStep
+08-16 11:29:49:269 SecSetupWizardActivity : startSecSetupWizard: mSetupWizardUseWizardScript true, mIsOwner true, isSupportServerAID false, isActivatedServerAID false
+08-16 11:29:49:270 SecSetupWizardActivity : startSecSetupWizard: isSupportLanguageSelection false, isSupportLanguageRolling false, isSupportCountrySelectionStep false
+08-16 11:29:49:273 ReactivationUtils : isSupportLMM : result : 2, SamsungReactiveSupported 1, SamsungGoogleReactiveSupported 3
+08-16 11:29:49:273 ReactivationUtils : isSupportLMM : false
+08-16 11:29:49:276 SecSetupWizardActivity : checkingAECondition dpm.getUserProvisioningState() :  0
+08-16 11:29:49:277 SecSetupWizardActivity : startSecSetupWizard: getLength 2, current start
+08-16 11:29:49:277 SecSetupWizardActivity : isRLChallengeRequried : false
+08-16 11:29:49:278 OemPostSetupUtils : makeReplacedSequenceList: SalesCode XAA, IsOwner true
+08-16 11:29:49:279 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <VanillaStep> : true
+08-16 11:29:49:287 OemPostSetupUtils : isStartSmartSwitchTransferWithSetting : smartswitch_transfer_start_in_oobe = 0
+08-16 11:29:49:287 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <VZW_ACT> : false
+08-16 11:29:49:288 CustomerRegionChecker : isVzwActivationStepOnlyDevice:false
+08-16 11:29:49:288 OemPostSetupUtils : isSupportTips : false
+08-16 11:29:49:290 OemPostSetupUtils : isSupportNotice : false
+08-16 11:29:49:290 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <BTSPurple> : false
+08-16 11:29:49:291 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <ThomBrowne> : false
+08-16 11:29:49:291 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <blackpink> : false
+08-16 11:29:49:291 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DCL> : false
+08-16 11:29:49:292 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <OlympicGames> : false
+08-16 11:29:49:292 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <OlympicAthletes> : false
+08-16 11:29:49:292 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <Paralympic> : false
+08-16 11:29:49:296 SecSetupWizardActivity : insert in list : sec_account_setup
+08-16 11:29:49:297 SecSetupWizardActivity : insert in list : sec_pay_setup
+08-16 11:29:49:299 SecSetupWizardActivity : insert in list : alternative_permission
+08-16 11:29:49:301 SecSetupWizardActivity : insert in list : sec_darkmode_setup
+08-16 11:29:49:304 SecSetupWizardActivity : insert in list : outro
+08-16 11:29:49:305 SecSetupWizardActivity : getNext: sec_account_setup : Intent { act=com.sems.app.signin.action.SAMSUNG_ACCOUNT_SETUPWIZARD (has extras) }
+08-16 11:29:49:306 SecSetupWizardActivity : startActivityForResult, current: sec_account_setup
+08-16 11:29:49:334 WizardFlowManager : try to connect GSA service
+08-16 11:29:49:346 WizardFlowManager : bind SSB_SERVICE
+08-16 11:29:49:514 WizardFlowManager : SSB_SERVICE connected
+08-16 11:29:49:515 WizardFlowManager : SSB_SERVICE message sent
+08-16 11:29:53:537 SecSetupWizardActivity : onActivityResult: requestCode 1010, resultCode 7 of sec_account_setup
+08-16 11:29:53:540 SecSetupWizardActivity : checkingAECondition dpm.getUserProvisioningState() :  0
+08-16 11:29:53:541 SecSetupWizardActivity : completeSecAccount : isLogIn false
+08-16 11:29:53:542 SecSetupWizardActivity : completeSecBackup : sec backup not found
+08-16 11:29:53:548 SecSetupWizardActivity : getNext: [skip] sec_pay_setup : Intent { act=com.samsung.android.spay.signin.setupwizard (has extras) }
+08-16 11:29:53:549 SecSetupWizardActivity : getNext: alternative_permission : Intent { cmp=com.sec.android.app.SecSetupWizard/.UI.AlternativePermissionActivity (has extras) }
+08-16 11:29:53:550 SecSetupWizardActivity : startActivityForResult, current: alternative_permission
+08-16 11:29:53:963 AlternativePermissionActivity : initPermissionView [0] com.samsung.android.mcfds - Continuity Service : DB info system,mcf_permission_denied,0,1
+08-16 11:29:53:997 AlternativePermissionActivity : initPermissionView [1] com.samsung.android.rubin.app - Customization Service : DB info null,null,-100,-100
+08-16 11:29:55:237 AlternativePermissionActivity : initPermissionView [2] com.samsung.android.beaconmanager - Nearby device scanning : DB info system,nearby_scanning_permission_allowed,1,0
+08-16 11:29:56:790 AlternativePermissionActivity : saveSwitchState [0] [true, true, true]
+08-16 11:29:56:791 AlternativePermissionActivity : finishAction: goto Next step
+08-16 11:29:56:843 SecSetupWizardActivity : onActivityResult: requestCode 1010, resultCode -1 of alternative_permission
+08-16 11:29:56:844 SecSetupWizardActivity : checkingAECondition dpm.getUserProvisioningState() :  0
+08-16 11:29:56:845 OemPostSetupUtils : isStartSmartSwitchTransferWithSetting : smartswitch_transfer_start_in_oobe = 0
+08-16 11:29:56:845 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <VZW_ACT> : false
+08-16 11:29:56:846 CustomerRegionChecker : isVzwActivationStepOnlyDevice:false
+08-16 11:29:56:846 SecSetupWizardActivity : getNext: sec_darkmode_setup : Intent { act=com.samsung.android.display.SECSETUP_DARK_MODE (has extras) }
+08-16 11:29:56:847 SecSetupWizardActivity : startActivityForResult, current: sec_darkmode_setup
+08-16 11:29:56:933 DarkModeSetupWizard : onCreate
+08-16 11:29:58:765 DarkModeSetupWizard : onCreate
+08-16 11:30:00:802 SecSetupWizardActivity : onActivityResult: requestCode 1010, resultCode -1 of sec_darkmode_setup
+08-16 11:30:00:808 SecSetupWizardActivity : checkingAECondition dpm.getUserProvisioningState() :  0
+08-16 11:30:00:810 SecSetupWizardActivity : getNext: outro : Intent { cmp=com.sec.android.app.SecSetupWizard/.UI.OutroActivity (has extras) }
+08-16 11:30:00:811 SecSetupWizardActivity : startActivityForResult, current: outro
+08-16 11:30:00:895 OutroActivity : start Outro page
+08-16 11:30:00:988 OemPostSetupUtils : isTipsButtonVisible : false
+08-16 11:30:01:293 OemPostSetupUtils : isTipsButtonVisible : false
+08-16 11:30:02:940 SecSetupWizardActivity : onActivityResult: requestCode 1010, resultCode 14 of outro
+08-16 11:30:02:942 SecSetupWizardActivity : checkingAECondition dpm.getUserProvisioningState() :  0
+08-16 11:30:02:942 SecSetupWizardActivity : finishAction : mSetupWizardUseWizardScript true, USER_SETUP_COMPLETE false
+08-16 11:30:02:943 WizardSystemBarHelper : enableNotifications - mStatusBarManager is not null So enable Notifications
+08-16 11:30:02:960 KmeManager :  checkDeviceSupportsKme already mKmeInitialized=true
+08-16 11:30:02:961 SecSetupWizardActivity : setHomeLauncher is not yet. so, set Default launcher
+08-16 11:30:02:970 WizardScriptManager : getNextIntentFromWizardScript : [Current] actionId oem_post_setup, mIsSetupFlow true, mIsSetupComplete false
+08-16 11:30:02:971 WizardScriptManager : getNextIntentFromWizardScript : [Next] actionId enterprise_finalization_flow, resultCode -1
+08-16 11:30:03:179 WizardFlowManager : unbind SSB_SERVICE
+08-16 11:30:03:344 SecSetupCompleteActivity : onCreate
+08-16 11:30:03:344 SecSetupCompleteActivity : setupComplete
+08-16 11:30:03:362 KmeManager :  checkDeviceSupportsKme already mKmeInitialized=true
+08-16 11:30:03:363 SecSetupCompleteActivity : KME stop with Thread
+08-16 11:30:03:432 SecSetupCompleteActivity : restoreDefaultValue : stop SettingsObserverService
+08-16 11:30:03:441 Utils : put Boolean in SharedPreferences [isBackupOrientation] : false
+08-16 11:30:03:441 Utils : restoreDefaultScreenOrientation, set auto rotate 1
+08-16 11:30:03:442 Utils : LOG:SetupWizard startTime 31203, endTime 87388
+08-16 11:30:03:444 KmeManager : KME_Analysis: Unbinding from BulkEnrollmentCheckService Elapsed Time: 87390 mIsBoundToKmeService = true
+08-16 11:30:03:452 Utils : [SET] Component is disable : com.sec.android.app.SecSetupWizard.SecureInterceptActivity
+08-16 11:30:03:458 Utils : [SET] Component is disable : com.sec.android.app.SecSetupWizard.SecSetupWizardActivity
+08-16 11:30:03:461 Utils : [SET] Component is disable : com.sec.android.app.SecSetupWizard.SetupWizardPreActionActivity
+08-16 11:30:03:553 WizardScriptManager : getNextIntentFromWizardScript : [Current] actionId complete, mIsSetupFlow true, mIsSetupComplete false
+08-16 11:30:03:554 WizardScriptManager : getScriptIntent_Complete : isStartSmartSwitchTransfer false, hasSamsungAccount false
+08-16 11:30:03:555 WizardScriptManager : getNextIntentFromWizardScript : [Next] actionId exit, resultCode 1
+08-16 11:30:03:563 SecSetupCompleteActivity : [BR] sendBroadcast - com.sec.android.app.secsetupwizard.SETUPWIZARD_COMPLETE
+08-16 11:30:03:564 Utils : put Boolean in SharedPreferences [UseWizardScript] : false
+08-16 11:30:03:565 SecSetupCompleteActivity : setupComplete : sys.pdp.action setupwizard_finish
+08-16 11:30:03:565 SecSetupCompleteActivity : setupComplete : reset UseWizardScript's pref value as false
+08-16 11:30:03:585 SettingsObserverService : onDestroy
+08-16 11:30:03:590 SettingsObserverService : onChange(), auto rotate setting is enabled by com.sec.android.app.SecSetupWizard
+08-16 11:30:03:590 SettingsObserverService : ignore auto rotate change to On by SUW
+08-16 11:30:04:242 SystemActivity : success setDefaultLauncher [com.sec.android.app.launcher]
+06-06 21:18:52:615 SetupWiwzardApplication : onCreate setConfiguration
+06-06 21:18:52:635 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+06-06 21:18:52:636 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+07-07 23:15:00:528 SetupWiwzardApplication : onCreate setConfiguration
+07-07 23:15:00:569 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+07-07 23:15:00:571 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+07-19 14:36:12:623 SetupWiwzardApplication : onCreate setConfiguration
+07-19 14:36:12:637 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+07-19 14:36:12:639 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+07-22 14:59:59:066 SetupWiwzardApplication : onCreate setConfiguration
+07-22 14:59:59:122 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+07-22 14:59:59:123 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+08-06 22:58:22:647 SetupWiwzardApplication : onCreate setConfiguration
+08-06 22:58:22:697 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+08-06 22:58:22:699 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+08-09 15:51:21:011 SetupWiwzardApplication : onCreate setConfiguration
+08-09 15:51:21:030 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+08-09 15:51:21:032 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+09-05 11:25:01:805 SetupWiwzardApplication : onCreate setConfiguration
+09-05 11:25:01:826 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+09-05 11:25:01:827 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+10-04 07:45:40:370 SetupWiwzardApplication : onCreate setConfiguration
+10-04 07:45:40:409 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+10-04 07:45:40:410 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+10-07 18:44:54:019 SetupWiwzardApplication : onCreate setConfiguration
+10-07 18:44:54:031 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+10-07 18:44:54:032 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+10-07 19:59:20:755 SetupWiwzardApplication : onCreate setConfiguration
+10-07 19:59:20:769 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+10-07 19:59:20:770 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+10-07 20:05:15:182 SetupWiwzardApplication : onCreate setConfiguration
+10-07 20:05:15:200 RestoreIdSelectionActivity : call com.android.wizard.NEXT and finish
+10-07 20:05:15:202 WizardScriptManager : getNextIntentFromWizardScript : [Current] actionId restore_id_selection, mIsSetupFlow true, mIsSetupComplete true
+10-07 20:05:15:204 Utils : getSharedPreferences() : SharedPreferences(pref) is created.
+10-07 20:05:15:204 Utils : getSharedPreferencesEdit() : SharedPreferences.Editor is created.
+10-07 20:05:15:206 Utils : put Boolean in SharedPreferences [checkCurrentRestoreFlow] : true
+10-07 20:05:15:207 WizardScriptManager : getNextIntentFromWizardScript : [Next] actionId unified_restore_flow, resultCode 204
+10-07 20:05:18:223 NewDeviceSelectionActivity : call com.android.wizard.NEXT and finish
+10-07 20:05:18:225 WizardScriptManager : getNextIntentFromWizardScript : [Current] actionId new_device_selection, mIsSetupFlow true, mIsSetupComplete true
+10-07 20:05:18:229 WizardScriptManager : getNextIntentFromWizardScript : [Next] actionId setup_as_new_flow, resultCode -1
+10-07 20:05:18:230 Utils : put Boolean in SharedPreferences [Select_NewDevice] : true
+10-07 20:25:39:903 SetupWiwzardApplication : onCreate setConfiguration
+10-07 20:25:39:920 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+10-07 20:25:39:921 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+10-08 07:26:01:034 SetupWiwzardApplication : onCreate setConfiguration
+10-08 07:26:01:047 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+10-08 07:26:01:048 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+10-08 08:40:25:457 SetupWiwzardApplication : onCreate setConfiguration
+10-08 08:40:25:473 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+10-08 08:40:25:474 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+10-08 08:49:21:588 SetupWiwzardApplication : onCreate setConfiguration
+10-08 08:49:21:603 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+10-08 08:49:21:605 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+10-08 10:27:50:220 SetupWiwzardApplication : onCreate setConfiguration
+10-08 10:27:50:233 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+10-08 10:27:50:234 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+10-14 11:37:39:416 SetupWiwzardApplication : onCreate setConfiguration
+10-14 11:37:39:440 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+10-14 11:37:39:441 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+10-18 08:46:42:797 SetupWiwzardApplication : onCreate setConfiguration
+10-18 08:46:42:810 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+10-18 08:46:42:811 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+10-28 03:18:29:568 SetupWiwzardApplication : onCreate setConfiguration
+10-28 03:18:29:621 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+10-28 03:18:29:624 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+10-28 14:50:23:159 SetupWiwzardApplication : onCreate setConfiguration
+10-28 14:50:23:178 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+10-28 14:50:23:179 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+10-30 22:35:58:149 SetupWiwzardApplication : onCreate setConfiguration
+10-30 22:35:58:175 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+10-30 22:35:58:176 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+10-31 15:28:51:362 SetupWiwzardApplication : onCreate setConfiguration
+10-31 15:28:51:375 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+10-31 15:28:51:377 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+11-01 02:18:39:412 SetupWiwzardApplication : onCreate setConfiguration
+11-01 02:18:39:431 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+11-01 02:18:39:432 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+11-01 02:47:41:944 SetupWiwzardApplication : onCreate setConfiguration
+11-01 02:47:41:957 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+11-01 02:47:41:958 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+11-01 09:56:36:497 SetupWiwzardApplication : onCreate setConfiguration
+11-01 09:56:36:515 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+11-01 09:56:36:516 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+11-01 14:07:16:538 SetupWiwzardApplication : onCreate setConfiguration
+11-01 14:07:16:554 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+11-01 14:07:16:555 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+11-05 15:09:57:106 SetupWiwzardApplication : onCreate setConfiguration
+11-05 15:09:57:123 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+11-05 15:09:57:124 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+11-07 12:15:28:885 SetupWiwzardApplication : onCreate setConfiguration
+11-07 12:15:28:899 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+11-07 12:15:28:900 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+11-07 12:44:35:537 SetupWiwzardApplication : onCreate setConfiguration
+11-07 12:44:35:550 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+11-07 12:44:35:551 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+11-07 12:48:56:014 SetupWiwzardApplication : onCreate setConfiguration
+11-07 12:48:56:029 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+11-07 12:48:56:030 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+11-07 13:46:28:277 SetupWiwzardApplication : onCreate setConfiguration
+11-07 13:46:28:291 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+11-07 13:46:28:292 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+11-27 14:40:04:320 SetupWiwzardApplication : onCreate setConfiguration
+11-27 14:40:04:338 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+11-27 14:40:04:339 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+11-27 16:58:27:753 SetupWiwzardApplication : onCreate setConfiguration
+11-27 16:58:27:778 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+11-27 16:58:27:779 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+12-03 11:41:15:840 SetupWiwzardApplication : onCreate setConfiguration
+12-03 11:41:15:853 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+12-03 11:41:15:854 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+12-05 09:11:18:629 SetupWiwzardApplication : onCreate setConfiguration
+12-05 09:11:18:648 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+12-05 09:11:18:649 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+12-12 21:27:26:072 SetupWiwzardApplication : onCreate setConfiguration
+12-12 21:27:26:110 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+12-12 21:27:26:112 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false
+12-17 17:29:38:939 SetupWiwzardApplication : onCreate setConfiguration
+12-17 17:29:38:950 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <SPR> : false
+12-17 17:29:38:951 Utils :  CscFeature_SetupWizard_ConfigStepSequenceType contains <DSH> : false

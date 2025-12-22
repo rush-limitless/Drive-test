@@ -44,6 +44,37 @@ NETWORK_DISPLAY_MAP = {
     'GPRS': '2G',
     'GSM': '2G',
 }
+NETWORK_TYPE_CODE_MAP = {
+    '1': 'GPRS',
+    '2': 'EDGE',
+    '3': 'UMTS',
+    '4': 'CDMA',
+    '5': 'EVDO_0',
+    '6': 'EVDO_A',
+    '7': '1XRTT',
+    '8': 'HSDPA',
+    '9': 'HSUPA',
+    '10': 'HSPA',
+    '11': 'IDEN',
+    '12': 'EVDO_B',
+    '13': 'LTE',
+    '14': 'EHRPD',
+    '15': 'HSPAP',
+    '16': 'GSM',
+    '17': 'TD_SCDMA',
+    '18': 'IWLAN',
+    '19': 'LTE_CA',
+    '20': 'NR',
+    '21': 'NR',
+    '22': 'NR',
+}
+NETWORK_SOURCE_CONFIDENCE = {
+    'dumpsys-registry': 0.9,
+    'dumpsys-telephony': 0.8,
+    'dumpsys-registry+getprop': 0.95,
+    'dumpsys-telephony+getprop': 0.85,
+    'getprop': 0.6,
+}
 
 CALL_STATE_IDLE = 0
 CALL_STATE_RINGING = 1
@@ -129,6 +160,10 @@ def _format_network_label(value: Optional[str]) -> Optional[str]:
     if not value:
         return None
     upper = value.upper()
+    if upper in {'UNKNOWN', 'N/A', 'NONE', 'NULL'}:
+        return None
+    if upper.isdigit() and upper in NETWORK_TYPE_CODE_MAP:
+        upper = NETWORK_TYPE_CODE_MAP[upper]
     display = NETWORK_DISPLAY_MAP.get(upper)
     if display:
         return f"{display} ({upper})"
@@ -162,6 +197,41 @@ def _parse_call_state(payload: str) -> Optional[int]:
 
 class TelcoModules(ADBExecutor):
     """Modules d'automatisation télécoms étendus."""
+
+    _NETWORK_CACHE_TTL_SECONDS = 1.5
+    _network_registration_cache: Dict[str, Dict[str, Any]] = {}
+    _network_registration_cache_ts: Dict[str, float] = {}
+
+    def _cache_key(self) -> str:
+        return self.device_id or "default"
+
+    def _get_cached_network_registration(self) -> Optional[Dict[str, Any]]:
+        key = self._cache_key()
+        cached = self._network_registration_cache.get(key)
+        cached_ts = self._network_registration_cache_ts.get(key)
+        if cached is None or cached_ts is None:
+            return None
+        if time.monotonic() - cached_ts <= self._NETWORK_CACHE_TTL_SECONDS:
+            return cached
+        return None
+
+    def _set_cached_network_registration(self, payload: Dict[str, Any]) -> None:
+        key = self._cache_key()
+        self._network_registration_cache[key] = payload
+        self._network_registration_cache_ts[key] = time.monotonic()
+
+    def _is_permission_denied(self, result: ExecutionResult) -> bool:
+        haystack = f"{result.output}\n{result.error}".lower()
+        return any(
+            token in haystack
+            for token in (
+                "permission denial",
+                "securityexception",
+                "not allowed",
+                "requires android.permission.dump",
+                "permission denied",
+            )
+        )
 
     def _parse_registration_info(self, payload: Optional[str]) -> Optional[Dict[str, Any]]:
         if not payload:
@@ -205,8 +275,12 @@ class TelcoModules(ADBExecutor):
         voice_state = normalize_label(extract('mVoiceRegState') or extract('mVoiceServiceState'))
         data_state = normalize_label(extract('mDataRegState') or extract('mDataServiceState'))
         data_connection = normalize_label(extract('mDataConnectionState'))
-        network_type_raw = extract('mDataNetworkType') or extract('mVoiceNetworkType')
+        data_network_raw = extract('mDataNetworkType')
+        voice_network_raw = extract('mVoiceNetworkType')
+        network_type_raw = data_network_raw or voice_network_raw
         network_label = _format_network_label(network_type_raw) if network_type_raw else None
+        data_network_label = _format_network_label(data_network_raw) if data_network_raw else None
+        voice_network_label = _format_network_label(voice_network_raw) if voice_network_raw else None
         emergency_only = bool_value(extract('mEmergencyOnly') or extract('mIsEmergencyOnly'))
 
         if operator:
@@ -225,10 +299,152 @@ class TelcoModules(ADBExecutor):
             info['network_technology'] = network_label
         elif network_type_raw:
             info['network_technology'] = network_type_raw.upper()
+        if data_network_label:
+            info['data_network_technology'] = data_network_label
+        if voice_network_label:
+            info['voice_network_technology'] = voice_network_label
         if emergency_only is not None:
             info['emergency_only'] = emergency_only
 
+        sim_slots = self._parse_sim_slots(payload)
+        if sim_slots:
+            info['sim_slots'] = sim_slots
+            first_slot = sim_slots[0]
+            if not info.get('operator'):
+                info['operator'] = first_slot.get('operator')
+            if not info.get('operator_numeric'):
+                info['operator_numeric'] = first_slot.get('operator_numeric')
+            if not info.get('network_technology'):
+                info['network_technology'] = first_slot.get('network_technology')
+
         return info or None
+
+    def _parse_sim_slots(self, payload: str) -> List[Dict[str, Any]]:
+        slots: List[Dict[str, Any]] = []
+        matches = list(re.finditer(r"Phone Id(?:=|:)\s*(\d+)", payload))
+        if not matches:
+            return slots
+
+        for index, match in enumerate(matches):
+            slot_index = int(match.group(1))
+            section_start = match.end()
+            section_end = matches[index + 1].start() if index + 1 < len(matches) else len(payload)
+            section = payload[section_start:section_end]
+
+            operator = (
+                _clean_operator_label(_extract_field(section, 'mOperatorAlphaShort'))
+                or _clean_operator_label(_extract_field(section, 'mOperatorAlphaLong'))
+            )
+            operator_numeric = _extract_field(section, 'mOperatorNumeric')
+            service_state = _normalize_state_value(_extract_field(section, 'mServiceState'))
+            voice_state = _normalize_state_value(_extract_field(section, 'mVoiceRegState') or _extract_field(section, 'mVoiceServiceState'))
+            data_state = _normalize_state_value(_extract_field(section, 'mDataRegState') or _extract_field(section, 'mDataServiceState'))
+            data_connection = _normalize_state_value(_extract_field(section, 'mDataConnectionState'))
+            data_network_raw = _extract_field(section, 'mDataNetworkType')
+            voice_network_raw = _extract_field(section, 'mVoiceNetworkType')
+            network_type_raw = data_network_raw or voice_network_raw
+            network_label = _format_network_label(network_type_raw) if network_type_raw else None
+            data_network_label = _format_network_label(data_network_raw) if data_network_raw else None
+            voice_network_label = _format_network_label(voice_network_raw) if voice_network_raw else None
+
+            slot_info = {
+                'slot_index': slot_index,
+                'operator': operator,
+                'operator_numeric': operator_numeric,
+                'service_state': service_state,
+                'voice_state': voice_state,
+                'data_state': data_state,
+                'data_connection_state': data_connection,
+                'network_technology': network_label or (network_type_raw.upper() if network_type_raw else None),
+                'data_network_technology': data_network_label,
+                'voice_network_technology': voice_network_label,
+            }
+            slots.append({k: v for k, v in slot_info.items() if v is not None})
+
+        return slots
+
+    def _getprop_value(self, key: str) -> Optional[str]:
+        result = self.execute_command([ADB_EXECUTABLE, 'shell', 'getprop', key])
+        if not result.success or result.output is None:
+            return None
+        return result.output.strip() or None
+
+    def _split_prop_list(self, value: Optional[str]) -> List[str]:
+        if not value:
+            return []
+        return [entry.strip() for entry in value.split(',') if entry.strip()]
+
+    def _collect_prop_values(self, keys: List[str], max_slots: int = 4) -> List[str]:
+        values: List[str] = []
+        for key in keys:
+            base = self._getprop_value(key)
+            values = self._split_prop_list(base)
+            if values:
+                break
+
+        suffix_values: List[str] = []
+        for key in keys:
+            for idx in range(1, max_slots + 1):
+                slot_value = self._getprop_value(f"{key}.{idx}")
+                if slot_value:
+                    suffix_values.append(slot_value.strip())
+            if suffix_values:
+                break
+
+        if not values:
+            values = suffix_values
+        elif suffix_values:
+            for idx, value in enumerate(suffix_values):
+                if idx < len(values):
+                    if not values[idx]:
+                        values[idx] = value
+                else:
+                    values.append(value)
+
+        return values
+
+    def _read_getprop_network_info(self) -> Optional[Dict[str, Any]]:
+        operator_list = self._collect_prop_values(['gsm.operator.alpha', 'gsm.sim.operator.alpha'])
+        numeric_list = self._collect_prop_values(['gsm.operator.numeric', 'gsm.sim.operator.numeric'])
+        data_type_list = self._collect_prop_values(['gsm.data.network.type'])
+        voice_type_list = self._collect_prop_values(['gsm.network.type', 'gsm.voice.network.type'])
+
+        slot_count = max(len(operator_list), len(numeric_list), len(data_type_list), len(voice_type_list))
+        if slot_count == 0:
+            return None
+
+        sim_slots: List[Dict[str, Any]] = []
+        for idx in range(slot_count):
+            op = operator_list[idx] if idx < len(operator_list) else None
+            num = numeric_list[idx] if idx < len(numeric_list) else None
+            data_net = data_type_list[idx] if idx < len(data_type_list) else None
+            voice_net = voice_type_list[idx] if idx < len(voice_type_list) else None
+            network_raw = data_net or voice_net
+            slot = {
+                'slot_index': idx,
+                'operator': _clean_operator_label(op),
+                'operator_numeric': num,
+                'network_technology': _format_network_label(network_raw) if network_raw else None,
+                'data_network_technology': _format_network_label(data_net) if data_net else None,
+                'voice_network_technology': _format_network_label(voice_net) if voice_net else None,
+            }
+            sim_slots.append({k: v for k, v in slot.items() if v is not None})
+
+        info = {
+            'operator': sim_slots[0].get('operator') if sim_slots else None,
+            'operator_numeric': sim_slots[0].get('operator_numeric') if sim_slots else None,
+            'network_technology': sim_slots[0].get('network_technology') if sim_slots else None,
+            'data_network_technology': sim_slots[0].get('data_network_technology') if sim_slots else None,
+            'voice_network_technology': sim_slots[0].get('voice_network_technology') if sim_slots else None,
+            'sim_slots': sim_slots,
+        }
+        return {k: v for k, v in info.items() if v is not None}
+
+    def _read_dumpsys_telephony_info(self) -> Optional[Dict[str, Any]]:
+        result = self.execute_command([ADB_EXECUTABLE, 'shell', 'dumpsys', 'telephony'])
+        if not result.success or not result.output or self._is_permission_denied(result):
+            return None
+        return self._parse_registration_info(result.output)
 
     def _is_app_running(self, package: str) -> bool:
         if not package:
@@ -905,6 +1121,210 @@ class TelcoModules(ADBExecutor):
             time.sleep(1)
         return False
 
+    def _tap_by_resource_id(self, resource_id_substring: str, retries: int = 2) -> bool:
+        target = resource_id_substring.lower()
+        for _ in range(retries):
+            root = self._ui_dump()
+            if root is None:
+                time.sleep(1)
+                continue
+            for node in root.iter():
+                res_id = (node.attrib.get('resource-id') or '').lower()
+                if target in res_id:
+                    bounds = node.attrib.get('bounds')
+                    pos = self._parse_bounds_center(bounds) if bounds else None
+                    if pos:
+                        self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'tap', str(pos[0]), str(pos[1])])
+                        time.sleep(1)
+                        return True
+            time.sleep(1)
+        return False
+
+    def _tap_best_apn_entry(self) -> bool:
+        root = self._ui_dump()
+        if root is None:
+            return False
+
+        if (
+            self._tap_by_text('MTN CM')
+            or self._tap_by_text('mtnwap')
+            or self._tap_by_text('Orange')
+            or self._tap_by_text('orangecmgprs')
+        ):
+            return True
+
+        entries = []
+
+        def parse_bounds(bounds: str):
+            m = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds or "")
+            if not m:
+                return None
+            left, top, right, bottom = map(int, m.groups())
+            return left, top, right, bottom
+
+        def walk(node, parent=None):
+            bounds = node.attrib.get('bounds')
+            rect = parse_bounds(bounds) if bounds else None
+            pos = None
+            if rect:
+                left, top, right, bottom = rect
+                pos = ((left + right) // 2, (top + bottom) // 2)
+            entry = {
+                'node': node,
+                'parent': parent,
+                'rect': rect,
+                'pos': pos,
+                'text': (node.attrib.get('text') or node.attrib.get('content-desc') or '').strip(),
+                'class': (node.attrib.get('class') or '').lower(),
+                'resource_id': (node.attrib.get('resource-id') or '').lower(),
+                'checked': node.attrib.get('checked') == 'true',
+                'selected': node.attrib.get('selected') == 'true',
+                'clickable': node.attrib.get('clickable') == 'true',
+            }
+            entries.append(entry)
+            for child in list(node):
+                walk(child, entry)
+
+        walk(root, None)
+
+        def is_header(label: str) -> bool:
+            lower = label.lower()
+            return any(token in lower for token in (
+                'access point names',
+                "nom des points d'acc",
+                "nom du point d'acc",
+                'add',
+                'ajouter',
+            ))
+
+        def tap_entry(entry: dict) -> bool:
+            if not entry.get('pos'):
+                return False
+            self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'tap', str(entry['pos'][0]), str(entry['pos'][1])])
+            time.sleep(1)
+            return True
+
+        def tap_rect(rect: tuple, bias: float = 0.6) -> bool:
+            left, top, right, bottom = rect
+            width = right - left
+            height = bottom - top
+            if width <= 0 or height <= 0:
+                return False
+            x = int(left + max(20, min(width - 20, width * bias)))
+            y = int((top + bottom) // 2)
+            self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'tap', str(x), str(y)])
+            time.sleep(1)
+            return True
+
+        def prefer_row_text(y_center: int) -> Optional[dict]:
+            best = None
+            best_delta = None
+            for entry in entries:
+                rect = entry.get('rect')
+                if not rect:
+                    continue
+                if not entry['text'] or is_header(entry['text']):
+                    continue
+                left, top, right, bottom = rect
+                if top <= y_center <= bottom:
+                    delta = abs(((top + bottom) // 2) - y_center)
+                    if best is None or delta < best_delta:
+                        best = entry
+                        best_delta = delta
+            return best
+
+        def resolve_click_target(entry: dict) -> Optional[dict]:
+            current = entry
+            while current:
+                if current.get('rect') and current['clickable'] and not (current['text'] and is_header(current['text'])):
+                    return current
+                current = current.get('parent')
+            return None
+
+        checked_entries = [e for e in entries if (e['checked'] or e['selected']) and not (e['text'] and is_header(e['text']))]
+        for entry in checked_entries:
+            target = resolve_click_target(entry)
+            if target and tap_entry(target):
+                return True
+            if entry.get('rect'):
+                _, top, _, bottom = entry['rect']
+                row_target = prefer_row_text((top + bottom) // 2)
+                if row_target and row_target.get('rect') and tap_rect(row_target['rect'], bias=0.7):
+                    return True
+
+        prioritized = [e for e in entries if e['text'] and not is_header(e['text'])]
+        prioritized.sort(key=lambda e: (e['rect'][1] if e['rect'] else 10**9))
+
+        for entry in prioritized:
+            if 'checkedtextview' in entry['class'] or 'apn' in entry['resource_id'] or 'carrier' in entry['resource_id']:
+                if entry['clickable'] and tap_entry(entry):
+                    return True
+                if entry.get('rect') and tap_rect(entry['rect'], bias=0.7):
+                    return True
+
+        for entry in prioritized:
+            if entry['clickable'] and tap_entry(entry):
+                return True
+            if entry.get('rect') and tap_rect(entry['rect'], bias=0.7):
+                return True
+
+        return False
+        candidates = []
+        for node in root.iter():
+            bounds = node.attrib.get('bounds')
+            if not bounds:
+                continue
+            pos = self._parse_bounds_center(bounds)
+            if not pos:
+                continue
+            text = (node.attrib.get('text') or node.attrib.get('content-desc') or '').strip()
+            class_name = (node.attrib.get('class') or '').lower()
+            resource_id = (node.attrib.get('resource-id') or '').lower()
+            checked = node.attrib.get('checked') == 'true'
+            selected = node.attrib.get('selected') == 'true'
+            clickable = node.attrib.get('clickable') == 'true'
+            candidates.append({
+                'pos': pos,
+                'text': text,
+                'class': class_name,
+                'resource_id': resource_id,
+                'checked': checked,
+                'selected': selected,
+                'clickable': clickable,
+            })
+
+        def is_header(label: str) -> bool:
+            lower = label.lower()
+            return any(token in lower for token in (
+                'access point names',
+                'nom des points d\'acc',
+                'nom du point d\'acc',
+                'add',
+                'ajouter',
+            ))
+
+        def tap_candidate(entry: dict) -> bool:
+            self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'tap', str(entry['pos'][0]), str(entry['pos'][1])])
+            time.sleep(1)
+            return True
+
+        prioritized = [c for c in candidates if c['text'] and not is_header(c['text'])]
+        prioritized.sort(key=lambda c: c['pos'][1])
+
+        for entry in candidates:
+            if (entry['checked'] or entry['selected']) and (not entry['text'] or not is_header(entry['text'])):
+                return tap_candidate(entry)
+
+        for entry in prioritized:
+            if 'checkedtextview' in entry['class'] or 'apn' in entry['resource_id'] or 'carrier' in entry['resource_id']:
+                return tap_candidate(entry)
+
+        for entry in prioritized:
+            if entry['clickable']:
+                return tap_candidate(entry)
+
+        return False
+
     def _scroll_down(self):
         try:
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'swipe', '500', '1500', '500', '500', '300'])
@@ -944,16 +1364,12 @@ class TelcoModules(ADBExecutor):
             time.sleep(0.2)
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_CENTER'])
             time.sleep(1)
-            # 5) Sélection APN (tap sur premier item de la liste) sans toucher le bouton retour
-            selected = False
-            # Essayer de tap sur le libellé de l'APN ou sa valeur
-            if self._tap_by_text('MTN CM') or self._tap_by_text('mtnwap'):
-                selected = True
-            else:
-                # Fallbacks: d'abord un tap approximatif au centre, puis navigation clavier
+            # 5) Selection APN (prefer active APN, then first tappable entry)
+            selected = self._tap_best_apn_entry()
+            if not selected:
+                # Fallback: tap center, then DPAD into first entry
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'tap', '540', '650'])
                 time.sleep(0.5)
-                # Utiliser DPAD pour sélectionner la première entrée si le tap ne suffit pas
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_DOWN'])
                 time.sleep(0.2)
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_CENTER'])
@@ -1385,15 +1801,52 @@ class TelcoModules(ADBExecutor):
     # Network & Signal
     # -----------------------------
     def check_network_registration(self) -> Dict[str, Any]:
+        cached = self._get_cached_network_registration()
+        if cached:
+            cached_payload = dict(cached)
+            cached_payload['cached'] = True
+            return cached_payload
+
         result = self.execute_command([ADB_EXECUTABLE, 'shell', 'dumpsys', 'telephony.registry'])
-        info = self._parse_registration_info(result.output) if result.success and result.output else None
-        return {
+        low_permission = self._is_permission_denied(result)
+        info = self._parse_registration_info(result.output) if result.success and result.output and not low_permission else None
+        source = 'dumpsys-registry'
+
+        if not info:
+            telephony_info = None
+            if not low_permission:
+                telephony_info = self._read_dumpsys_telephony_info()
+            if telephony_info:
+                info = telephony_info
+                source = 'dumpsys-telephony'
+
+        fallback_info = self._read_getprop_network_info()
+        if fallback_info:
+            if not info:
+                info = fallback_info
+                source = 'getprop'
+            else:
+                for key, value in fallback_info.items():
+                    if key not in info:
+                        info[key] = value
+                if 'sim_slots' not in info and fallback_info.get('sim_slots'):
+                    info['sim_slots'] = fallback_info.get('sim_slots')
+                source = f"{source}+getprop"
+
+        if info is not None:
+            info['source'] = source
+            info['confidence'] = NETWORK_SOURCE_CONFIDENCE.get(source, 0.5)
+
+        response = {
             'module': 'check_network_registration',
-            'success': result.success,
+            'success': result.success or bool(fallback_info) or bool(info),
             'duration': result.duration,
-            'error': result.error if not result.success else None,
+            'error': result.error if not result.success and not fallback_info and not info else None,
             'registration_info': info,
+            'low_permission': low_permission,
         }
+        self._set_cached_network_registration(response)
+        return response
 
     def check_signal_strength(self) -> Dict[str, Any]:
         result = self.execute_command([ADB_EXECUTABLE, 'shell', 'dumpsys', 'telephony.registry'])
@@ -1519,6 +1972,36 @@ class TelcoModules(ADBExecutor):
         number_value = number.strip()
         attempts: List[Dict[str, Any]] = []
 
+        def _focus_message_field() -> bool:
+            root = self._ui_dump()
+            if root is None:
+                return False
+            for node in root.iter():
+                class_name = (node.attrib.get('class') or '').lower()
+                if class_name == 'android.widget.edittext':
+                    bounds = node.attrib.get('bounds')
+                    pos = self._parse_bounds_center(bounds) if bounds else None
+                    if pos:
+                        self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'tap', str(pos[0]), str(pos[1])])
+                        time.sleep(0.5)
+                        return True
+            return False
+
+        def _tap_send_button() -> bool:
+            send_resource_candidates = [
+                'send_message_button',
+                'send_button',
+                'send_message',
+                'send',
+            ]
+            for candidate in send_resource_candidates:
+                if self._tap_by_resource_id(candidate):
+                    return True
+            if self._tap_by_text('Send') or self._tap_by_text('Envoyer'):
+                return True
+            tap = self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'tap', '666', '889'])
+            return tap.success
+
         def _run_sequence(sequence_name: str) -> bool:
             attempts.append({'strategy': sequence_name})
             if sequence_name == 'intent_sendto':
@@ -1526,22 +2009,21 @@ class TelcoModules(ADBExecutor):
                     ADB_EXECUTABLE, 'shell', 'am', 'start',
                     '-a', 'android.intent.action.SENDTO',
                     '-d', f'sms:{number_value}',
+                    '--es', 'sms_body', message,
+                    '--ez', 'exit_on_sent', 'true',
                 ])
                 attempts[-1]['start_success'] = result.success
                 if not result.success:
                     attempts[-1]['error'] = result.error
                     return False
                 time.sleep(2)
-                self.execute_command([
-                    ADB_EXECUTABLE, 'shell', 'input', 'text', sanitized_message
-                ])
+                _focus_message_field()
+                self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'text', sanitized_message])
                 time.sleep(1)
-                tap = self.execute_command([
-                    ADB_EXECUTABLE, 'shell', 'input', 'tap', '666', '889'
-                ])
-                attempts[-1]['tap_success'] = tap.success
-                attempts[-1]['tap_error'] = tap.error if not tap.success else None
-                return tap.success
+                tapped = _tap_send_button()
+                attempts[-1]['tap_success'] = tapped
+                attempts[-1]['tap_error'] = None if tapped else 'send_button_not_found'
+                return tapped
 
             if sequence_name == 'app_messages':
                 result = self.execute_command([
@@ -1559,22 +2041,33 @@ class TelcoModules(ADBExecutor):
                 time.sleep(1)
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'text', self._sanitize_text_input(number_value)])
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_TAB'])
+                _focus_message_field()
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'text', sanitized_message])
-                tap = self.execute_command([
-                    ADB_EXECUTABLE, 'shell', 'input', 'tap', '666', '889'
-                ])
-                attempts[-1]['tap_success'] = tap.success
-                attempts[-1]['tap_error'] = tap.error if not tap.success else None
-                return tap.success
+                tapped = _tap_send_button()
+                attempts[-1]['tap_success'] = tapped
+                attempts[-1]['tap_error'] = None if tapped else 'send_button_not_found'
+                return tapped
             return False
 
         success = _run_sequence('intent_sendto') or _run_sequence('app_messages')
         duration = time.time() - start
+        error = None
+        if not success:
+            for attempt in attempts:
+                if not attempt.get('start_success'):
+                    error = attempt.get('error') or f"{attempt.get('strategy', 'sms')} start failed"
+                    break
+                if attempt.get('tap_error'):
+                    error = attempt.get('tap_error')
+                    break
+            if not error:
+                error = 'SMS send failed (UI interaction not confirmed)'
         return {
             'module': 'send_sms',
             'success': success,
             'duration': duration,
             'attempts': attempts,
+            'error': error,
         }
 
     def delete_sms(self) -> Dict[str, Any]:

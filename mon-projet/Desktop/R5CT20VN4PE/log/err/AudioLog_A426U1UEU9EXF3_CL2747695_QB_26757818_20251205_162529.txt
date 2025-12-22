@@ -1,0 +1,109 @@
+@@@@@@@@ Call Number 1 (UNKNOWN) @@@@@@@@
+Call Start at : 2025/12/05 10:39:13.229 (GMT+0)
+Call End   at : 2025/12/05 10:40:14.239 (GMT+0)
+Call Network : WCDMA
+Call Mode : AMR-NB
+######## AFE Data Logging 1 ########
+AFE_TX_GOOD : 60 samples/1s 
+AFE_TX_MUTE : 0 samples/1s
+AFE_RX_GOOD : 55 samples/1s 
+AFE_RX_MUTE : 5 samples/1s 
+AFE_device_number : 4 RCV 
+Volume idx : 4
+Call speech start num: 6
+######## Packet Data Logging 1 ########
+======== TX ========
+Total Call Time: 3025 packets/20ms 
+Good Speech Time : 1150 packets/20ms 
+Normal Mute Time : 1875 packets/20ms 
+======== RX ========
+Total Call Time : 2982 packets/20ms 
+Good Speech Time : 2134 packets/20ms 
+Suspicious Mute Time : 8 packets/20ms 
+Normal Mute Time(AMR codec Only) : 840 packets/20ms 
+######## Big Data Info 1 ########
+
+
+@@@@@@@@ Call Number 2 (UNKNOWN) @@@@@@@@
+Call Start at : 2025/12/05 16:22:38.628 (GMT+0)
+Call End   at : 2025/12/05 16:22:50.039 (GMT+0)
+Call Network : WCDMA
+Call Mode : AMR-NB
+######## AFE Data Logging 2 ########
+AFE_TX_GOOD : 11 samples/1s RCV(9, 4), SPK(2, 2)
+AFE_TX_MUTE : 0 samples/1s
+AFE_RX_GOOD : 9 samples/1s RCV(7, 4), SPK(2, 2)
+AFE_RX_MUTE : 2 samples/1s RCV(2, 4), SPK(0, 2)
+device change count : 2
+Call speech start num: 1
+######## Packet Data Logging 2 ########
+======== TX ========
+Total Call Time: 557 packets/20ms 
+Good Speech Time : 390 packets/20ms RCV(343), SPK(47)
+Normal Mute Time : 167 packets/20ms RCV(123), SPK(44)
+======== RX ========
+Total Call Time : 570 packets/20ms 
+Good Speech Time : 566 packets/20ms RCV(463), SPK(103)
+Suspicious Mute Time : 4 packets/20ms RCV(4), SPK(0)
+Normal Mute Time(AMR codec Only) : 0 packets/20ms RCV(0), SPK(0)
+######## Big Data Info 2 ########
+
+
+@@@@@@@@ Call Number 3 (UNKNOWN) @@@@@@@@
+Call Start at : 2025/12/05 16:22:50.103 (GMT+0)
+Call End   at : 2025/12/05 16:22:58.901 (GMT+0)
+Call Network : GSM
+Call Mode : AMR-NB
+######## AFE Data Logging 3 ########
+AFE_TX_GOOD : 9 samples/1s 
+AFE_TX_MUTE : 0 samples/1s
+AFE_RX_GOOD : 9 samples/1s 
+AFE_RX_MUTE : 0 samples/1s 
+AFE_device_number : 1 SPK 
+Volume idx : 2
+Call speech start num: 1
+######## Packet Data Logging 3 ########
+======== TX ========
+Total Call Time: 437 packets/20ms 
+Good Speech Time : 437 packets/20ms 
+Normal Mute Time : 0 packets/20ms 
+======== RX ========
+Total Call Time : 439 packets/20ms 
+Good Speech Time : 406 packets/20ms 
+Suspicious Mute Time : 33 packets/20ms 
+Normal Mute Time(AMR codec Only) : 0 packets/20ms 
+######## Big Data Info 3 ########
+
+
+@@@@@@@@ Call Number 4 (UNKNOWN) @@@@@@@@
+Call Start at : 2025/12/05 16:23:26.267 (GMT+0)
+Call End   at : 2025/12/05 16:23:47.275 (GMT+0)
+Call Network : GSM
+Call Mode : AMR-NB
+######## AFE Data Logging 4 ########
+AFE_TX_GOOD : 21 samples/1s 
+AFE_TX_MUTE : 0 samples/1s
+AFE_RX_GOOD : 18 samples/1s 
+AFE_RX_MUTE : 3 samples/1s 
+AFE_device_number : 1 SPK 
+Volume idx : 2
+Call speech start num: 1
+######## Packet Data Logging 4 ########
+======== TX ========
+Total Call Time: 1048 packets/20ms 
+Good Speech Time : 716 packets/20ms 
+Normal Mute Time : 332 packets/20ms 
+======== RX ========
+Total Call Time : 1051 packets/20ms 
+Good Speech Time : 1032 packets/20ms 
+Suspicious Mute Time : 19 packets/20ms 
+Normal Mute Time(AMR codec Only) : 0 packets/20ms 
+######## Big Data Info 4 ########
+
+
+@@@@@@@@ Call Once Mute Info @@@@@@@@
+
+@@@@@@@@ UBMT Time Info @@@@@@@@
+
+@@@@@@@@ DBMT Time Info @@@@@@@@
+

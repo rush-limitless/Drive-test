@@ -1,0 +1,991 @@
+12-19 13:17:17.864  1113 21846 I tftp_server: pid=1113 tid=21846 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.864  1256  2300 D MotionRecognitionService: [SAR]  onReceive : ACTION_BATTERY_CHANGED, Plugged: 2
+12-19 13:17:17.864  1256  1256 D PhoneWindowManagerExt: ACTION_BATTERY_CHANGED - Level=100, status=2
+12-19 13:17:17.866  1256  1256 D SemWifiApBroadcastReceiver: Received : android.intent.action.BATTERY_CHANGED
+12-19 13:17:17.866  1113 21846 I tftp_server: pid=1113 tid=21846 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 16000]: sent_size = 3982 total-blocks = 3 total-bytes = 16000 timedout-pkts = 0, w
+12-19 13:17:17.866  1113 21846 I tftp_server: pid=1113 tid=21846 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3982]: fread [Total, Max, Min] = [160, 130, 0]
+12-19 13:17:17.866  1113 21846 I tftp_server: pid=1113 tid=21846 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [391, 1292]
+12-19 13:17:17.866  1113 21846 I tftp_server: pid=1113 tid=21846 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3982]: Tx/Rx [Min, Max] = [23, 272, 513, 779]
+12-19 13:17:17.866  1113 21846 I tftp_server: pid=1113 tid=21846 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.866  1113 21846 I tftp_server: pid=1113 tid=21846 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 2771
+12-19 13:17:17.866  6700  6700 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: true
+12-19 13:17:17.867  6700  6700 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: true
+12-19 13:17:17.867  1113  1113 I tftp_server: pid=1113 tid=1113 tftp-server : INF :[tftp_server.c, 659] rcvd request [1] [112] [1] [0] [3983]
+12-19 13:17:17.868  1113 21847 I tftp_server: pid=1113 tid=21847 tftp-server : INF :[tftp_server_utils.c, 113] file [readonly/firmware/image/bitra/qdsp6m.qdb] : [/vendor/rfs/msm/mpss/readonly/firmware/imag
+12-19 13:17:17.868  6700  6700 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: true
+12-19 13:17:17.868  1113 21847 I tftp_server: pid=1113 tid=21847 tftp-server : INF :[tftp_server.c, 1203] OACK options [port: 3983] : [7680, 1000, 6576000, 10, 16000, 0, 0, 0]
+12-19 13:17:17.868  1113 21847 I tftp_server: pid=1113 tid=21847 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.869  7013  7013 D SemBigDataInfoController: Intent: android.intent.action.BATTERY_CHANGED
+12-19 13:17:17.872  6700  6700 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: true
+12-19 13:17:17.873  6700  6700 D KeyguardUpdateMonitor: received broadcast android.intent.action.BATTERY_CHANGED
+12-19 13:17:17.873  1113 21847 I tftp_server: pid=1113 tid=21847 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 16000]: sent_size = 3983 total-blocks = 3 total-bytes = 16000 timedout-pkts = 0, w
+12-19 13:17:17.873  1113 21847 I tftp_server: pid=1113 tid=21847 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3983]: fread [Total, Max, Min] = [90, 44, 0]
+12-19 13:17:17.873  1113 21847 I tftp_server: pid=1113 tid=21847 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [1842, 2820]
+12-19 13:17:17.873  6700  6700 I PowerUI : mBootCompleted = true |  mFullyConnected = true
+12-19 13:17:17.873  1113 21847 I tftp_server: pid=1113 tid=21847 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3983]: Tx/Rx [Min, Max] = [38, 1707, 342, 2478]
+12-19 13:17:17.873  1113 21847 I tftp_server: pid=1113 tid=21847 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.873  1113 21847 I tftp_server: pid=1113 tid=21847 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 5473
+12-19 13:17:17.873  6700  6700 W PowerUI : Plug reason
+12-19 13:17:17.873  6700  6700 W PowerUI : Skip charging animation - by plug status
+12-19 13:17:17.873  6700  6700 D PowerUI : priorPlugType = 2 mPlugType = 2 priorBatteryStatus = 2 mBatteryStatus = 2
+12-19 13:17:17.873  6700  6700 W PowerUI : Plug reason
+12-19 13:17:17.873  6700  6700 W PowerUI : Skip charging sound - by plug status
+12-19 13:17:17.873  6700  6700 I PowerUI : oldMisalign : false, curMisalign : false
+12-19 13:17:17.874  6700 10241 D SecPowerUI.Notification: dismissing low battery warning: level=100
+12-19 13:17:17.874  6700 10241 D SecPowerUI.Notification: updateNotification mWarning=false mPlaySound=false
+12-19 13:17:17.874  6700 10241 D SecPowerUI.Notification: SecBatteryStatsSnapshot{batteryLevel=100, currentBatteryMode=0, chargingTime=60000, chargingType=11, batteryHealth=2, automaticTestMode=false, isHiccupState=false}
+12-19 13:17:17.875  1113  1113 I tftp_server: pid=1113 tid=1113 tftp-server : INF :[tftp_server.c, 659] rcvd request [1] [112] [1] [0] [3984]
+12-19 13:17:17.875  6700  6700 D SecPowerUI.Notification: showChargingNotice oldChargingType : 11 / currentChargingType : 11, oldChargingTime : 60000 / mChargingTime : 0
+12-19 13:17:17.875  6700  6700 D SecPowerUI.Notification: showChargingNotification()
+12-19 13:17:17.875  6700  6700 D SecPowerUI.Notification: SecBatteryStatsSnapshot{batteryLevel=100, currentBatteryMode=0, chargingTime=0, chargingType=11, batteryHealth=2, automaticTestMode=false, isHiccupState=false}
+12-19 13:17:17.875  1113 21848 I tftp_server: pid=1113 tid=21848 tftp-server : INF :[tftp_server_utils.c, 113] file [readonly/firmware/image/bitra/qdsp6m.qdb] : [/vendor/rfs/msm/mpss/readonly/firmware/imag
+12-19 13:17:17.875  6700 10241 D SecPowerUI.Notification: 1. restoreScreenTimeOut - saved_value : :
+12-19 13:17:17.875  6700 10241 E SecPowerUI.Notification: no saved value, so we do nothing !!
+12-19 13:17:17.876  1113 21848 I tftp_server: pid=1113 tid=21848 tftp-server : INF :[tftp_server.c, 1203] OACK options [port: 3984] : [7680, 1000, 6592000, 10, 16000, 0, 0, 0]
+12-19 13:17:17.876  1113 21848 I tftp_server: pid=1113 tid=21848 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.878  1256  6771 D ApplicationPolicy: isStatusBarNotificationAllowedAsUser: packageName = com.android.systemui,userId = 0
+12-19 13:17:17.878  1256  6771 D ApplicationPolicy: isStatusBarNotificationAllowedAsUser: packageName = com.android.systemui,userId = -1
+12-19 13:17:17.878  1256  6771 D ApplicationPolicy: isStatusBarNotificationAllowedAsUser: converting userId from USER_ALLto 0
+12-19 13:17:17.879  6700  6700 D PowerUI : Battery swelling mode - priorBatterySwellingMode = 0 mBatterySwellingMode = 0 mBatteryStatus = 2
+12-19 13:17:17.879  6700  6700 I PowerUI : mBatteryMiscEvent = 65536
+12-19 13:17:17.879  1113  1113 I tftp_server: pid=1113 tid=1113 tftp-server : INF :[tftp_server.c, 659] rcvd request [1] [112] [1] [0] [3985]
+12-19 13:17:17.880  1113 21849 I tftp_server: pid=1113 tid=21849 tftp-server : INF :[tftp_server_utils.c, 113] file [readonly/firmware/image/bitra/qdsp6m.qdb] : [/vendor/rfs/msm/mpss/readonly/firmware/imag
+12-19 13:17:17.880  1113 21849 I tftp_server: pid=1113 tid=21849 tftp-server : INF :[tftp_server.c, 1203] OACK options [port: 3985] : [7680, 1000, 6608000, 10, 16000, 0, 0, 0]
+12-19 13:17:17.880  1113 21849 I tftp_server: pid=1113 tid=21849 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.881  1113 21848 I tftp_server: pid=1113 tid=21848 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 16000]: sent_size = 3984 total-blocks = 3 total-bytes = 16000 timedout-pkts = 0, w
+12-19 13:17:17.881  1113 21848 I tftp_server: pid=1113 tid=21848 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3984]: fread [Total, Max, Min] = [73, 41, 0]
+12-19 13:17:17.881  1113 21848 I tftp_server: pid=1113 tid=21848 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [365, 4356]
+12-19 13:17:17.881  1113 21848 I tftp_server: pid=1113 tid=21848 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3984]: Tx/Rx [Min, Max] = [23, 257, 987, 3369]
+12-19 13:17:17.881  1113 21848 I tftp_server: pid=1113 tid=21848 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.882  1113 21849 I tftp_server: pid=1113 tid=21849 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 16000]: sent_size = 3985 total-blocks = 3 total-bytes = 16000 timedout-pkts = 0, w
+12-19 13:17:17.882  1113 21849 I tftp_server: pid=1113 tid=21849 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3985]: fread [Total, Max, Min] = [78, 45, 0]
+12-19 13:17:17.882  1113 21848 I tftp_server: pid=1113 tid=21848 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 6144
+12-19 13:17:17.882  1113 21849 I tftp_server: pid=1113 tid=21849 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [372, 1411]
+12-19 13:17:17.882  1113 21849 I tftp_server: pid=1113 tid=21849 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3985]: Tx/Rx [Min, Max] = [24, 254, 511, 900]
+12-19 13:17:17.883  1113 21849 I tftp_server: pid=1113 tid=21849 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.883  1113 21849 I tftp_server: pid=1113 tid=21849 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 2798
+12-19 13:17:17.886  1113  1113 I tftp_server: pid=1113 tid=1113 tftp-server : INF :[tftp_server.c, 659] rcvd request [1] [112] [1] [0] [3986]
+12-19 13:17:17.887  1113 21851 I tftp_server: pid=1113 tid=21851 tftp-server : INF :[tftp_server_utils.c, 113] file [readonly/firmware/image/bitra/qdsp6m.qdb] : [/vendor/rfs/msm/mpss/readonly/firmware/imag
+12-19 13:17:17.887  1113 21851 I tftp_server: pid=1113 tid=21851 tftp-server : INF :[tftp_server.c, 1203] OACK options [port: 3986] : [7680, 1000, 6624000, 10, 16000, 0, 0, 0]
+12-19 13:17:17.887  1113 21851 I tftp_server: pid=1113 tid=21851 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.888   895   895 D Zygote  : Forked child process 21852
+12-19 13:17:17.888  6700  6700 I FaceWidgetPositionAlgorithm: getClockContainerHeight() supplier = 193, bottom margin = 0, real height = 238
+12-19 13:17:17.888  6700  6700 I FaceWidgetPositionAlgorithm: getClockContainerHeight() supplier = 193, bottom margin = 45, real height = 238
+12-19 13:17:17.888  6700  6700 I FaceWidgetPositionAlgorithm: getMediaContainerHeight() height = 0 container Visibility = 8, isValid = false, mIsDozing = false, fraction = 1.0, source = 0, target = 0
+12-19 13:17:17.888  6700  6700 I FaceWidgetPositionAlgorithm: getMediaContainerHeight() supplier = 0
+12-19 13:17:17.890  1113 21851 I tftp_server: pid=1113 tid=21851 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 16000]: sent_size = 3986 total-blocks = 3 total-bytes = 16000 timedout-pkts = 0, w
+12-19 13:17:17.890  6700  6700 V QsExpandAnimator: setQsExpansionPosition 0.0
+12-19 13:17:17.891  1113 21851 I tftp_server: pid=1113 tid=21851 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3986]: fread [Total, Max, Min] = [263, 202, 0]
+12-19 13:17:17.891  1113 21851 I tftp_server: pid=1113 tid=21851 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [515, 2374]
+12-19 13:17:17.891  1113 21851 I tftp_server: pid=1113 tid=21851 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3986]: Tx/Rx [Min, Max] = [42, 261, 313, 2061]
+12-19 13:17:17.891  1113 21851 I tftp_server: pid=1113 tid=21851 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.891  1113 21851 I tftp_server: pid=1113 tid=21851 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 3994
+12-19 13:17:17.892  1113  1113 I tftp_server: pid=1113 tid=1113 tftp-server : INF :[tftp_server.c, 659] rcvd request [1] [112] [1] [0] [3987]
+12-19 13:17:17.894  1113 21853 I tftp_server: pid=1113 tid=21853 tftp-server : INF :[tftp_server_utils.c, 113] file [readonly/firmware/image/bitra/qdsp6m.qdb] : [/vendor/rfs/msm/mpss/readonly/firmware/imag
+12-19 13:17:17.894  1113 21853 I tftp_server: pid=1113 tid=21853 tftp-server : INF :[tftp_server.c, 1203] OACK options [port: 3987] : [7680, 1000, 6640000, 10, 16000, 0, 0, 0]
+12-19 13:17:17.894  1113 21853 I tftp_server: pid=1113 tid=21853 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.898  1113 21853 I tftp_server: pid=1113 tid=21853 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 16000]: sent_size = 3987 total-blocks = 3 total-bytes = 16000 timedout-pkts = 0, w
+12-19 13:17:17.898  1113 21853 I tftp_server: pid=1113 tid=21853 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3987]: fread [Total, Max, Min] = [109, 41, 0]
+12-19 13:17:17.898  1113 21853 I tftp_server: pid=1113 tid=21853 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [2308, 590]
+12-19 13:17:17.898  1113 21853 I tftp_server: pid=1113 tid=21853 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3987]: Tx/Rx [Min, Max] = [49, 2048, 252, 338]
+12-19 13:17:17.898  1113 21853 I tftp_server: pid=1113 tid=21853 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.898  1113 21853 I tftp_server: pid=1113 tid=21853 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 4300
+12-19 13:17:17.900  1113  1113 I tftp_server: pid=1113 tid=1113 tftp-server : INF :[tftp_server.c, 659] rcvd request [1] [112] [1] [0] [3988]
+12-19 13:17:17.900  6700  6700 I AODBatteryManager: updateBatteryData: ACTION_BATTERY_CHANGED
+12-19 13:17:17.900  1113 21854 I tftp_server: pid=1113 tid=21854 tftp-server : INF :[tftp_server_utils.c, 113] file [readonly/firmware/image/bitra/qdsp6m.qdb] : [/vendor/rfs/msm/mpss/readonly/firmware/imag
+12-19 13:17:17.900  1113 21854 I tftp_server: pid=1113 tid=21854 tftp-server : INF :[tftp_server.c, 1203] OACK options [port: 3988] : [7680, 1000, 6656000, 10, 16000, 0, 0, 0]
+12-19 13:17:17.900  1113 21854 I tftp_server: pid=1113 tid=21854 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.901  6700  6700 I AODBatteryManager: saveBatteryData : AOD BatteryData [mBatteryLevel=100, mBatteryStatus=CHARGING, mBatteryPlugType=USB, mBatteryPlugged=true, mRemainingChargeTime=0, mBatteryChargingType=1, mBatteryChargerType=NORMAL, mBatteryOnline=USB, mBatterySwellingMode=NONE, mBatteryProtectMode=false]
+12-19 13:17:17.901  6700  6700 I ChargingInfoManager: updateChargingInfo: newState = AOD ChargingInfo [mState=BATTERY_AND_REMAIN_TIME, mIsCharging=true, mIsFullyCharged=false, mIsBatteryProtectMode=false], oldState = AOD ChargingInfo [mState=BATTERY_AND_REMAIN_TIME, mIsCharging=true, mIsFullyCharged=false, mIsBatteryProtectMode=false]
+12-19 13:17:17.902  6700  6700 D KeyguardUpdateMonitor: handleBatteryUpdate
+12-19 13:17:17.903  1113 21854 I tftp_server: pid=1113 tid=21854 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 16000]: sent_size = 3988 total-blocks = 3 total-bytes = 16000 timedout-pkts = 0, w
+12-19 13:17:17.903  1113 21854 I tftp_server: pid=1113 tid=21854 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3988]: fread [Total, Max, Min] = [84, 48, 0]
+12-19 13:17:17.903  1113 21854 I tftp_server: pid=1113 tid=21854 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [424, 1493]
+12-19 13:17:17.903  1113 21854 I tftp_server: pid=1113 tid=21854 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3988]: Tx/Rx [Min, Max] = [23, 299, 578, 915]
+12-19 13:17:17.903  1113 21854 I tftp_server: pid=1113 tid=21854 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.903  1113 21854 I tftp_server: pid=1113 tid=21854 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 2748
+12-19 13:17:17.905  1113  1113 I tftp_server: pid=1113 tid=1113 tftp-server : INF :[tftp_server.c, 659] rcvd request [1] [112] [1] [0] [3989]
+12-19 13:17:17.905  1113 21855 I tftp_server: pid=1113 tid=21855 tftp-server : INF :[tftp_server_utils.c, 113] file [readonly/firmware/image/bitra/qdsp6m.qdb] : [/vendor/rfs/msm/mpss/readonly/firmware/imag
+12-19 13:17:17.905  1113 21855 I tftp_server: pid=1113 tid=21855 tftp-server : INF :[tftp_server.c, 1203] OACK options [port: 3989] : [7680, 1000, 6672000, 10, 16000, 0, 0, 0]
+12-19 13:17:17.905  1113 21855 I tftp_server: pid=1113 tid=21855 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.907  1113 21855 I tftp_server: pid=1113 tid=21855 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 16000]: sent_size = 3989 total-blocks = 3 total-bytes = 16000 timedout-pkts = 0, w
+12-19 13:17:17.907  1113 21855 I tftp_server: pid=1113 tid=21855 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3989]: fread [Total, Max, Min] = [75, 41, 0]
+12-19 13:17:17.907  1113 21855 I tftp_server: pid=1113 tid=21855 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [364, 1256]
+12-19 13:17:17.907  1113 21855 I tftp_server: pid=1113 tid=21855 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3989]: Tx/Rx [Min, Max] = [23, 259, 485, 771]
+12-19 13:17:17.907  1113 21855 I tftp_server: pid=1113 tid=21855 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.908  1113 21855 I tftp_server: pid=1113 tid=21855 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 2504
+12-19 13:17:17.909  1113  1113 I tftp_server: pid=1113 tid=1113 tftp-server : INF :[tftp_server.c, 659] rcvd request [1] [112] [1] [0] [3990]
+12-19 13:17:17.910  1113 21856 I tftp_server: pid=1113 tid=21856 tftp-server : INF :[tftp_server_utils.c, 113] file [readonly/firmware/image/bitra/qdsp6m.qdb] : [/vendor/rfs/msm/mpss/readonly/firmware/imag
+12-19 13:17:17.911  1113 21856 I tftp_server: pid=1113 tid=21856 tftp-server : INF :[tftp_server.c, 1203] OACK options [port: 3990] : [7680, 1000, 6688000, 10, 16000, 0, 0, 0]
+12-19 13:17:17.911  1113 21856 I tftp_server: pid=1113 tid=21856 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.912  1113 21856 I tftp_server: pid=1113 tid=21856 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 16000]: sent_size = 3990 total-blocks = 3 total-bytes = 16000 timedout-pkts = 0, w
+12-19 13:17:17.913  1113 21856 I tftp_server: pid=1113 tid=21856 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3990]: fread [Total, Max, Min] = [74, 39, 0]
+12-19 13:17:17.913  1113 21856 I tftp_server: pid=1113 tid=21856 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [542, 749]
+12-19 13:17:17.913  1113 21856 I tftp_server: pid=1113 tid=21856 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3990]: Tx/Rx [Min, Max] = [26, 341, 299, 450]
+12-19 13:17:17.913  1113 21856 I tftp_server: pid=1113 tid=21856 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.914  1113  1113 I tftp_server: pid=1113 tid=1113 tftp-server : INF :[tftp_server.c, 659] rcvd request [1] [112] [1] [0] [3991]
+12-19 13:17:17.915  1113 21856 I tftp_server: pid=1113 tid=21856 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 4946
+12-19 13:17:17.916  1113 21857 I tftp_server: pid=1113 tid=21857 tftp-server : INF :[tftp_server_utils.c, 113] file [readonly/firmware/image/bitra/qdsp6m.qdb] : [/vendor/rfs/msm/mpss/readonly/firmware/imag
+12-19 13:17:17.917  1113 21857 I tftp_server: pid=1113 tid=21857 tftp-server : INF :[tftp_server.c, 1203] OACK options [port: 3991] : [7680, 1000, 6704000, 10, 16000, 0, 0, 0]
+12-19 13:17:17.917  1113 21857 I tftp_server: pid=1113 tid=21857 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.920  1113 21857 I tftp_server: pid=1113 tid=21857 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 16000]: sent_size = 3991 total-blocks = 3 total-bytes = 16000 timedout-pkts = 0, w
+12-19 13:17:17.920  1113 21857 I tftp_server: pid=1113 tid=21857 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3991]: fread [Total, Max, Min] = [196, 159, 0]
+12-19 13:17:17.920  1113 21857 I tftp_server: pid=1113 tid=21857 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [426, 2196]
+12-19 13:17:17.920  1113 21857 I tftp_server: pid=1113 tid=21857 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3991]: Tx/Rx [Min, Max] = [25, 310, 500, 1696]
+12-19 13:17:17.920  1113 21857 I tftp_server: pid=1113 tid=21857 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.921  1113 21857 I tftp_server: pid=1113 tid=21857 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 5005
+12-19 13:17:17.922  1113  1113 I tftp_server: pid=1113 tid=1113 tftp-server : INF :[tftp_server.c, 659] rcvd request [1] [112] [1] [0] [3992]
+12-19 13:17:17.923  1113 21858 I tftp_server: pid=1113 tid=21858 tftp-server : INF :[tftp_server_utils.c, 113] file [readonly/firmware/image/bitra/qdsp6m.qdb] : [/vendor/rfs/msm/mpss/readonly/firmware/imag
+12-19 13:17:17.923  1113 21858 I tftp_server: pid=1113 tid=21858 tftp-server : INF :[tftp_server.c, 1203] OACK options [port: 3992] : [7680, 1000, 6720000, 10, 16000, 0, 0, 0]
+12-19 13:17:17.923  1113 21858 I tftp_server: pid=1113 tid=21858 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.925  1113 21858 I tftp_server: pid=1113 tid=21858 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 16000]: sent_size = 3992 total-blocks = 3 total-bytes = 16000 timedout-pkts = 0, w
+12-19 13:17:17.926  1113 21858 I tftp_server: pid=1113 tid=21858 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3992]: fread [Total, Max, Min] = [72, 40, 0]
+12-19 13:17:17.926  1113 21858 I tftp_server: pid=1113 tid=21858 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [381, 1793]
+12-19 13:17:17.926  1113 21858 I tftp_server: pid=1113 tid=21858 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3992]: Tx/Rx [Min, Max] = [26, 267, 888, 905]
+12-19 13:17:17.926  1113 21858 I tftp_server: pid=1113 tid=21858 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.926  1113 21858 I tftp_server: pid=1113 tid=21858 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 2951
+12-19 13:17:17.927  1113  1113 I tftp_server: pid=1113 tid=1113 tftp-server : INF :[tftp_server.c, 659] rcvd request [1] [112] [1] [0] [3993]
+12-19 13:17:17.927  1113 21859 I tftp_server: pid=1113 tid=21859 tftp-server : INF :[tftp_server_utils.c, 113] file [readonly/firmware/image/bitra/qdsp6m.qdb] : [/vendor/rfs/msm/mpss/readonly/firmware/imag
+12-19 13:17:17.928  1113 21859 I tftp_server: pid=1113 tid=21859 tftp-server : INF :[tftp_server.c, 1203] OACK options [port: 3993] : [7680, 1000, 6736000, 10, 16000, 0, 0, 0]
+12-19 13:17:17.928  1113 21859 I tftp_server: pid=1113 tid=21859 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.929  6700  6700 D KeyguardSecIndicationPolicy:  add T Event pos = DEFAULT, type =              BATTERY, id =  3706, text =   100%, duration = 3000
+12-19 13:17:17.929  6700  6700 D KeyguardSecIndicationPolicy:   update top pos = DEFAULT, item = [id=3700|ty=UNLOCK_GUIDE|pr=25|txt=Swipe to open|ti=duration=PERSISTENT|an=false] -> [id=3706|ty=BATTERY|pr=40|txt=  100%|ti=duration=3000|an=false]
+12-19 13:17:17.929  6700  6700 D KeyguardSecIndicationController: onIndicationChanged() return - keyguard is not visible, pos = DEFAULT, item = [id=3706|ty=BATTERY|pr=40|txt=  100%|ti=duration=3000|an=false]
+12-19 13:17:17.930  6700  6700 D KeyguardSecIndicationPolicy: update Event pos = DEFAULT, type =      BATTERY_RESTING, id =  3707, text =   100%
+12-19 13:17:17.930  6700  6700 D KeyguardSecIndicationPolicy:  remove Item pos = DEFAULT, type =           OWNER_INFO
+12-19 13:17:17.930  6700  6700 D KeyguardSecIndicationController: addBatteryAndOwnerInfoIndication() battery status = BatteryStatus{status=2,level=100,plugged=2,health=2,maxChargingWattage=-1,remaining=0ultraFastCharger=0}
+12-19 13:17:17.933  1113 21859 I tftp_server: pid=1113 tid=21859 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 16000]: sent_size = 3993 total-blocks = 3 total-bytes = 16000 timedout-pkts = 0, w
+12-19 13:17:17.933  1113 21859 I tftp_server: pid=1113 tid=21859 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3993]: fread [Total, Max, Min] = [85, 38, 0]
+12-19 13:17:17.933  1113 21859 I tftp_server: pid=1113 tid=21859 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [1865, 2549]
+12-19 13:17:17.933  1113 21859 I tftp_server: pid=1113 tid=21859 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3993]: Tx/Rx [Min, Max] = [37, 1739, 376, 2173]
+12-19 13:17:17.934  1113  1113 I tftp_server: pid=1113 tid=1113 tftp-server : INF :[tftp_server.c, 659] rcvd request [1] [112] [1] [0] [3994]
+12-19 13:17:17.934  1113 21860 I tftp_server: pid=1113 tid=21860 tftp-server : INF :[tftp_server_utils.c, 113] file [readonly/firmware/image/bitra/qdsp6m.qdb] : [/vendor/rfs/msm/mpss/readonly/firmware/imag
+12-19 13:17:17.935  1113 21860 I tftp_server: pid=1113 tid=21860 tftp-server : INF :[tftp_server.c, 1203] OACK options [port: 3994] : [7680, 1000, 6752000, 10, 16000, 0, 0, 0]
+12-19 13:17:17.935  1113 21860 I tftp_server: pid=1113 tid=21860 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.933  1113 21859 I tftp_server: pid=1113 tid=21859 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.935  1113 21859 I tftp_server: pid=1113 tid=21859 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 7997
+12-19 13:17:17.937  1113 21860 I tftp_server: pid=1113 tid=21860 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 16000]: sent_size = 3994 total-blocks = 3 total-bytes = 16000 timedout-pkts = 0, w
+12-19 13:17:17.937  1113 21860 I tftp_server: pid=1113 tid=21860 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3994]: fread [Total, Max, Min] = [150, 106, 0]
+12-19 13:17:17.938  1113 21860 I tftp_server: pid=1113 tid=21860 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [483, 1749]
+12-19 13:17:17.938  1113 21860 I tftp_server: pid=1113 tid=21860 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3994]: Tx/Rx [Min, Max] = [27, 363, 525, 1224]
+12-19 13:17:17.938  1113 21860 I tftp_server: pid=1113 tid=21860 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.938  1113 21860 I tftp_server: pid=1113 tid=21860 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 3309
+12-19 13:17:17.939  1113  1113 I tftp_server: pid=1113 tid=1113 tftp-server : INF :[tftp_server.c, 659] rcvd request [1] [112] [1] [0] [3995]
+12-19 13:17:17.940  1113 21862 I tftp_server: pid=1113 tid=21862 tftp-server : INF :[tftp_server_utils.c, 113] file [readonly/firmware/image/bitra/qdsp6m.qdb] : [/vendor/rfs/msm/mpss/readonly/firmware/imag
+12-19 13:17:17.940  1113 21862 I tftp_server: pid=1113 tid=21862 tftp-server : INF :[tftp_server.c, 1203] OACK options [port: 3995] : [7680, 1000, 6768000, 10, 16000, 0, 0, 0]
+12-19 13:17:17.940  1113 21862 I tftp_server: pid=1113 tid=21862 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.944  1113 21862 I tftp_server: pid=1113 tid=21862 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 16000]: sent_size = 3995 total-blocks = 3 total-bytes = 16000 timedout-pkts = 0, w
+12-19 13:17:17.944  1113 21862 I tftp_server: pid=1113 tid=21862 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3995]: fread [Total, Max, Min] = [92, 41, 0]
+12-19 13:17:17.944  1113 21862 I tftp_server: pid=1113 tid=21862 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [2349, 1093]
+12-19 13:17:17.944  1113 21862 I tftp_server: pid=1113 tid=21862 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3995]: Tx/Rx [Min, Max] = [34, 2032, 348, 745]
+12-19 13:17:17.944  1113 21862 I tftp_server: pid=1113 tid=21862 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.944  1113 21862 I tftp_server: pid=1113 tid=21862 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 4341
+12-19 13:17:17.946  1113  1113 I tftp_server: pid=1113 tid=1113 tftp-server : INF :[tftp_server.c, 659] rcvd request [1] [112] [1] [0] [3996]
+12-19 13:17:17.947  1113 21863 I tftp_server: pid=1113 tid=21863 tftp-server : INF :[tftp_server_utils.c, 113] file [readonly/firmware/image/bitra/qdsp6m.qdb] : [/vendor/rfs/msm/mpss/readonly/firmware/imag
+12-19 13:17:17.947  1113 21863 I tftp_server: pid=1113 tid=21863 tftp-server : INF :[tftp_server.c, 1203] OACK options [port: 3996] : [7680, 1000, 6784000, 10, 16000, 0, 0, 0]
+12-19 13:17:17.948  1113 21863 I tftp_server: pid=1113 tid=21863 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.951  1113 21863 I tftp_server: pid=1113 tid=21863 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 16000]: sent_size = 3996 total-blocks = 3 total-bytes = 16000 timedout-pkts = 0, w
+12-19 13:17:17.951  1113 21863 I tftp_server: pid=1113 tid=21863 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3996]: fread [Total, Max, Min] = [358, 192, 0]
+12-19 13:17:17.951  1113 21863 I tftp_server: pid=1113 tid=21863 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [1964, 758]
+12-19 13:17:17.951  1113 21863 I tftp_server: pid=1113 tid=21863 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3996]: Tx/Rx [Min, Max] = [41, 1794, 345, 413]
+12-19 13:17:17.951  1113 21863 I tftp_server: pid=1113 tid=21863 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.952  1113 21863 I tftp_server: pid=1113 tid=21863 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 5390
+12-19 13:17:17.952 21852 21852 I roid.apps.turbo: Using CollectorTypeCC GC.
+12-19 13:17:17.953  1113  1113 I tftp_server: pid=1113 tid=1113 tftp-server : INF :[tftp_server.c, 659] rcvd request [1] [112] [1] [0] [3997]
+12-19 13:17:17.954 21312 21546 I UriTaskContentObserver: (REDACTED) Throttling content uri change event for %s
+12-19 13:17:17.955  1113 21864 I tftp_server: pid=1113 tid=21864 tftp-server : INF :[tftp_server_utils.c, 113] file [readonly/firmware/image/bitra/qdsp6m.qdb] : [/vendor/rfs/msm/mpss/readonly/firmware/imag
+12-19 13:17:17.955  1113 21864 I tftp_server: pid=1113 tid=21864 tftp-server : INF :[tftp_server.c, 1203] OACK options [port: 3997] : [7680, 1000, 6800000, 10, 16000, 0, 0, 0]
+12-19 13:17:17.955  1113 21864 I tftp_server: pid=1113 tid=21864 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.956  1113 21864 I tftp_server: pid=1113 tid=21864 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 16000]: sent_size = 3997 total-blocks = 3 total-bytes = 16000 timedout-pkts = 0, w
+12-19 13:17:17.956  1113 21864 I tftp_server: pid=1113 tid=21864 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3997]: fread [Total, Max, Min] = [71, 44, 0]
+12-19 13:17:17.956  1113 21864 I tftp_server: pid=1113 tid=21864 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [409, 820]
+12-19 13:17:17.956  1113 21864 I tftp_server: pid=1113 tid=21864 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3997]: Tx/Rx [Min, Max] = [23, 301, 284, 536]
+12-19 13:17:17.956  1113 21864 I tftp_server: pid=1113 tid=21864 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.957  1113 21864 I tftp_server: pid=1113 tid=21864 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 2022
+12-19 13:17:17.959  1113  1113 I tftp_server: pid=1113 tid=1113 tftp-server : INF :[tftp_server.c, 659] rcvd request [1] [111] [1] [0] [3998]
+12-19 13:17:17.959  1113 21870 I tftp_server: pid=1113 tid=21870 tftp-server : INF :[tftp_server_utils.c, 113] file [readonly/firmware/image/bitra/qdsp6m.qdb] : [/vendor/rfs/msm/mpss/readonly/firmware/imag
+12-19 13:17:17.960  1113 21870 I tftp_server: pid=1113 tid=21870 tftp-server : INF :[tftp_server.c, 1203] OACK options [port: 3998] : [7680, 1000, 6816000, 10, 5444, 0, 0, 0]
+12-19 13:17:17.960  1113 21870 I tftp_server: pid=1113 tid=21870 tftp-server : INF :[tftp_os_la.c, 63] open : [-1] [-1] [384] [0] [/vendor/rfs/msm/mpss/readonly/firmware/image/bitra/qdsp6m.qdb]
+12-19 13:17:17.961  1113 21870 I tftp_server: pid=1113 tid=21870 tftp-server : INF :[tftp_server.c, 1320] RRQ stats [port: 5444]: sent_size = 3998 total-blocks = 1 total-bytes = 5444 timedout-pkts = 0, wro
+12-19 13:17:17.961  1113 21870 I tftp_server: pid=1113 tid=21870 tftp-server : INF :[tftp_server.c, 1327] RRQ file stats [port: 3998]: fread [Total, Max, Min] = [26, 26, 0]
+12-19 13:17:17.961  1113 21870 I tftp_server: pid=1113 tid=21870 tftp-server : INF :[tftp_server.c, 1331] RRQ time stats : Total : [TX, RX] = [83, 796]
+12-19 13:17:17.961  1113 21870 I tftp_server: pid=1113 tid=21870 tftp-server : INF :[tftp_server.c, 1338] RRQ time stats [port: 3998]: Tx/Rx [Min, Max] = [34, 49, 313, 483]
+12-19 13:17:17.961  1113 21870 I tftp_server: pid=1113 tid=21870 tftp-server : INF :[tftp_server.c, 1354] RRQ was successfully processed.
+12-19 13:17:17.961  1113 21870 I tftp_server: pid=1113 tid=21870 tftp-server : INF :[tftp_server.c, 1809] RRQ Total API = 1711
+12-19 13:17:17.964 21852 21852 E roid.apps.turbo: Not starting debugger since process cannot load the jdwp agent.
+12-19 13:17:17.971  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 48 Cam Lux 50
+12-19 13:17:17.961  9126 20432 W MediaProvider: isAppCloneUserPair for user 0: false
+12-19 13:17:17.977 21852 21852 D ActivityThread: setConscryptValidator
+12-19 13:17:17.977 21852 21852 D ActivityThread: setConscryptValidator - put
+12-19 13:17:17.994  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:17.994  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:17.994  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:17.994  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:17.996  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:18.003 21852 21852 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10212; state: ENABLED
+12-19 13:17:18.030 21852 21852 D nativeloader: Configuring classloader-namespace for other apk /system/framework/org.apache.http.legacy.jar. target_sdk_version=33, uses_libraries=ALL, library_path=/product/priv-app/Turbo/lib/arm64:/product/priv-app/Turbo/Turbo.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.apps.turbo
+12-19 13:17:18.031 21852 21852 D nativeloader: Extending system_exposed_libraries: libhumantracking.arcsoft.so:libPortraitDistortionCorrection.arcsoft.so:libPortraitDistortionCorrectionCali.arcsoft.so:libface_landmark.arcsoft.so:libFacialStickerEngine.arcsoft.so:libveengine.arcsoft.so:libimage_enhancement.arcsoft.so:liblow_light_hdr.arcsoft.so:libhigh_dynamic_range.arcsoft.so:libFacialAttributeDetection.arcsoft.so:libBeauty_v4.camera.samsung.so:libexifa.camera.samsung.so:libjpega.camera.samsung.so:libOpenCv.camera.samsung.so:libImageScreener.camera.samsung.so:libMyFilter.camera.samsung.so:libtensorflowLite.myfilter.camera.samsung.so:libtensorflowlite_inference_api.myfilter.camera.samsung.so:libEventFinder.camera.samsung.so:libSmartScan.camera.samsung.so:libRectify.camera.samsung.so:libDocRectifyWrapper.camera.samsung.so:libUltraWideDistortionCorrection.camera.samsung.so:libWideDistortionCorrection.camera.samsung.so:libHpr_RecGAE_cvFeature_v1.0.camera.samsung.so:libHprFace_GAE_api.camera.samsung.so:libFace_Landmark_API.camera.samsung.so:libHprFace_GAE_jni
+12-19 13:17:18.075 21852 21852 D nativeloader: Configuring vendor-classloader-namespace for unbundled product apk /product/priv-app/Turbo/Turbo.apk. target_sdk_version=33, uses_libraries=, library_path=/product/priv-app/Turbo/lib/arm64:/product/priv-app/Turbo/Turbo.apk!/lib/arm64-v8a:/product/lib64:/system/product/lib64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.apps.turbo:/product/lib64:/system/product/lib64
+12-19 13:17:18.084  7230  7230 I Launcher.NotificationListener: onNotificationPosted : com.android.systemui number : 0
+12-19 13:17:18.084 10247 10247 I Edge.badge: updateBadge item = com.android.systemui:-1 1
+12-19 13:17:18.103 21852 21852 V GraphicsEnvironment: ANGLE Developer option for 'com.google.android.apps.turbo' set to: 'default'
+12-19 13:17:18.103 21852 21852 V GraphicsEnvironment: ANGLE GameManagerService for com.google.android.apps.turbo: false
+12-19 13:17:18.108 21852 21852 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+12-19 13:17:18.115 21852 21852 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+12-19 13:17:18.131  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:18.165 21852 21883 D CompatibilityChangeReporter: Compat change id reported: 183155436; UID 10212; state: ENABLED
+12-19 13:17:18.195  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:18.195  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:18.195  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:18.195  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:18.196  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:18.214  1256  1335 I libprocessgroup: Successfully killed process cgroup uid 10255 pid 19491 in 5ms
+12-19 13:17:18.235   895   895 I Zygote  : Process 19491 exited due to signal 9 (Killed)
+12-19 13:17:18.286  6700  6700 D BubblesManager: onEntryUpdated : shouldBubbleUp=false ,key=-1|com.android.systemui|2131428972|charging_state|10053
+12-19 13:17:18.287  6700  6700 D InterruptionStateProvider:  no Heads up : edgelighting enabled app. -1|com.android.systemui|2131428972|charging_state|10053
+12-19 13:17:18.292  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:18.305  6700  6700 I FaceWidgetPositionAlgorithm: getClockContainerHeight() supplier = 193, bottom margin = 0, real height = 238
+12-19 13:17:18.305  6700  6700 I FaceWidgetPositionAlgorithm: getClockContainerHeight() supplier = 193, bottom margin = 45, real height = 238
+12-19 13:17:18.305  6700  6700 I FaceWidgetPositionAlgorithm: getMediaContainerHeight() height = 0 container Visibility = 8, isValid = false, mIsDozing = false, fraction = 1.0, source = 0, target = 0
+12-19 13:17:18.305  6700  6700 I FaceWidgetPositionAlgorithm: getMediaContainerHeight() supplier = 0
+12-19 13:17:18.350  6700  6700 I FaceWidgetPositionAlgorithm: getClockContainerHeight() supplier = 193, bottom margin = 0, real height = 238
+12-19 13:17:18.350  6700  6700 I FaceWidgetPositionAlgorithm: getClockContainerHeight() supplier = 193, bottom margin = 45, real height = 238
+12-19 13:17:18.351  6700  6700 I FaceWidgetPositionAlgorithm: getMediaContainerHeight() height = 0 container Visibility = 8, isValid = false, mIsDozing = false, fraction = 1.0, source = 0, target = 0
+12-19 13:17:18.351  6700  6700 I FaceWidgetPositionAlgorithm: getMediaContainerHeight() supplier = 0
+12-19 13:17:18.390  6700  6700 I FaceWidgetPositionAlgorithm: getClockContainerHeight() supplier = 193, bottom margin = 0, real height = 238
+12-19 13:17:18.390  6700  6700 I FaceWidgetPositionAlgorithm: getClockContainerHeight() supplier = 193, bottom margin = 45, real height = 238
+12-19 13:17:18.390  6700  6700 I FaceWidgetPositionAlgorithm: getMediaContainerHeight() height = 0 container Visibility = 8, isValid = false, mIsDozing = false, fraction = 1.0, source = 0, target = 0
+12-19 13:17:18.390  6700  6700 I FaceWidgetPositionAlgorithm: getMediaContainerHeight() supplier = 0
+12-19 13:17:18.395  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:18.396  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:18.396  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:18.396  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:18.396  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:18.451  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 48 Cam Lux 50
+12-19 13:17:18.579 20914 20914 I SCS@AiSearch user 0: (ObserverWorker::AOSP_MP) [main] entering in startWork():  
+12-19 13:17:18.579 20914 20914 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) [main] entering in onChange():  
+12-19 13:17:18.579 20914 20977 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) [AOSP_MP-0] entering in collectChanges():  
+12-19 13:17:18.583  1256  9066 D PackageManager: setEnabledSetting : userId = 0 packageName = com.samsung.android.scs cmp = androidx.work.impl.background.systemalarm.RescheduleReceiver newState = 1 callingPackage = 10093/com.samsung.android.scs
+12-19 13:17:18.586  1256  9066 D ApplicationPolicy: getApplicationStateEnabled : pkg = com.samsung.android.scs userId : 0
+12-19 13:17:18.587  1256  9066 D ApplicationPolicy: getApplicationComponentState : pkg = com.samsung.android.scs userId : 0
+12-19 13:17:18.596  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:18.596  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:18.596  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:18.596  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:18.597  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:18.610 20914 20977 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) fetchInternal values : maxSyncId: 1000000455 indexCount: 65 sourceCount: 65
+12-19 13:17:18.613  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 47 Cam Lux 50
+12-19 13:17:18.613  1046 17950 I sensors-hal: handle_sns_std_sensor_event:218, phy lux: 50, raw lux : 2, brightness: 513, mode: 38, gain: 19, add1: 0, add2: 20, ts=681993147616089
+12-19 13:17:18.634 20914 20977 I SCS@AiSearch user 0: (IndexManager) [AOSP_MP-0] entering in addIndex():  
+12-19 13:17:18.637 20914 20977 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) fetch: fetching took  37 ms
+12-19 13:17:18.637 20914 20977 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) fetchChanges: applied 0 items
+12-19 13:17:18.637 20914 20977 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) Collect finished. Result: true
+12-19 13:17:18.638 20914 20977 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) enqueue ObserverWorker name: com.sec.android.app.myfiles, policy: APPEND_OR_REPLACE
+12-19 13:17:18.638 20914 20972 I WM-WorkerWrapper: Worker result SUCCESS for Work [ id=7afe5ab3-3793-48d0-aad3-bafd2fe57a35, tags={ com.sec.android.app.myfiles, com.samsung.android.scs.ai.search.data.collector.ObserverWorker } ]
+12-19 13:17:18.654  1256  7209 D PackageManager: setEnabledSetting : userId = 0 packageName = com.samsung.android.scs cmp = androidx.work.impl.background.systemalarm.RescheduleReceiver newState = 1 callingPackage = 10093/com.samsung.android.scs
+12-19 13:17:18.654  1256  7209 D ApplicationPolicy: getApplicationStateEnabled : pkg = com.samsung.android.scs userId : 0
+12-19 13:17:18.655  1256  7209 D ApplicationPolicy: getApplicationComponentState : pkg = com.samsung.android.scs userId : 0
+12-19 13:17:18.765 21751 21751 D SemCscFeature: Encoded
+12-19 13:17:18.771  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 48 Cam Lux 50
+12-19 13:17:18.772 21751 21751 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@297ab; boundsInParent: Rect(0, 0 - 0, 105); boundsInScreen: Rect(720, 52 - 720, 157); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:18.773 21751 21751 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@1dbf9; boundsInParent: Rect(0, 0 - 720, 105); boundsInScreen: Rect(0, 1558 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.Button; text: CP RAM LOGGING: OFF; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: com.sec.android.app.servicemodeapp:id/cPRamLogging; uniqueId: null; checkable: false; checked: false; focusable: true; focused: false; selected: false; clickable: true; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: true; visible: false; actions: [AccessibilityAction: ACTION_FOCUS - null, AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_CLICK - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_NEXT_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_SET_SELECTION - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:18.773 21751 21751 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@1e37b; boundsInParent: Rect(0, 0 - 720, 212); boundsInScreen: Rect(0, 1704 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:18.773 21751 21751 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@1f640; boundsInParent: Rect(0, 0 - 720, 319); boundsInScreen: Rect(0, 1957 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:18.773 21751 21751 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@20905; boundsInParent: Rect(0, 0 - 720, 105); boundsInScreen: Rect(0, 2317 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:18.773 21751 21751 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@21bca; boundsInParent: Rect(0, 0 - 720, 319); boundsInScreen: Rect(0, 2463 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:18.773 21751 21751 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@23611; boundsInParent: Rect(0, 0 - 720, 212); boundsInScreen: Rect(0, 2823 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:18.773 21751 21751 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@248d6; boundsInParent: Rect(0, 0 - 720, 105); boundsInScreen: Rect(0, 3076 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:18.773 21751 21751 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@257da; boundsInParent: Rect(0, 0 - 720, 105); boundsInScreen: Rect(0, 3222 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:18.773 21751 21751 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@25f5c; boundsInParent: Rect(0, 0 - 720, 105); boundsInScreen: Rect(0, 3368 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:18.773 21751 21751 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@27221; boundsInParent: Rect(0, 0 - 720, 0); boundsInScreen: Rect(0, 3514 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:18.773 21751 21751 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@266de; boundsInParent: Rect(0, 0 - 720, 0); boundsInScreen: Rect(0, 3514 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:18.773 21751 21751 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@279a3; boundsInParent: Rect(0, 0 - 720, 105); boundsInScreen: Rect(0, 3514 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:18.776 21751 21751 W AccessibilityNodeInfoDumper: Fetch time: 8ms
+12-19 13:17:18.786  6700  6795 D MobileStatusTracker(0/2): onSignalStrengthsChanged level=2, vendorLevel=3
+12-19 13:17:18.788  6700  6795 D MobileSignalController(0/2): notifyListener: enabled=true, connected=true, dataConnected=false, networkType=LTE (LTE), emergencyOnly=false, roaming=false, isDefault=false, dataActivity=, level=3, ca=false, mmWave=false, disabledDataIcon=false, simCard=ETC
+12-19 13:17:18.789 21751 21751 D AndroidRuntime: Shutting down VM
+12-19 13:17:18.790  6700  6795 D NetworkController: SignalStrength from intent slotId=0
+12-19 13:17:18.797  1109  1109 I Layer   : id=17857 removedFromDrawingState WindowToken{59d01d2 type=2032 android.os.Binder@d7245d}#17857 (120)
+12-19 13:17:18.797  1109  1109 I SurfaceFlinger: id=17857 Removed WindowToken{59d01d2 type=2032 android.os.Binder@d7245d}#17857 (120)
+12-19 13:17:18.797  1109  1109 I Layer   : id=17857 Destroyed WindowToken{59d01d2 type=2032 android.os.Binder@d7245d}#17857
+12-19 13:17:18.797  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:18.798  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:18.798  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:18.798  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:18.799  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:18.923  1256  7397 D SemWifiUsabilityStatsMonitor: onWifiUsabilityStats - seqNum 5861, isSameBssidAndFreq true
+12-19 13:17:18.925  1256  6625 I SemWifiLinkQualityMonitor: Link Qos Query: 0.020 ms / 398.631 Mbps (433 / 0.002 / 1.000)
+12-19 13:17:18.926  6700  6700 D NetworkController.WifiSignalController: notifyListener: visible=true, connected=true, inetCondition=1, isDefault=true, wifiTestReported=true, receivedInetCondition=-1, hideDuringMobileSwitching=false
+12-19 13:17:18.931  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:18.998  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:18.998  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:18.998  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:18.998  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:18.999  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:19.092  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:19.199  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:19.199  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:19.199  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:19.199  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:19.200  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:19.252  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:19.400  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:19.401  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:19.401  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:19.401  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:19.402  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:19.412  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 48 Cam Lux 50
+12-19 13:17:19.573  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 48 Cam Lux 50
+12-19 13:17:19.573  1046 17950 I sensors-hal: handle_sns_std_sensor_event:218, phy lux: 50, raw lux : 2, brightness: 513, mode: 38, gain: 19, add1: 0, add2: 20, ts=681994107592912
+12-19 13:17:19.588  1050 21341 I HYPER-HAL: [ResourceManager.cpp]removeResource(): [CPUMaxFreq] RemoveResource Request ID : 41019167
+12-19 13:17:19.589  1050 21341 I HYPER-HAL: [RequestManager.cpp]releaseLocked(): Released ID : 41019167
+12-19 13:17:19.600  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:19.600  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:19.601  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:19.601  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:19.602  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:19.731  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 46 Cam Lux 50
+12-19 13:17:19.801  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:19.802  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:19.802  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:19.802  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:19.804  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:19.891  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 46 Cam Lux 50
+12-19 13:17:19.916 21889 21889 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+12-19 13:17:19.921 21889 21889 I AndroidRuntime: Using default boot image
+12-19 13:17:19.921 21889 21889 I AndroidRuntime: Leaving lock profiling enabled
+12-19 13:17:19.922 21889 21889 D SecNativeFeatureCppIf: encoded
+12-19 13:17:19.922 21889 21889 D SecNativeFeatureCppIf: decoding and unzip finish
+12-19 13:17:19.922 21889 21889 D SecNativeFeatureCppIf: use unCompDataBuff. encoded
+12-19 13:17:19.922 21889 21889 D SecNativeFeatureCppIf: Free unCompDataBuff
+12-19 13:17:19.922 21889 21889 D AndroidRuntime: addProductProperty: pBrand1 is not null
+12-19 13:17:19.922 21889 21889 D AndroidRuntime: addProductProperty: not brand or 7
+12-19 13:17:19.925 21889 21889 I app_process: Using CollectorTypeCC GC.
+12-19 13:17:20.002  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:20.002  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:20.002  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:20.002  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:20.003  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:20.035 21889 21889 D app_process: Time zone APEX ICU file found: /apex/com.android.tzdata/etc/icu/icu_tzdata.dat
+12-19 13:17:20.035 21889 21889 D app_process: I18n APEX ICU file found: /apex/com.android.i18n/etc/icu/icudt70l.dat
+12-19 13:17:20.045 21889 21889 W app_process: ClassLoaderContext classpath size mismatch. expected=0, found=1 (PCL[] | PCL[/system/framework/android.test.runner.jar*2256426886])
+12-19 13:17:20.052  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 46 Cam Lux 50
+12-19 13:17:20.063 21889 21889 E SemDvfsManager_JNI: SemDvfsManager: registerfunction enter
+12-19 13:17:20.064 21889 21889 E SemAffinityControl: SemAffinityControl: registerfunction enter
+12-19 13:17:20.072 21889 21889 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+12-19 13:17:20.082  1109  7891 I SurfaceFlinger: id=17858 createSurf, flag=80004, WindowToken{342c253 type=2032 android.os.Binder@62b8242}#17858
+12-19 13:17:20.115  1256  1256 I AccessibilityManagerService: semIsAccessibilityServiceEnabled()
+12-19 13:17:20.115  1256  1256 I AccessibilityManagerService: accesibilityService is null
+12-19 13:17:20.115  1256  1256 I AccessibilityManagerService: semIsAccessibilityServiceEnabled()
+12-19 13:17:20.115  1256  1256 I AccessibilityManagerService: accesibilityService is null
+12-19 13:17:20.115  1256  1256 D AS.AudioService: Accessibility volume enabled = false
+12-19 13:17:20.121  7230  4781 I TouchInteractionService: onActiveNavBarRegionChanges, region : SkRegion((0,1510,258,1600)(259,1510,460,1600)(461,1510,640,1600))
+12-19 13:17:20.121  6700  6700 V Navbar.Store: ----handleEvent(0) OnUpdateRemoteViewContainer(leftContainer=android.widget.LinearLayout{b7a525a I.E...... ......I. 0,0-79,90 #7f0b04f6 app:id/left_remoteview}, rightContainer=android.widget.LinearLayout{3c8ac8b I.E...... ......I. 641,0-720,90 #7f0b07aa app:id/right_remoteview}, contextualButtonVisible=false, darkIntensity=0.0) [Module] SamsungNavigationBarView
+12-19 13:17:20.121  6700  6700 V Navbar.Store: ------[Band]REMOTE_VIEW_PACK_SET_REMOTEVIEW_CONTAINER
+12-19 13:17:20.121  6700  6700 V Navbar.Store: --------apply(0) UpdateRemoteViewContainer
+12-19 13:17:20.122  6700  6700 V Navbar.Store: --------apply(0) UpdateRemoteViewDarkIntensity
+12-19 13:17:20.122  6700  6700 V Navbar.Store: handleEvent(0) OnNavBarUpdateA11YService(clickable=false, longClickable=false) [Module] NavigationBar
+12-19 13:17:20.122  6700  6700 V Navbar.Store: --[Band]SETUPWIZARD_PACK_UPDATE_A11Y_SERVICE
+12-19 13:17:20.131  7230  4781 I TouchInteractionService: onActiveNavBarRegionChanges, region : SkRegion((0,1510,258,1600)(259,1510,460,1600)(461,1510,640,1600))
+12-19 13:17:20.203  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:20.204  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:20.204  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:20.204  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:20.205  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:20.211  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 46 Cam Lux 50
+12-19 13:17:20.372  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 48 Cam Lux 50
+12-19 13:17:20.404  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:20.404  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:20.405  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:20.405  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:20.407  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:20.532  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 38 Cam Lux 50
+12-19 13:17:20.533  1046 17950 I sensors-hal: handle_sns_std_sensor_event:218, phy lux: 50, raw lux : 2, brightness: 437, mode: 38, gain: 19, add1: 0, add2: 20, ts=681995067599683
+12-19 13:17:20.605  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:20.606  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:20.606  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:20.606  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:20.607  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:20.692  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 36 Cam Lux 50
+12-19 13:17:20.806  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:20.806  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:20.806  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:20.806  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:20.807  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:20.851  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 36 Cam Lux 50
+12-19 13:17:20.931  6700  6700 D KeyguardSecIndicationPolicy:  remove Item pos = DEFAULT                             , id =  3706, 
+12-19 13:17:20.932  6700  6700 D KeyguardSecIndicationPolicy:   update top pos = DEFAULT, item = [id=3706|ty=BATTERY|pr=40|txt=  100%|ti=duration=3000|an=false] -> [id=3700|ty=UNLOCK_GUIDE|pr=25|txt=Swipe to open|ti=duration=PERSISTENT|an=false]
+12-19 13:17:20.932  6700  6700 D KeyguardSecIndicationController: onIndicationChanged() return - keyguard is not visible, pos = DEFAULT, item = [id=3700|ty=UNLOCK_GUIDE|pr=25|txt=Swipe to open|ti=duration=PERSISTENT|an=false]
+12-19 13:17:21.006  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:21.007  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:21.007  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:21.007  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:21.008  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:21.012  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 41 Cam Lux 50
+12-19 13:17:21.110 21889 21889 D SemCscFeature: Encoded
+12-19 13:17:21.115 21889 21889 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@297b5; boundsInParent: Rect(0, 0 - 0, 105); boundsInScreen: Rect(720, 52 - 720, 157); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:21.116 21889 21889 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@1dc03; boundsInParent: Rect(0, 0 - 720, 105); boundsInScreen: Rect(0, 1558 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.Button; text: CP RAM LOGGING: OFF; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: com.sec.android.app.servicemodeapp:id/cPRamLogging; uniqueId: null; checkable: false; checked: false; focusable: true; focused: false; selected: false; clickable: true; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: true; visible: false; actions: [AccessibilityAction: ACTION_FOCUS - null, AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_CLICK - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_NEXT_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY - null, AccessibilityAction: ACTION_SET_SELECTION - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:21.117 21889 21889 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@1e385; boundsInParent: Rect(0, 0 - 720, 212); boundsInScreen: Rect(0, 1704 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:21.117 21889 21889 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@1f64a; boundsInParent: Rect(0, 0 - 720, 319); boundsInScreen: Rect(0, 1957 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:21.117 21889 21889 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@2090f; boundsInParent: Rect(0, 0 - 720, 105); boundsInScreen: Rect(0, 2317 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:21.117 21889 21889 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@21bd4; boundsInParent: Rect(0, 0 - 720, 319); boundsInScreen: Rect(0, 2463 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:21.117 21889 21889 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@2361b; boundsInParent: Rect(0, 0 - 720, 212); boundsInScreen: Rect(0, 2823 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:21.117 21889 21889 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@248e0; boundsInParent: Rect(0, 0 - 720, 105); boundsInScreen: Rect(0, 3076 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:21.117 21889 21889 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@257e4; boundsInParent: Rect(0, 0 - 720, 105); boundsInScreen: Rect(0, 3222 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:21.117 21889 21889 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@25f66; boundsInParent: Rect(0, 0 - 720, 105); boundsInScreen: Rect(0, 3368 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:21.117 21889 21889 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@2722b; boundsInParent: Rect(0, 0 - 720, 0); boundsInScreen: Rect(0, 3514 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:21.117 21889 21889 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@266e8; boundsInParent: Rect(0, 0 - 720, 0); boundsInScreen: Rect(0, 3514 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:21.117 21889 21889 I AccessibilityNodeInfoDumper: Skipping invisible child: android.view.accessibility.AccessibilityNodeInfo@279ad; boundsInParent: Rect(0, 0 - 720, 105); boundsInScreen: Rect(0, 3514 - 720, 1510); packageName: com.sec.android.app.servicemodeapp; className: android.widget.LinearLayout; text: null; error: null; maxTextLength: -1; stateDescription: null; contentDescription: null; tooltipText: null; viewIdResName: null; uniqueId: null; checkable: false; checked: false; focusable: false; focused: false; selected: false; clickable: false; longClickable: false; contextClickable: false; enabled: true; password: false; scrollable: false; importantForAccessibility: false; visible: false; actions: [AccessibilityAction: ACTION_SELECT - null, AccessibilityAction: ACTION_CLEAR_SELECTION - null, AccessibilityAction: ACTION_ACCESSIBILITY_FOCUS - null, AccessibilityAction: ACTION_SHOW_ON_SCREEN - null]; isTextSelectable: false
+12-19 13:17:21.119 21889 21889 W AccessibilityNodeInfoDumper: Fetch time: 6ms
+12-19 13:17:21.127 21889 21889 D AndroidRuntime: Shutting down VM
+12-19 13:17:21.129  1109  1109 I Layer   : id=17858 removedFromDrawingState WindowToken{342c253 type=2032 android.os.Binder@62b8242}#17858 (120)
+12-19 13:17:21.130  1109  1109 I SurfaceFlinger: id=17858 Removed WindowToken{342c253 type=2032 android.os.Binder@62b8242}#17858 (120)
+12-19 13:17:21.130  1109  1109 I Layer   : id=17858 Destroyed WindowToken{342c253 type=2032 android.os.Binder@62b8242}#17858
+12-19 13:17:21.171  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 42 Cam Lux 50
+12-19 13:17:21.208  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:21.209  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:21.209  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:21.209  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:21.210  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:21.332  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 38 Cam Lux 50
+12-19 13:17:21.409  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:21.410  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:21.410  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:21.410  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:21.411  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:21.492  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 38 Cam Lux 50
+12-19 13:17:21.492  1046 17950 I sensors-hal: handle_sns_std_sensor_event:218, phy lux: 50, raw lux : 2, brightness: 494, mode: 38, gain: 19, add1: 0, add2: 20, ts=681996027597964
+12-19 13:17:21.610  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:21.611  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:21.611  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:21.611  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:21.612  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:21.652  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 42 Cam Lux 50
+12-19 13:17:21.812  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 42 Cam Lux 50
+12-19 13:17:21.812  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:21.812  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:21.812  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:21.812  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:21.814  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:21.942  1256  7397 D SemWifiUsabilityStatsMonitor: onWifiUsabilityStats - seqNum 5862, isSameBssidAndFreq true
+12-19 13:17:21.945  6700  6700 D NetworkController.WifiSignalController: notifyListener: visible=true, connected=true, inetCondition=1, isDefault=true, wifiTestReported=true, receivedInetCondition=-1, hideDuringMobileSwitching=false
+12-19 13:17:21.950  1256  6625 I SemWifiLinkQualityMonitor: Link Qos query: inf. ms / 0 Mbps
+12-19 13:17:21.972  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 36 Cam Lux 50
+12-19 13:17:22.013  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:22.014  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:22.014  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:22.014  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:22.015  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:22.132  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 36 Cam Lux 50
+12-19 13:17:22.214  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:22.215  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:22.215  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:22.215  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:22.216  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:22.240  1256 10044 D InputDispatcher: Inject motion (21928/2000): action=0x0, time=135941554000000, f=0x0, d=0 dsdx=1.000000 dtdx=0.000000
+12-19 13:17:22.240  1256  2315 I InputDispatcher: Delivering touch to (6700): action: 0x4, f=0x0, d=0, '266d454', t=1 
+12-19 13:17:22.241  1256  2315 I InputDispatcher: Delivering touch to (20734): action: 0x0, f=0x0, d=0, 'ef7c42d', t=1 
+12-19 13:17:22.241  1256  1304 I GestureDetector: obtain mCurrentDownEvent. id: -820619406 caller: com.android.server.wm.SystemGesturesPointerEventListener.onPointerEvent:203 com.android.server.wm.PointerEventDispatcher.onInputEvent:53 android.view.InputEventReceiver.dispatchInputEvent:285 
+12-19 13:17:22.242  1256  1304 I GestureDetector: obtain mCurrentDownEvent. id: -820619406 caller: com.android.server.wm.SystemPerformancePointerEventListener.onPointerEvent:89 com.android.server.wm.PointerEventDispatcher.onInputEvent:53 android.view.InputEventReceiver.dispatchInputEvent:285 
+12-19 13:17:22.242 20734 20734 I ViewRootImpl@842fc0[SysDump]: ViewPostIme pointer 0
+12-19 13:17:22.243  6700  6700 I ViewRootImpl@a2b58d4[NavigationBar0]: MSG_WINDOW_TOUCH_MODE_CHANGED 
+12-19 13:17:22.244  1256 10044 D InputDispatcher: Inject motion (21928/2000): action=0x1, time=135941554000000, f=0x0, d=0 dsdx=1.000000 dtdx=0.000000
+12-19 13:17:22.244 10247 10247 I ViewRootImpl@c260f6[CocktailBarService]: MSG_WINDOW_TOUCH_MODE_CHANGED 
+12-19 13:17:22.244  1256  2315 I InputDispatcher: Delivering touch to (20734): action: 0x1, f=0x0, d=0, 'ef7c42d', t=1 
+12-19 13:17:22.244 20734 20734 I ViewRootImpl@842fc0[SysDump]: ViewPostIme pointer 1
+12-19 13:17:22.244  1256  1304 I GestureDetector: obtain mCurrentMotionEventRaw. action: 1 id: -133605579
+12-19 13:17:22.245  1256  1304 I GestureDetector: obtain mCurrentMotionEventRaw. action: 1 id: -133605579
+12-19 13:17:22.245  6700  6700 V Navbar.Store: --NavBarStates canUseNavBarBackgroundFrame: false
+12-19 13:17:22.246  6700  6700 I ViewRootImpl@438229[StatusBar]: MSG_WINDOW_TOUCH_MODE_CHANGED 
+12-19 13:17:22.248 20734 20734 I ViewRootImpl@842fc0[SysDump]: MSG_WINDOW_TOUCH_MODE_CHANGED 
+12-19 13:17:22.248 20734 20734 I ServiceModeApp: [Class]SysDump, [Method]onClick, 
+12-19 13:17:22.248 20734 20734 I ServiceModeApp: [Class]SysDump, [Method]silentLog, 
+12-19 13:17:22.248 20734 20734 D ServiceModeApp: [Class]SysDump, [Message]is commercial version ? : true
+12-19 13:17:22.248 20734 20734 D ServiceModeApp: [Class]SysDump, [Message]otpAuth : true
+12-19 13:17:22.248 20734 20734 D ServiceModeApp: [Class]SysDump, [Message]It's commercial version and Authentication
+12-19 13:17:22.249 20734 20734 D ServiceModeApp: [Class]SysDump, [Message]Silence saving : start now! 
+12-19 13:17:22.250 20734 20734 I ServiceModeApp: [Class]SysDump, [Message]progress dialog show
+12-19 13:17:22.250 20734 20734 I ServiceModeApp: [Class]SysDump, [Message]showProgressDialog()
+12-19 13:17:22.250 20734 20734 I Dialog  : mIsDeviceDefault = true, mIsSamsungBasicInteraction = false, isMetaDataInActivity = false
+12-19 13:17:22.251 16939 16939 I SilentLog: SILENT_LOG_STARTSTOP
+12-19 13:17:22.255 16939 16939 I SilentLog: bAdplSupported = true
+12-19 13:17:22.255 16939 16939 I SilentLog: showNotification
+12-19 13:17:22.258  6700 14302 D SecFgsManagerControllerImpl: onForegroundStateChanged: dialogShown:false, isForeground:false, packageName:com.sec.modem.settings , token:android.os.BinderProxy@ef709f, userId:0
+12-19 13:17:22.262  1256  7232 E ActivityManager: Sending non-protected broadcast com.sec.modem.settings.cplogging.SILENTLOG from system 16939:com.sec.modem.settings/1000 pkg com.sec.modem.settings
+12-19 13:17:22.262  1256  7232 E ActivityManager: java.lang.Throwable
+12-19 13:17:22.262  1256  7232 E ActivityManager: 	at com.android.server.am.ActivityManagerService.checkBroadcastFromSystem(ActivityManagerService.java:16105)
+12-19 13:17:22.262  1256  7232 E ActivityManager: 	at com.android.server.am.ActivityManagerService.broadcastIntentLocked(ActivityManagerService.java:16922)
+12-19 13:17:22.262  1256  7232 E ActivityManager: 	at com.android.server.am.ActivityManagerService.broadcastIntentLocked(ActivityManagerService.java:16124)
+12-19 13:17:22.262  1256  7232 E ActivityManager: 	at com.android.server.am.ActivityManagerService.broadcastIntentWithFeature(ActivityManagerService.java:17101)
+12-19 13:17:22.262  1256  7232 E ActivityManager: 	at android.app.IActivityManager$Stub.onTransact(IActivityManager.java:2728)
+12-19 13:17:22.262  1256  7232 E ActivityManager: 	at com.android.server.am.ActivityManagerService.onTransact(ActivityManagerService.java:3135)
+12-19 13:17:22.262  1256  7232 E ActivityManager: 	at android.os.Binder.execTransactInternal(Binder.java:1316)
+12-19 13:17:22.262  1256  7232 E ActivityManager: 	at android.os.Binder.execTransact(Binder.java:1280)
+12-19 13:17:22.263 16939 16939 I SilentLog: KILLING MDLOG
+12-19 13:17:22.272  6700  6700 D BubblesManager: setupNotifPipeline(), onEntryRemoved : reason=8
+12-19 13:17:22.276 20734 20734 I DecorView: [INFO] isPopOver=false config=false
+12-19 13:17:22.276 20734 20734 I DecorView: updateCaptionType: isFloating=true isApplication=true hasWindowDecorCaption=false this=DecorView@aafba36[]
+12-19 13:17:22.276 20734 20734 D DecorView: setCaptionType = 0, this = DecorView@aafba36[]
+12-19 13:17:22.277 20734 20734 I DecorView: setWindowBackground: isPopOver=false color=ff010101 d=android.graphics.drawable.InsetDrawable@e1ff2a4
+12-19 13:17:22.279 20734 20734 D ScrollView: initGoToTop
+12-19 13:17:22.280 20734 20734 D ScrollView: initGoToTop
+12-19 13:17:22.280  6700  6700 D PluginInstanceManager: stopListening
+12-19 13:17:22.283 20734 20734 W Settings: Setting show_button_background has moved from android.provider.Settings.System to android.provider.Settings.Global, returning read-only value.
+12-19 13:17:22.284  6700  6700 I FaceWidgetPositionAlgorithm: getClockContainerHeight() supplier = 193, bottom margin = 0, real height = 238
+12-19 13:17:22.285  6700  6700 I FaceWidgetPositionAlgorithm: getClockContainerHeight() supplier = 193, bottom margin = 45, real height = 238
+12-19 13:17:22.285  6700  6700 I FaceWidgetPositionAlgorithm: getMediaContainerHeight() height = 0 container Visibility = 8, isValid = false, mIsDozing = false, fraction = 1.0, source = 0, target = 0
+12-19 13:17:22.285  6700  6700 I FaceWidgetPositionAlgorithm: getMediaContainerHeight() supplier = 0
+12-19 13:17:22.287 20734 20760 D NativeCustomFrequencyManager: [NativeCFMS] BpCustomFrequencyManager::BpCustomFrequencyManager()
+12-19 13:17:22.289  1256  7232 D InputTransport: Input channel constructed: '90dc6fd', fd=935
+12-19 13:17:22.289  1256  7232 D InputTransport: Input channel constructed: '90dc6fd', fd=937
+12-19 13:17:22.290  1256  7232 D InputTransport: Input channel constructed: '90dc6fd', fd=939
+12-19 13:17:22.290  1109  7891 I SurfaceFlinger: id=17859 createSurf, flag=80004, 90dc6fd com.sec.android.app.servicemodeapp/com.sec.android.app.servicemodeapp.SysDump#17859
+12-19 13:17:22.291 21931 21931 E diag_mdlog_system: diag_mdlog: command = k
+12-19 13:17:22.291 21931 21931 E diag_mdlog_system: diag:main: kernel supported: NUM_PERIPHERALS = 7, DIAG_CON_ALL: 255
+12-19 13:17:22.291 21931 21931 E diag_mdlog_system: diag: Session for peripheral mask 255 is active with PID = 20985
+12-19 13:17:22.291 21931 21931 E diag_mdlog_system: diag_mdlog: Closing diag_fd_temp
+12-19 13:17:22.291 21931 21931 E diag_mdlog_system: 
+12-19 13:17:22.291 21931 21931 E diag_mdlog_system: diag_mdlog: stopping diag_mdlog instance pid: 20985
+12-19 13:17:22.291 20985 20985 E diag_mdlog_system: diag: Signal received
+12-19 13:17:22.291 20985 20985 E diag_mdlog_system: diag: Sending empty mask MSM
+12-19 13:17:22.292  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 42 Cam Lux 50
+12-19 13:17:22.293  1109  1228 I SurfaceFlinger: id=17860 createSurf, flag=24000, Surface(name=de4ca85 StatusBar)/@0x883f191 - animation-leash of insets_animation#17860
+12-19 13:17:22.294  1109  7891 I SurfaceFlinger: id=17861 createSurf, flag=24000, Surface(name=266d454 NavigationBar0)/@0x4859ab - animation-leash of insets_animation#17861
+12-19 13:17:22.295  1256  1307 W Choreographer: Frame time is 0.063361 ms in the future!  Check that graphics HAL is generating vsync timestamps using the correct timebase.
+12-19 13:17:22.296  1256  7232 D InputTransport: Input channel destroyed: '90dc6fd', fd=939
+12-19 13:17:22.296 20734 20734 D InsetsController: onStateChanged: InsetsState: {mDisplayFrame=Rect(0, 0 - 720, 1600), mDisplayCutout=DisplayCutout{insets=Rect(0, 52 - 0, 0) waterfall=Insets{left=0, top=0, right=0, bottom=0} boundingRect={Bounds=[Rect(0, 0 - 0, 0), Rect(272, 0 - 448, 52), Rect(0, 0 - 0, 0), Rect(0, 0 - 0, 0)]} cutoutPathParserInfo={CutoutPathParserInfo{displayWidth=720 displayHeight=1600 physicalDisplayWidth=720 physicalDisplayHeight=1600 density={1.875} cutoutSpec={M 0,0 H -46.93333333333333 V 27.73333333333333 H 46.93333333333333 V 0 H 0 Z @dp} rotation={0} scale={1.0} physicalPixelDisplaySizeRatio={1.0}}}}, mRoundedCorners=RoundedCorners{[RoundedCorner{position=TopLeft, radius=60, center=Point(60, 60)}, RoundedCorner{position=TopRight, radius=60, center=Point(660, 60)}, RoundedCorner{position=BottomRight, radius=60, center=Point(660, 1540)}, RoundedCorner{position=BottomLeft, radius=60, center=Point(60, 1540)}]}  mRoundedCornerFrame=Rect(0, 0 - 720, 1600), mPrivacyIndicatorBounds=PrivacyIndicatorBounds {static bounds=Rect(637, 0 - 720, 52) rotation=0}, mSources= { InsetsSource: {mType=ITYPE_STATUS_BAR, mFrame=[0,0][720,52], mVisible=true, mInsetsRoundedCornerFrame=false}, InsetsSource: {mType=ITYPE_NAVIGATION_BAR, mFrame=[0,1510][720,1600], mVisible=true, mInsetsRoundedCornerFrame=false}, InsetsSource: {mType=ITYPE_LEFT_GESTURES, mFrame=[0,0][0,1600], mVisible=true, mInsetsRoundedCornerFrame=false}, InsetsSource: {mType=ITYPE_RIGHT_GESTURES, mFrame=[720,0][720,1600], mVisible=true, mInsetsRoundedCornerFrame=false}, InsetsSource: {mType=ITYPE_TOP_MANDATORY_GESTURES, mFrame=[0,0][720,75], mVisible=true, mInsetsRoundedCornerFrame=false}, InsetsSource: {mType=ITYPE_BOTTOM_MANDATORY_GESTURES, mFrame=[0,1510][720,1600], mVisible=true, mInsetsRoundedCornerFrame=false}, InsetsSource: {mType=ITYPE_LEFT_DISPLAY_CUTOUT, mFrame=[0,0][-100000,1600], mVisible=true, mInsetsRoundedCornerFrame=false}, InsetsSource: {mType=ITYPE_TOP_DISPLAY_CUTOUT, mFrame=[0,0][720,52], mVisible=true, mInsetsRoundedCornerFrame=false}, InsetsSource: {mType=ITYPE_RIGHT_DISPLAY_CUTOUT, mFrame=[100000,0][720,1600], mVisible=true, mInsetsRoundedCornerFrame=false}, InsetsSource: {mType=ITYPE_BOTTOM_DISPLAY_CUTOUT, mFrame=[0,100000][720,1600], mVisible=true, mInsetsRoundedCornerFrame=false}, InsetsSource: {mType=ITYPE_TOP_TAPPABLE_ELEMENT, mFrame=[0,0][720,52], mVisible=true, mInsetsRoundedCornerFrame=false}, InsetsSource: {mType=ITYPE_BOTTOM_TAPPABLE_ELEMENT, mFrame=[0,1510][720,1600], mVisible=true, mInsetsRoundedCornerFrame=false} } host=com.sec.android.app.servicemodeapp/com.sec.android.app.servicemodeapp.SysDump from=android.view.ViewRootImpl.setView:1732
+12-19 13:17:22.297 20734 20734 I ViewRootImpl@d7f00ed[SysDump]: setView = com.android.internal.policy.DecorView@aafba36 TM=true
+12-19 13:17:22.300 20734 20734 I ViewRootImpl@d7f00ed[SysDump]: performTraversals params={(0,0)(wrapxwrap) gr=CENTER sim={adjust=pan forwardNavigation} ty=APPLICATION fmt=TRANSLUCENT wanim=0x10302f7 surfaceInsets=Rect(5, 5 - 5, 5)
+12-19 13:17:22.300 20734 20734 I ViewRootImpl@d7f00ed[SysDump]:   fl=1820002
+12-19 13:17:22.300 20734 20734 I ViewRootImpl@d7f00ed[SysDump]:   pfl=42000000
+12-19 13:17:22.300 20734 20734 I ViewRootImpl@d7f00ed[SysDump]:   bhv=DEFAULT
+12-19 13:17:22.300 20734 20734 I ViewRootImpl@d7f00ed[SysDump]:   fitTypes=STATUS_BARS NAVIGATION_BARS CAPTION_BAR
+12-19 13:17:22.300 20734 20734 I ViewRootImpl@d7f00ed[SysDump]:  dimAmount=0.65 dimDuration=150 naviIconColor=0}
+12-19 13:17:22.300 20734 20734 I ViewRootImpl@d7f00ed[SysDump]: performTraversals mFirst=true windowShouldResize=true viewVisibilityChanged=false mForceNextWindowRelayout=false params={(0,0)(wrapxwrap) gr=CENTER sim={adjust=pan forwardNavigation} ty=APPLICATION fmt=TRANSLUCENT wanim=0x10302f7 surfaceInsets=Rect(5, 5 - 5, 5)
+12-19 13:17:22.300 20734 20734 I ViewRootImpl@d7f00ed[SysDump]:   fl=1820002
+12-19 13:17:22.300 20734 20734 I ViewRootImpl@d7f00ed[SysDump]:   pfl=42000000
+12-19 13:17:22.300 20734 20734 I ViewRootImpl@d7f00ed[SysDump]:   bhv=DEFAULT
+12-19 13:17:22.300 20734 20734 I ViewRootImpl@d7f00ed[SysDump]:   fitTypes=STATUS_BARS NAVIGATION_BARS CAPTION_BAR
+12-19 13:17:22.300 20734 20734 I ViewRootImpl@d7f00ed[SysDump]:  dimAmount=0.65 dimDuration=150 naviIconColor=0}
+12-19 13:17:22.301  1256 10044 V WindowManager: Relayout Window{90dc6fd u0 com.sec.android.app.servicemodeapp/com.sec.android.app.servicemodeapp.SysDump}: viewVisibility=0 req=720x210 d0
+12-19 13:17:22.301  1109  7891 I SurfaceFlinger: id=17862 createSurf, flag=40004, com.sec.android.app.servicemodeapp/com.sec.android.app.servicemodeapp.SysDump$_20734#17862
+12-19 13:17:22.306  1256 10044 V WindowManager: Relayout hash=90dc6fd, pid=20734, syncId=-1: mAttrs={(0,0)(wrapxwrap) gr=CENTER sim={adjust=pan forwardNavigation} ty=APPLICATION fmt=TRANSLUCENT wanim=0x10302f7 surfaceInsets=Rect(5, 5 - 5, 5)
+12-19 13:17:22.306  1256 10044 V WindowManager:   fl=1820002
+12-19 13:17:22.306  1256 10044 V WindowManager:   pfl=42000000
+12-19 13:17:22.306  1256 10044 V WindowManager:   bhv=DEFAULT
+12-19 13:17:22.306  1256 10044 V WindowManager:   fitTypes=STATUS_BARS NAVIGATION_BARS CAPTION_BAR
+12-19 13:17:22.306  1256 10044 V WindowManager:  dimAmount=0.65 dimDuration=150 naviIconColor=0}
+12-19 13:17:22.308 20734 20734 I ViewRootImpl@d7f00ed[SysDump]: updateBlastSurfaceIfNeeded mBlastBufferQueue=null isSameSurfaceControl=false
+12-19 13:17:22.309 20734 20734 I BLASTBufferQueue: new BLASTBufferQueue, mName= ViewRootImpl@d7f00ed[SysDump] mNativeObject= 0xb400007339c6b0d0 sc.mNativeObject= 0xb4000072c9cb4720 caller= android.view.ViewRootImpl.updateBlastSurfaceIfNeeded:2909 android.view.ViewRootImpl.relayoutWindow:9847 android.view.ViewRootImpl.performTraversals:3884 android.view.ViewRootImpl.doTraversal:3116 android.view.ViewRootImpl$TraversalRunnable.run:10885 android.view.Choreographer$CallbackRecord.run:1301 android.view.Choreographer$CallbackRecord.run:1309 android.view.Choreographer.doCallbacks:923 android.view.Choreographer.doFrame:852 android.view.Choreographer$FrameDisplayEventReceiver.run:1283 
+12-19 13:17:22.309 20734 20734 I BLASTBufferQueue: update, w= 730 h= 220 mName = ViewRootImpl@d7f00ed[SysDump] mNativeObject= 0xb400007339c6b0d0 sc.mNativeObject= 0xb4000072c9cb4720 format= -3 caller= android.graphics.BLASTBufferQueue.<init>:84 android.view.ViewRootImpl.updateBlastSurfaceIfNeeded:2909 android.view.ViewRootImpl.relayoutWindow:9847 android.view.ViewRootImpl.performTraversals:3884 android.view.ViewRootImpl.doTraversal:3116 android.view.ViewRootImpl$TraversalRunnable.run:10885 
+12-19 13:17:22.310 20734 20734 I ViewRootImpl@d7f00ed[SysDump]: Relayout returned: old=(0,52,720,1510) new=(0,676,720,886) req=(720,210)0 dur=8 res=0x3 s={true 0xb4000073c9c73110} ch=true seqId=0
+12-19 13:17:22.310 20734 20760 D OpenGLRenderer: eglCreateWindowSurface
+12-19 13:17:22.311 20734 20734 I ViewRootImpl@d7f00ed[SysDump]: mThreadedRenderer.initialize() mSurface={isValid=true 0xb4000073c9c73110} hwInitialized=true
+12-19 13:17:22.312  1109  1109 I Layer   : id=17853 removedFromDrawingState Surface(name=de4ca85 StatusBar)/@0x883f191 - animation-leash of insets_animation#17853 (123)
+12-19 13:17:22.312  1109  1109 I Layer   : id=17854 removedFromDrawingState Surface(name=266d454 NavigationBar0)/@0x4859ab - animation-leash of insets_animation#17854 (123)
+12-19 13:17:22.314 20734 20734 I ViewRootImpl@d7f00ed[SysDump]: reportNextDraw android.view.ViewRootImpl.performTraversals:4438 android.view.ViewRootImpl.doTraversal:3116 android.view.ViewRootImpl$TraversalRunnable.run:10885 android.view.Choreographer$CallbackRecord.run:1301 android.view.Choreographer$CallbackRecord.run:1309 
+12-19 13:17:22.315 20734 20734 I ViewRootImpl@d7f00ed[SysDump]: Setup new sync id=0
+12-19 13:17:22.315 20734 20734 I ViewRootImpl@d7f00ed[SysDump]: Setting syncFrameCallback
+12-19 13:17:22.315 20734 20734 I ViewRootImpl@d7f00ed[SysDump]: registerCallbacksForSync syncBuffer=false
+12-19 13:17:22.320 20734 20765 I ViewRootImpl@d7f00ed[SysDump]: Received frameDrawingCallback syncResult=0 frameNum=1.
+12-19 13:17:22.320 20734 20765 I ViewRootImpl@d7f00ed[SysDump]: Setting up sync and frameCommitCallback
+12-19 13:17:22.320 20734 20760 I BLASTBufferQueue: [ViewRootImpl@d7f00ed[SysDump]#2](f:0,a:0) onFrameAvailable the first frame is available
+12-19 13:17:22.321 20734 20760 I ViewRootImpl@d7f00ed[SysDump]: Received frameCommittedCallback lastAttemptedDrawFrameNum=1 didProduceBuffer=true
+12-19 13:17:22.321 20734 20760 D OpenGLRenderer: CFMS:: SetUp Pid : 20734    Tid : 20760
+12-19 13:17:22.321 20734 20760 W Parcel  : Expecting binder but got null!
+12-19 13:17:22.321 20734 20734 I ViewRootImpl@d7f00ed[SysDump]: onSyncComplete
+12-19 13:17:22.322 20734 20734 I ViewRootImpl@d7f00ed[SysDump]: setupSync seqId=0 mSyncId=0 fn=1 caller=android.view.ViewRootImpl$$ExternalSyntheticLambda11.accept:6 android.window.SurfaceSyncer.lambda$setupSync$1$android-window-SurfaceSyncer:128 android.window.SurfaceSyncer$$ExternalSyntheticLambda1.accept:8 android.window.SurfaceSyncer$SyncSet.checkIfSyncIsComplete:382 android.window.SurfaceSyncer$SyncSet.markSyncReady:359 android.window.SurfaceSyncer.markSyncReady:151 android.view.ViewRootImpl.performTraversals:4503 
+12-19 13:17:22.322 20734 20734 I ViewRootImpl@d7f00ed[SysDump]: reportDrawFinished seqId=0 mSyncId=-1 fn=1 mSurfaceChangedTransaction=0xb4000072f9c71e50
+12-19 13:17:22.323  1109  7891 I SurfaceFlinger: id=17854 Removed Surface(name=266d454 NavigationBar0)/@0x4859ab - animation-leash of insets_animation#17854 (123)
+12-19 13:17:22.323  1109  7891 I SurfaceFlinger: id=17853 Removed Surface(name=de4ca85 StatusBar)/@0x883f191 - animation-leash of insets_animation#17853 (123)
+12-19 13:17:22.328  1109  7891 I SurfaceFlinger: id=17863 createSurf, flag=24004, Surface(name=90dc6fd com.sec.android.app.servicemodeapp/com.sec.android.app.servicemodeapp.SysDump)/@0x9c89b4a - animation-leash of window_animation#17863
+12-19 13:17:22.329  1109  1109 I Layer   : id=17854 Destroyed Surface(name=266d454 NavigationBar0)/@0x4859ab - animation-leash of insets_animation#17854
+12-19 13:17:22.330  1109  1109 I Layer   : id=17853 Destroyed Surface(name=de4ca85 StatusBar)/@0x883f191 - animation-leash of insets_animation#17853
+12-19 13:17:22.331  1109  1228 I SurfaceFlinger: id=17864 createSurf, flag=20004, Dim Layer for - Task=176#17864
+12-19 13:17:22.332  1256 10044 D InputDispatcher: Focus request (0): 90dc6fd com.sec.android.app.servicemodeapp/com.sec.android.app.servicemodeapp.SysDump but waiting because NO_WINDOW
+12-19 13:17:22.332  1256 10044 D InputDispatcher: Focus left window (0): ef7c42d com.sec.android.app.servicemodeapp/com.sec.android.app.servicemodeapp.SysDump
+12-19 13:17:22.334 20734 20734 I ViewRootImpl@842fc0[SysDump]: MSG_WINDOW_FOCUS_CHANGED 0 1
+12-19 13:17:22.336  1109  7891 I SurfaceFlinger: id=17865 createSurf, flag=24000, Surface(name=Dim Layer for - Task=176)/@0xd624bd8 - animation-leash of dimmer#17865
+12-19 13:17:22.342  8665  8696 I ContactsProvider_EventLog: cp_s: [CONTACT con(58) dat(108) acc({sim(2)=77}) calls([logtype:100 cnt:21, logtype:300 cnt:56]) Iso(CM) uId(0) ]
+12-19 13:17:22.342  8665  8696 I ContactsProvider_EventLog: cp_s: [ agr({[2 ,2]=10, [2 ,2 ,2 ,2]=1, [2]=44, [2 ,2 ,2]=3}) ]
+12-19 13:17:22.342  8665  8696 I ContactsProvider_EventLog: cp_s: [ cnt({acore(8665)=1, scs(20914)=1, dialer(20508)=65}) ]
+12-19 13:17:22.342  8665  8696 I ContactsProvider_EventLog: cp_s: [PROFILE ] [SAPROFILE ]
+12-19 13:17:22.342  8665  8696 I ContactsProvider_EventLog: cp_s: [STATE R(F) ]
+12-19 13:17:22.346  1109  1109 I Layer   : Layer [com.sec.android.app.servicemodeapp/com.sec.android.app.servicemodeapp.SysDump$_20734#17862] hidden!! flag(0)
+12-19 13:17:22.381  1256  7232 D InputDispatcher: Focus entered window (0): 90dc6fd com.sec.android.app.servicemodeapp/com.sec.android.app.servicemodeapp.SysDump
+12-19 13:17:22.383 20734 20734 I ViewRootImpl@d7f00ed[SysDump]: MSG_WINDOW_FOCUS_CHANGED 1 0
+12-19 13:17:22.383 20734 20734 I ViewRootImpl@d7f00ed[SysDump]: mThreadedRenderer.initializeIfNeeded()#2 mSurface={isValid=true 0xb4000073c9c73110}
+12-19 13:17:22.386  1109  1109 D SurfaceFlinger: Display 4630947232161729153 HWC layers:
+12-19 13:17:22.386  1109  1109 D SurfaceFlinger:      DEVICE | 0xb400007769f55390 | 0102 | RGBA_8888    |    0.0    0.0  720.0 1600.0 |    0    0  720 1600 | com.sec.android.app.servicemodeapp/c[...].servicemodeapp.SysDump$_20734#17852
+12-19 13:17:22.386  1109  1109 D SurfaceFlinger:  SOLID_COLOR |              | 0000 |  Unknown  |    0.0    0.0    0.0    0.0 |    0    0  720 1600 | Dim Layer for - Task=176#17864
+12-19 13:17:22.386  1109  1109 D SurfaceFlinger:      DEVICE | 0xb400007769f57550 | 0100 | RGBA_8888    |    5.0    0.0  725.0  220.0 |    0  762  720  982 | com.sec.android.app.servicemodeapp/c[...].servicemodeapp.SysDump$_20734#17862
+12-19 13:17:22.386  1109  1109 D SurfaceFlinger:      DEVICE | 0xb400007769f47d40 | 0100 | RGBA_8888    |    0.0    0.0  720.0   52.0 |    0    0  720   52 | StatusBar$_6700#81
+12-19 13:17:22.386  1109  1109 D SurfaceFlinger:      DEVICE | 0xb400007769f48910 | 0100 | RGBA_8888    |    0.0    0.0   67.0  228.0 |  653  371  720  599 | com.samsung.android.app.cocktailbars[...]vice.CocktailBarService$_10247#17695
+12-19 13:17:22.386  1109  1109 D SurfaceFlinger:      DEVICE | 0xb400007769f41260 | 0100 | RGBA_8888    |    0.0    0.0  720.0   90.0 |    0 1510  720 1600 | NavigationBar0$_6700#78
+12-19 13:17:22.386  1109  1109 D SurfaceFlinger: 
+12-19 13:17:22.415  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:22.415  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:22.415  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:22.416  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:22.416  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:22.452  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 42 Cam Lux 50
+12-19 13:17:22.452  1046 17950 I sensors-hal: handle_sns_std_sensor_event:218, phy lux: 50, raw lux : 2, brightness: 494, mode: 38, gain: 19, add1: 0, add2: 20, ts=681996987597964
+12-19 13:17:22.541  1256  1304 I GestureDetector: handleMessage TAP
+12-19 13:17:22.542  1256  1256 I GestureDetector: handleMessage TAP
+12-19 13:17:22.611  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 42 Cam Lux 50
+12-19 13:17:22.618  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:22.618  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:22.618  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:22.618  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:22.619  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:22.662  1109  1109 I Layer   : id=17863 removedFromDrawingState Surface(name=90dc6fd com.sec.android.app.servicemodeapp/com.sec.android.app.servicemodeapp.SysDump)/@0x9c89b4a - animation-leash of window_animation#17863 (124)
+12-19 13:17:22.662  1109  1109 I Layer   : id=17865 removedFromDrawingState Surface(name=Dim Layer for - Task=176)/@0xd624bd8 - animation-leash of dimmer#17865 (124)
+12-19 13:17:22.663  1109  1109 I SurfaceFlinger: id=17865 Removed Surface(name=Dim Layer for - Task=176)/@0xd624bd8 - animation-leash of dimmer#17865 (124)
+12-19 13:17:22.663  1109  1109 I SurfaceFlinger: id=17863 Removed Surface(name=90dc6fd com.sec.android.app.servicemodeapp/com.sec.android.app.servicemodeapp.SysDump)/@0x9c89b4a - animation-leash of window_animation#17863 (124)
+12-19 13:17:22.663  1109  1109 I Layer   : id=17863 Destroyed Surface(name=90dc6fd com.sec.android.app.servicemodeapp/com.sec.android.app.servicemodeapp.SysDump)/@0x9c89b4a - animation-leash of window_animation#17863
+12-19 13:17:22.663  1109  1109 I Layer   : id=17865 Destroyed Surface(name=Dim Layer for - Task=176)/@0xd624bd8 - animation-leash of dimmer#17865
+12-19 13:17:22.698 21312 18586 I NetworkScheduler.Stats: (REDACTED) Task %s/%s started execution. cause:%s exec_start_elapsed_seconds: %s
+12-19 13:17:22.703 21312 20913 I NetworkScheduler.Stats: (REDACTED) Task %s/%s finished executing. cause:%s result: %s elapsed_millis: %s uptime_millis: %s exec_start_elapsed_seconds: %s
+12-19 13:17:22.771  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 40 Cam Lux 50
+12-19 13:17:22.785 10247  2098 I AppsEdge.Badge: getBadgeIconType 0
+12-19 13:17:22.795 20937 20956 I BadgeProvider: query, [selection] : null
+12-19 13:17:22.818  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:22.818  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:22.818  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:22.818  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:22.819  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:22.882  6700  6700 D SecPowerUI.Notification: showChargingNotice oldChargingType : 11 / currentChargingType : 11, oldChargingTime : 0 / mChargingTime : 0
+12-19 13:17:22.883  6700  6700 D SecPowerUI.Notification: There is no change about charging status, so return!
+12-19 13:17:22.931  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 36 Cam Lux 50
+12-19 13:17:23.019  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:23.019  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:23.019  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:23.019  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:23.020  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:23.091  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 36 Cam Lux 50
+12-19 13:17:23.108 20985 20985 E diag_mdlog_system: diag: diag_kill_qshrink4_threads: Initiate qshrink threads kill (qshrink_kill_thread: 1)
+12-19 13:17:23.109 20985 20985 E diag_mdlog_system: diag:In diag_kill_qshrink4_threads finished killing qshrink4 threads
+12-19 13:17:23.109 20985 21024 E diag_mdlog_system: diag: In adpl_read_thread, Exit read thread for 0 length packet
+12-19 13:17:23.109 20985 20985 E diag_mdlog_system: diag: diag_kill_adpl_threads: Initiate adpl threads kill (adpl_kill_thread: 1)
+12-19 13:17:23.110 20985 20985 E diag_mdlog_system:  diag_send_cmds_to_disable_adpl: Closing IPA node to adpl driver
+12-19 13:17:23.119 20985 20985 E diag_mdlog_system:  diag_send_cmds_to_disable_adpl: Closed IPA node, ret: 0
+12-19 13:17:23.119  1565  1565 I ADPL_SDM_INFO: [adpl_peripheral.c:814] odl_ph_recv_msg():Read 1 data from ipa device file
+12-19 13:17:23.119  1565  1565 I ADPL_SDM_INFO: [adpl_peripheral.c:685] odl_process_ph_reset():Processing ODL reset for odl_status:0
+12-19 13:17:23.120 20985 20985 E diag_mdlog_system: diag: In diag_kill_adpl_threads, Successful in killing config thread
+12-19 13:17:23.120  1565  1565 I ADPL_SDM_INFO: [adpl_dpm.c:755] odl_dpm_port_close():qmi_client_send_msg_sync(dpm_port_close): error 0 result 0
+12-19 13:17:23.120 20985 21025 E diag_mdlog_system: diag: In adpl_write_thread: Exit write thread after write completion
+12-19 13:17:23.120  1565  1565 I ADPL_SDM_INFO: [adpl_dpm.c:765] odl_dpm_port_close():ODL port closed
+12-19 13:17:23.121  1565  1565 I ADPL_SDM_INFO: [adpl_peripheral.c:580] adpl_ph_get_ep_info():Peripheral type 2, peripheral id 3, ipa consumer EP -1, ipa producer EP 17 
+12-19 13:17:23.121  1565  1565 I ADPL_SDM_INFO: [adpl_dpm.c:476] adpl_dpm_port_open():Sending to modem  Peripheral type 2, peripheral id 3, ipa consumer EP -1, ipa producer EP 17
+12-19 13:17:23.121 20985 20985 E diag_mdlog_system: diag: In diag_kill_adpl_threads, Successful in killing write thread
+12-19 13:17:23.121 20985 20985 E diag_mdlog_system: diag:In diag_kill_adpl_threads finished killing adpl threads
+12-19 13:17:23.121 20985 20985 E diag_mdlog_system: diag: diag_kill_diagid_threads: Initiate diagid threads kill (diagid_kill_thread: 1)
+12-19 13:17:23.121  1565  1565 I ADPL_SDM_INFO: [adpl_dpm.c:491] adpl_dpm_port_open():qmi_client_send_msg_sync(dpm_port_open): error 0 result 0
+12-19 13:17:23.121  1565  1565 I ADPL_SDM_INFO: [adpl_dpm.c:501] adpl_dpm_port_open():ADPL port opened
+12-19 13:17:23.121  1565  1565 I ADPL_SDM_INFO: [adpl_peripheral.c:769] odl_process_ph_reset():Completed ODL reset processing
+12-19 13:17:23.219  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:23.220  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:23.220  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:23.220  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:23.221  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:23.252  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 40 Cam Lux 50
+12-19 13:17:23.266  6700  6795 D MobileStatusTracker(0/2): onSignalStrengthsChanged level=2, vendorLevel=3
+12-19 13:17:23.270  6700  6795 D MobileSignalController(0/2): notifyListener: enabled=true, connected=true, dataConnected=false, networkType=LTE (LTE), emergencyOnly=false, roaming=false, isDefault=false, dataActivity=, level=3, ca=false, mmWave=false, disabledDataIcon=false, simCard=ETC
+12-19 13:17:23.271  6700  6795 D NetworkController: SignalStrength from intent slotId=0
+12-19 13:17:23.412  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 40 Cam Lux 50
+12-19 13:17:23.412  1046 17950 I sensors-hal: handle_sns_std_sensor_event:218, phy lux: 50, raw lux : 2, brightness: 494, mode: 38, gain: 19, add1: 0, add2: 20, ts=681997947599527
+12-19 13:17:23.421  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:23.421  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:23.421  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:23.421  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:23.423  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:23.571  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 38 Cam Lux 50
+12-19 13:17:23.622  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:23.622  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:23.622  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:23.622  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:23.623  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:23.731  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 40 Cam Lux 50
+12-19 13:17:23.823  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:23.823  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:23.823  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:23.823  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:23.824  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:23.892  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 40 Cam Lux 50
+12-19 13:17:23.911 21939 21939 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+12-19 13:17:23.917 21939 21939 I AndroidRuntime: Using default boot image
+12-19 13:17:23.917 21939 21939 I AndroidRuntime: Leaving lock profiling enabled
+12-19 13:17:23.918 21939 21939 D SecNativeFeatureCppIf: encoded
+12-19 13:17:23.918 21939 21939 D SecNativeFeatureCppIf: decoding and unzip finish
+12-19 13:17:23.918 21939 21939 D SecNativeFeatureCppIf: use unCompDataBuff. encoded
+12-19 13:17:23.918 21939 21939 D SecNativeFeatureCppIf: Free unCompDataBuff
+12-19 13:17:23.918 21939 21939 D AndroidRuntime: addProductProperty: pBrand1 is not null
+12-19 13:17:23.918 21939 21939 D AndroidRuntime: addProductProperty: not brand or 7
+12-19 13:17:23.921 21939 21939 I app_process: Using CollectorTypeCC GC.
+12-19 13:17:24.026  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:24.027  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:24.028  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:24.028  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:24.032  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:24.038 21939 21939 D app_process: Time zone APEX ICU file found: /apex/com.android.tzdata/etc/icu/icu_tzdata.dat
+12-19 13:17:24.038 21939 21939 D app_process: I18n APEX ICU file found: /apex/com.android.i18n/etc/icu/icudt70l.dat
+12-19 13:17:24.048 21939 21939 W app_process: ClassLoaderContext classpath size mismatch. expected=0, found=1 (PCL[] | PCL[/system/framework/android.test.runner.jar*2256426886])
+12-19 13:17:24.051  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 38 Cam Lux 50
+12-19 13:17:24.069 21939 21939 E SemDvfsManager_JNI: SemDvfsManager: registerfunction enter
+12-19 13:17:24.070 21939 21939 E SemAffinityControl: SemAffinityControl: registerfunction enter
+12-19 13:17:24.078 21939 21939 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+12-19 13:17:24.091  1109  1228 I SurfaceFlinger: id=17866 createSurf, flag=80004, WindowToken{626487 type=2032 android.os.Binder@d203cc6}#17866
+12-19 13:17:24.121 20985 20985 E diag_mdlog_system: diag:In diag_kill_diagid_threads Cleaned up diagid resources
+12-19 13:17:24.121 20985 20985 E diag_mdlog_system: diag: diag_kill_key_info_threads: enter enabled:0 data_ready:0
+12-19 13:17:24.130  1256  1256 I AccessibilityManagerService: semIsAccessibilityServiceEnabled()
+12-19 13:17:24.130  1256  1256 I AccessibilityManagerService: accesibilityService is null
+12-19 13:17:24.130  1256  1256 I AccessibilityManagerService: semIsAccessibilityServiceEnabled()
+12-19 13:17:24.130  1256  1256 I AccessibilityManagerService: accesibilityService is null
+12-19 13:17:24.130  1256  1256 D AS.AudioService: Accessibility volume enabled = false
+12-19 13:17:24.139  7230  4781 I TouchInteractionService: onActiveNavBarRegionChanges, region : SkRegion((0,1510,258,1600)(259,1510,460,1600)(461,1510,640,1600))
+12-19 13:17:24.141  6700  6700 V Navbar.Store: ----handleEvent(0) OnUpdateRemoteViewContainer(leftContainer=android.widget.LinearLayout{b7a525a I.E...... ......I. 0,0-79,90 #7f0b04f6 app:id/left_remoteview}, rightContainer=android.widget.LinearLayout{3c8ac8b I.E...... ......I. 641,0-720,90 #7f0b07aa app:id/right_remoteview}, contextualButtonVisible=false, darkIntensity=0.0) [Module] SamsungNavigationBarView
+12-19 13:17:24.141  6700  6700 V Navbar.Store: ------[Band]REMOTE_VIEW_PACK_SET_REMOTEVIEW_CONTAINER
+12-19 13:17:24.141  6700  6700 V Navbar.Store: --------apply(0) UpdateRemoteViewContainer
+12-19 13:17:24.142  6700  6700 V Navbar.Store: --------apply(0) UpdateRemoteViewDarkIntensity
+12-19 13:17:24.142  6700  6700 V Navbar.Store: handleEvent(0) OnNavBarUpdateA11YService(clickable=false, longClickable=false) [Module] NavigationBar
+12-19 13:17:24.142  6700  6700 V Navbar.Store: --[Band]SETUPWIZARD_PACK_UPDATE_A11Y_SERVICE
+12-19 13:17:24.147  7230  4781 I TouchInteractionService: onActiveNavBarRegionChanges, region : SkRegion((0,1510,258,1600)(259,1510,460,1600)(461,1510,640,1600))
+12-19 13:17:24.212  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 40 Cam Lux 50
+12-19 13:17:24.227  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:24.228  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:24.228  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:24.228  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:24.229  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:24.372  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 41 Cam Lux 50
+12-19 13:17:24.372  1046 17950 I sensors-hal: handle_sns_std_sensor_event:218, phy lux: 50, raw lux : 2, brightness: 475, mode: 38, gain: 19, add1: 0, add2: 20, ts=681998907599787
+12-19 13:17:24.429  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:24.429  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:24.429  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:24.429  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:24.431  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:24.531  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 37 Cam Lux 50
+12-19 13:17:24.629  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:24.630  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:24.630  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:24.630  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:24.631  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:24.692  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 34 Cam Lux 50
+12-19 13:17:24.830  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:24.830  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:24.830  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:24.830  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:24.831  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:24.852  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 33 Cam Lux 50
+12-19 13:17:24.964  1256  7397 D SemWifiUsabilityStatsMonitor: onWifiUsabilityStats - seqNum 5863, isSameBssidAndFreq true
+12-19 13:17:24.966  1256  6625 I SemWifiLinkQualityMonitor: Link Qos query: inf. ms / 0 Mbps
+12-19 13:17:25.011  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 35 Cam Lux 50
+12-19 13:17:25.031  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:25.031  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:25.031  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:25.031  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:25.033  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:25.122 20985 20985 E diag_mdlog_system: diag: diag_kill_key_info_threads: finished freeing key info resources
+12-19 13:17:25.123 20985 20985 E diag_mdlog_system: diag_kill_comm_read: signalling hidl read thread exit
+12-19 13:17:25.123 20985 20985 E diag_mdlog_system: diag_kill_comm_read: signalling hidl write thread exit
+12-19 13:17:25.123 20985 20985 E diag_mdlog_system: diag: sending signal to unblock read thread
+12-19 13:17:25.123 20985 20991 E diag_mdlog_system:  CreateWaitThread exiting ...[1]..
+12-19 13:17:25.128 21939 21939 D SemCscFeature: Encoded
+12-19 13:17:25.147 21939 21939 W AccessibilityNodeInfoDumper: Fetch time: 11ms
+12-19 13:17:25.155  1046 18211 I sensors-hal: handle_sns_client_event:123, auto_rotation_event_2: mode:255, type:1:0/-0.134,0.309,10.067, ar:0
+12-19 13:17:25.165 21939 21939 D AndroidRuntime: Shutting down VM
+12-19 13:17:25.172  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 41 Cam Lux 50
+12-19 13:17:25.178  1109  1109 I Layer   : id=17866 removedFromDrawingState WindowToken{626487 type=2032 android.os.Binder@d203cc6}#17866 (123)
+12-19 13:17:25.178  1109  1109 I SurfaceFlinger: id=17866 Removed WindowToken{626487 type=2032 android.os.Binder@d203cc6}#17866 (123)
+12-19 13:17:25.179  1109  1109 I Layer   : id=17866 Destroyed WindowToken{626487 type=2032 android.os.Binder@d203cc6}#17866
+12-19 13:17:25.205 20985 20992 E diag_mdlog_system:  Exiting....WriteToDisk 
+12-19 13:17:25.231  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:25.231  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:25.231  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:25.231  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:25.232  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:25.332  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 43 Cam Lux 50
+12-19 13:17:25.332  1046 17950 I sensors-hal: handle_sns_std_sensor_event:218, phy lux: 50, raw lux : 2, brightness: 513, mode: 38, gain: 19, add1: 0, add2: 20, ts=681999867598121
+12-19 13:17:25.432  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:25.433  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:25.433  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:25.433  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:25.434  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:25.491  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:25.633  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:25.633  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:25.634  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:25.634  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:25.635  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:25.651  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:25.695 23275 23394 I PolicyManager: [#CMH#] Is foreground game app: false
+12-19 13:17:25.737 20914 20914 I SCS@AiSearch user 0: (ObserverWorker::AOSP_MP) [main] entering in startWork():  
+12-19 13:17:25.737 20914 20914 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) [main] entering in onChange():  
+12-19 13:17:25.738 20914 20977 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) [AOSP_MP-0] entering in collectChanges():  
+12-19 13:17:25.741  1256 10044 D PackageManager: setEnabledSetting : userId = 0 packageName = com.samsung.android.scs cmp = androidx.work.impl.background.systemalarm.RescheduleReceiver newState = 1 callingPackage = 10093/com.samsung.android.scs
+12-19 13:17:25.742  1256 10044 D ApplicationPolicy: getApplicationStateEnabled : pkg = com.samsung.android.scs userId : 0
+12-19 13:17:25.744  1256 10044 D ApplicationPolicy: getApplicationComponentState : pkg = com.samsung.android.scs userId : 0
+12-19 13:17:25.765 20914 20977 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) fetchInternal values : maxSyncId: 1000000455 indexCount: 65 sourceCount: 65
+12-19 13:17:25.793 20914 20977 I SCS@AiSearch user 0: (IndexManager) [AOSP_MP-0] entering in addIndex():  
+12-19 13:17:25.798 20914 20977 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) fetch: fetching took  45 ms
+12-19 13:17:25.798 20914 20977 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) fetchChanges: applied 0 items
+12-19 13:17:25.799 20914 20977 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) Collect finished. Result: true
+12-19 13:17:25.800 20914 20977 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) enqueue ObserverWorker name: com.sec.android.app.myfiles, policy: APPEND_OR_REPLACE
+12-19 13:17:25.800 20914 20938 I WM-WorkerWrapper: Worker result SUCCESS for Work [ id=7edb249c-7754-4e04-bbc5-4b968f429ef7, tags={ com.sec.android.app.myfiles, com.samsung.android.scs.ai.search.data.collector.ObserverWorker } ]
+12-19 13:17:25.811  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:25.815  1256 10044 D PackageManager: setEnabledSetting : userId = 0 packageName = com.samsung.android.scs cmp = androidx.work.impl.background.systemalarm.RescheduleReceiver newState = 1 callingPackage = 10093/com.samsung.android.scs
+12-19 13:17:25.816  1256 10044 D ApplicationPolicy: getApplicationStateEnabled : pkg = com.samsung.android.scs userId : 0
+12-19 13:17:25.816  1256 10044 D ApplicationPolicy: getApplicationComponentState : pkg = com.samsung.android.scs userId : 0
+12-19 13:17:25.834  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:25.834  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:25.834  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:25.834  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:25.834  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:25.837  9126  9148 W FuseDaemon: Reducing the number of considered missed Gc histogram windows from 104 to 100
+12-19 13:17:25.972  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 46 Cam Lux 50
+12-19 13:17:26.034  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:26.034  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:26.035  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:26.035  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:26.036  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:26.123 20985 20985 E diag_mdlog_system: diag: Sending cond to CreateWaitThread
+12-19 13:17:26.124 20985 20991 E diag_mdlog_system: diag_kill_comm_read: signalling hidl read thread exit
+12-19 13:17:26.124 20985 20991 E diag_mdlog_system: diag_kill_comm_read: signalling hidl write thread exit
+12-19 13:17:26.124 20985 20991 E diag_mdlog_system: diag: CreateWaitThread, Exiting...
+12-19 13:17:26.132  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 43 Cam Lux 50
+12-19 13:17:26.235  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:26.235  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:26.235  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:26.236  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:26.237  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:26.291  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 43 Cam Lux 50
+12-19 13:17:26.292  1046 17950 I sensors-hal: handle_sns_std_sensor_event:218, phy lux: 50, raw lux : 2, brightness: 513, mode: 38, gain: 0, add1: 0, add2: 20, ts=682000827599631
+12-19 13:17:26.324 20985 20985 E diag_mdlog_system: diag: Diag_LSM_DeInit: Timeout while waiting for read thread exit
+12-19 13:17:26.324 20985 20985 E diag_mdlog_system: diag: Diag_LSM_DeInit, Joining the read thread, deinit_rcvd: 0, sig_rcvd: 0
+12-19 13:17:26.436  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:26.436  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:26.436  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:26.436  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:26.438  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:26.451  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 46 Cam Lux 50
+12-19 13:17:26.611  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:26.637  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:26.637  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:26.637  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:26.637  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:26.639  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:26.772  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:26.838  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:26.838  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:26.838  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:26.838  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:26.840  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:26.931  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:26.996  1256  6569 D ConnectivityService: reportNetworkActive, notify 0 listeners
+12-19 13:17:27.039  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:27.039  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:27.039  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:27.039  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:27.040  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:27.093  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:27.142 20985 20985 E diag_mdlog_system: diag: Diag_LSM_DeInit done for pid: 20985
+12-19 13:17:27.149 20985 20985 E diag_mdlog_system: diag: PID file is not present
+12-19 13:17:27.149 20985 20985 E diag_mdlog_system: diag: Exiting program 
+12-19 13:17:27.239  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:27.239  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:27.239  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:27.239  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:27.240  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:27.251  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:27.251  1046 17950 I sensors-hal: handle_sns_std_sensor_event:218, phy lux: 50, raw lux : 2, brightness: 513, mode: 38, gain: 19, add1: 0, add2: 20, ts=682001787599475
+12-19 13:17:27.330 21967 21967 D AndroidRuntime: >>>>>> START com.android.internal.os.RuntimeInit uid 2000 <<<<<<
+12-19 13:17:27.335 21967 21967 I AndroidRuntime: Using default boot image
+12-19 13:17:27.335 21967 21967 I AndroidRuntime: Leaving lock profiling enabled
+12-19 13:17:27.335 21967 21967 D SecNativeFeatureCppIf: encoded
+12-19 13:17:27.336 21967 21967 D SecNativeFeatureCppIf: decoding and unzip finish
+12-19 13:17:27.336 21967 21967 D SecNativeFeatureCppIf: use unCompDataBuff. encoded
+12-19 13:17:27.336 21967 21967 D SecNativeFeatureCppIf: Free unCompDataBuff
+12-19 13:17:27.336 21967 21967 D AndroidRuntime: addProductProperty: pBrand1 is not null
+12-19 13:17:27.336 21967 21967 D AndroidRuntime: addProductProperty: not brand or 7
+12-19 13:17:27.339 21967 21967 I app_process: Using CollectorTypeCC GC.
+12-19 13:17:27.411  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:27.443  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:27.443  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:27.443  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:27.443  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:27.447  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:27.453 21967 21967 D app_process: Time zone APEX ICU file found: /apex/com.android.tzdata/etc/icu/icu_tzdata.dat
+12-19 13:17:27.453 21967 21967 D app_process: I18n APEX ICU file found: /apex/com.android.i18n/etc/icu/icudt70l.dat
+12-19 13:17:27.463 21967 21967 W app_process: ClassLoaderContext classpath size mismatch. expected=0, found=1 (PCL[] | PCL[/system/framework/android.test.runner.jar*2256426886])
+12-19 13:17:27.484 21967 21967 E SemDvfsManager_JNI: SemDvfsManager: registerfunction enter
+12-19 13:17:27.484 21967 21967 E SemAffinityControl: SemAffinityControl: registerfunction enter
+12-19 13:17:27.492 21967 21967 D AndroidRuntime: Calling main entry com.android.commands.uiautomator.Launcher
+12-19 13:17:27.503  1109  1228 I SurfaceFlinger: id=17867 createSurf, flag=80004, WindowToken{6e138bd type=2032 android.os.Binder@8fd8814}#17867
+12-19 13:17:27.532  1256  1256 I AccessibilityManagerService: semIsAccessibilityServiceEnabled()
+12-19 13:17:27.532  1256  1256 I AccessibilityManagerService: accesibilityService is null
+12-19 13:17:27.532  1256  1256 I AccessibilityManagerService: semIsAccessibilityServiceEnabled()
+12-19 13:17:27.532  1256  1256 I AccessibilityManagerService: accesibilityService is null
+12-19 13:17:27.532  1256  1256 D AS.AudioService: Accessibility volume enabled = false
+12-19 13:17:27.545  7230  4781 I TouchInteractionService: onActiveNavBarRegionChanges, region : SkRegion((0,1510,258,1600)(259,1510,460,1600)(461,1510,640,1600))
+12-19 13:17:27.546  6700  6700 V Navbar.Store: ----handleEvent(0) OnUpdateRemoteViewContainer(leftContainer=android.widget.LinearLayout{b7a525a I.E...... ......I. 0,0-79,90 #7f0b04f6 app:id/left_remoteview}, rightContainer=android.widget.LinearLayout{3c8ac8b I.E...... ......I. 641,0-720,90 #7f0b07aa app:id/right_remoteview}, contextualButtonVisible=false, darkIntensity=0.0) [Module] SamsungNavigationBarView
+12-19 13:17:27.546  6700  6700 V Navbar.Store: ------[Band]REMOTE_VIEW_PACK_SET_REMOTEVIEW_CONTAINER
+12-19 13:17:27.546  6700  6700 V Navbar.Store: --------apply(0) UpdateRemoteViewContainer
+12-19 13:17:27.546  6700  6700 V Navbar.Store: --------apply(0) UpdateRemoteViewDarkIntensity
+12-19 13:17:27.547  6700  6700 V Navbar.Store: handleEvent(0) OnNavBarUpdateA11YService(clickable=false, longClickable=false) [Module] NavigationBar
+12-19 13:17:27.547  6700  6700 V Navbar.Store: --[Band]SETUPWIZARD_PACK_UPDATE_A11Y_SERVICE
+12-19 13:17:27.561  7230  4781 I TouchInteractionService: onActiveNavBarRegionChanges, region : SkRegion((0,1510,258,1600)(259,1510,460,1600)(461,1510,640,1600))
+12-19 13:17:27.571  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:27.643  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:27.644  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:27.644  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:27.644  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:27.645  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:27.731  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:27.743  6700  6795 D MobileStatusTracker(0/2): onSignalStrengthsChanged level=2, vendorLevel=3
+12-19 13:17:27.744  6700  6795 D MobileSignalController(0/2): notifyListener: enabled=true, connected=true, dataConnected=false, networkType=LTE (LTE), emergencyOnly=false, roaming=false, isDefault=false, dataActivity=, level=3, ca=false, mmWave=false, disabledDataIcon=false, simCard=ETC
+12-19 13:17:27.747  6700  6795 D NetworkController: SignalStrength from intent slotId=0
+12-19 13:17:27.845  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:27.845  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:27.846  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:27.846  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:27.847  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:27.891  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:27.923  1043  1043 E android.hardware.health@2.1-service-samsung: Could not open /sys/class/power_supply/battery/lrp
+12-19 13:17:27.929  1256  2300 D MotionRecognitionService: [SAR]  onReceive : ACTION_BATTERY_CHANGED, Plugged: 2
+12-19 13:17:27.930  1256  1256 D PhoneWindowManagerExt: ACTION_BATTERY_CHANGED - Level=100, status=2
+12-19 13:17:27.931  1256  1256 D SemWifiApBroadcastReceiver: Received : android.intent.action.BATTERY_CHANGED
+12-19 13:17:27.936  6700  6700 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: false
+12-19 13:17:27.937  6700  6700 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: false
+12-19 13:17:27.938  6700  6700 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: false
+12-19 13:17:27.938  6700  6700 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: false
+12-19 13:17:27.938  6700  6700 D KeyguardUpdateMonitor: received broadcast android.intent.action.BATTERY_CHANGED
+12-19 13:17:27.939  6700  6700 I PowerUI : mBootCompleted = true |  mFullyConnected = true
+12-19 13:17:27.939  6700  6700 W PowerUI : Plug reason
+12-19 13:17:27.939  6700  6700 W PowerUI : Skip charging animation - by plug status
+12-19 13:17:27.939  6700  6700 D PowerUI : priorPlugType = 2 mPlugType = 2 priorBatteryStatus = 2 mBatteryStatus = 2
+12-19 13:17:27.939  6700  6700 W PowerUI : Plug reason
+12-19 13:17:27.939  6700  6700 W PowerUI : Skip charging sound - by plug status
+12-19 13:17:27.939  6700  6700 I PowerUI : oldMisalign : false, curMisalign : false
+12-19 13:17:27.940  6700 11537 D SecPowerUI.Notification: dismissing low battery warning: level=100
+12-19 13:17:27.940  6700 11537 D SecPowerUI.Notification: updateNotification mWarning=false mPlaySound=false
+12-19 13:17:27.940  6700 11537 D SecPowerUI.Notification: SecBatteryStatsSnapshot{batteryLevel=100, currentBatteryMode=0, chargingTime=0, chargingType=11, batteryHealth=2, automaticTestMode=false, isHiccupState=false}
+12-19 13:17:27.941  7013  7013 D SemBigDataInfoController: Intent: android.intent.action.BATTERY_CHANGED
+12-19 13:17:27.941  6700 11537 D SecPowerUI.Notification: 1. restoreScreenTimeOut - saved_value : :
+12-19 13:17:27.941  6700 11537 E SecPowerUI.Notification: no saved value, so we do nothing !!
+12-19 13:17:27.942  6700  6700 D SecPowerUI.Notification: showChargingNotice oldChargingType : 11 / currentChargingType : 11, oldChargingTime : 0 / mChargingTime : 0
+12-19 13:17:27.942  6700  6700 D SecPowerUI.Notification: There is no change about charging status, so return!
+12-19 13:17:27.942  6700  6700 D PowerUI : Battery swelling mode - priorBatterySwellingMode = 0 mBatterySwellingMode = 0 mBatteryStatus = 2
+12-19 13:17:27.942  6700  6700 I PowerUI : mBatteryMiscEvent = 65536
+12-19 13:17:27.942  6700  6700 D KeyguardUpdateMonitor: handleBatteryUpdate
+12-19 13:17:27.944  6700  6700 I AODBatteryManager: updateBatteryData: ACTION_BATTERY_CHANGED
+12-19 13:17:27.946  6700  6700 I AODBatteryManager: saveBatteryData : AOD BatteryData [mBatteryLevel=100, mBatteryStatus=CHARGING, mBatteryPlugType=USB, mBatteryPlugged=true, mRemainingChargeTime=0, mBatteryChargingType=1, mBatteryChargerType=NORMAL, mBatteryOnline=USB, mBatterySwellingMode=NONE, mBatteryProtectMode=false]
+12-19 13:17:27.977  1256  7397 D SemWifiUsabilityStatsMonitor: onWifiUsabilityStats - seqNum 5864, isSameBssidAndFreq true
+12-19 13:17:27.978  1256  6625 I SemWifiLinkQualityMonitor: Link Qos query: inf. ms / 0 Mbps
+12-19 13:17:28.045  1256  8458 D MotionRecognitionService: values = 50.0
+12-19 13:17:28.046  1256  8458 D MotionRecognitionService: onReceive lux: 50.0  action: 
+12-19 13:17:28.046  1256  8458 D MotionRecognitionService: Inject brightness form Cam 50.0
+12-19 13:17:28.046  1256  8458 D MotionRecognitionService: Inject calibrated lux
+12-19 13:17:28.047  1046  1046 E sensors-hal: inject_sensor_data:97, Receive Cam Lux: 50
+12-19 13:17:28.052  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:28.211  1046 17950 E sensors-hal: handle_sns_std_sensor_event:196, Phy Lux 45 Cam Lux 50
+12-19 13:17:28.211  1046 17950 I sensors-hal: handle_sns_std_sensor_event:218, phy lux: 50, raw lux : 2, brightness: 513, mode: 38, gain: 19, add1: 0, add2: 20, ts=682002747600204
+12-19 13:17:28.245  1256  8458 D MotionRe

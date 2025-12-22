@@ -19,8 +19,15 @@ export interface Device {
   marketing_name?: string;
   phone_number?: string;
   sim_info?: SimInfo;
+  sim_slots?: Array<{
+    slot_index?: number;
+    operator?: string;
+    operator_numeric?: string;
+    network_technology?: string;
+  }>;
   battery_level?: number | string;
   network_operator?: string;
+  network_operator_live?: string;
   carrier?: string;
   network_technology?: string;
   last_seen?: string;

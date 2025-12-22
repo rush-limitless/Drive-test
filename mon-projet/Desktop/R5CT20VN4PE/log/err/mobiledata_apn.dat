@@ -1,0 +1,644 @@
+-------- TelephonyProvider --------
+2024-06-14 05:13:17.539Z D/TelephonyProvider: dbh.onCreate:+ db=SQLiteDatabase: /data/user_de/0/com.android.providers.telephony/databases/telephony.db
+2024-06-14 05:13:17.542Z D/TelephonyProvider: dbh.createSimInfoTable:+ siminfo
+2024-06-14 05:13:17.545Z D/TelephonyProvider: dbh.createSimInfoTable:-
+2024-06-14 05:13:17.547Z D/TelephonyProvider: dbh.createCarriersTable: carriers
+2024-06-14 05:13:17.550Z D/TelephonyProvider: dbh.createCarriersTable:-
+2024-06-14 05:13:17.551Z D/TelephonyProvider: dbh.onCreate: Apply apns from xml.
+2024-06-14 05:13:17.553Z D/TelephonyProvider: Get numeric items from MPS
+2024-06-14 05:13:17.554Z D/TelephonyProvider: [TimeLap] customerList + 1.5 remove duplicated
+2024-06-14 05:13:17.555Z D/TelephonyProvider: This is Q OS new model or higher. customerPath = /optics/configs/carriers
+2024-06-14 05:13:17.601Z D/TelephonyProvider: This model is not for GCF. Do not apply GCF customer.xml
+2024-06-14 05:13:17.602Z D/TelephonyProvider: Final customerList path = [/optics/configs/carriers/ACG/conf/customer.xml, /optics/configs/carriers/AIO/conf/customer.xml, /optics/configs/carriers/ATC/conf/customer.xml, /optics/configs/carriers/ATT/conf/customer.xml, /optics/configs/carriers/CCT/conf/customer.xml, /optics/configs/carriers/CHA/conf/customer.xml, /optics/configs/carriers/DSH/conf/customer.xml, /optics/configs/carriers/FKR/conf/customer.xml, /optics/configs/carriers/LRA/conf/customer.xml, /optics/configs/carriers/TFV/conf/customer.xml, /optics/configs/carriers/TMB/conf/customer.xml, /optics/configs/carriers/TMK/conf/customer.xml, /optics/configs/carriers/USC/conf/customer.xml, /optics/configs/carriers/VZW/conf/customer.xml, /optics/configs/carriers/XAA/conf/customer.xml, /optics/configs/carriers/XAG/conf/customer.xml, /optics/configs/carriers/XAR/conf/customer.xml]
+2024-06-14 05:13:17.602Z D/TelephonyProvider: [TimeLap] customerList -
+2024-06-14 05:13:17.603Z E/TelephonyProvider: [TimeLap] createCarrier +
+2024-06-14 05:13:17.916Z E/TelephonyProvider: [TimeLap] createCarrier -
+2024-06-14 05:13:17.917Z E/TelephonyProvider: [TimeLap] doActionCarrierXML +
+2024-06-14 05:13:17.930Z E/TelephonyProvider: [TimeLap] doActionCarrierXML -
+2024-06-14 05:13:17.931Z E/TelephonyProvider: [TimeLap] getGlobalFdInfo +
+2024-06-14 05:13:17.932Z E/TelephonyProvider: [TimeLap] getGlobalFdInfo -
+2024-06-14 05:13:17.933Z D/TelephonyProvider: Set all numeric for comparison from MPS.
+2024-06-14 05:13:17.933Z D/TelephonyProvider: [TimeLap] loadNumeric +
+2024-06-14 05:13:17.941Z D/TelephonyProvider: [TimeLap] loadNumeric -
+2024-06-14 05:13:17.942Z D/TelephonyProvider: Load APNs from /system/etc/apns-conf.xml instead of /oem/telephony/apns-conf.xml
+2024-06-14 05:13:17.942Z D/TelephonyProvider: Load APNs from /system/etc/apns-conf.xml instead of /product/etc/apns-conf.xml
+2024-06-14 05:13:17.943Z D/TelephonyProvider: Load APNs from /system/etc/apns-conf.xml instead of /data/misc/apns/apns-conf.xml
+2024-06-14 05:13:17.944Z D/TelephonyProvider: confFile = /system/etc/apns-conf.xml
+2024-06-14 05:13:17.944Z D/TelephonyProvider: [TimeLap] loadApnsConfFile +
+2024-06-14 05:13:19.232Z D/TelephonyProvider: Checksum for /system/etc/apns-conf.xml is 365376000
+2024-06-14 05:13:19.233Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:19.237Z D/TelephonyProvider: [TimeLap] loadApnsConfFile -
+2024-06-14 05:13:19.238Z D/TelephonyProvider: [TimeLap] loadMPS +
+2024-06-14 05:13:19.239Z D/TelephonyProvider: loadMPS+
+2024-06-14 05:13:19.242Z D/TelephonyProvider: loadMPS+ simSlot : 0
+2024-06-14 05:13:22.385Z D/TelephonyProvider: loadMPS-
+2024-06-14 05:13:22.386Z D/TelephonyProvider: [TimeLap] loadMPS -
+2024-06-14 05:13:22.387Z E/TelephonyProvider: [TimeLap] addApnInfo +
+2024-06-14 05:13:22.388Z E/TelephonyProvider: mDoc is null, make mDoc
+2024-06-14 05:13:22.389Z D/TelephonyProvider: mCarriers.size() :1374
+2024-06-14 05:13:22.457Z E/TelephonyProvider: [TimeLap] addApnInfo -
+2024-06-14 05:13:22.458Z E/TelephonyProvider: [TimeLap] addFdInfo +
+2024-06-14 05:13:22.460Z E/TelephonyProvider: mFdDoc is null, make mFdDoc
+2024-06-14 05:13:22.461Z D/TelephonyProvider: mFdInfos.size() :73
+2024-06-14 05:13:22.463Z E/TelephonyProvider: [TimeLap] addFdInfo -
+2024-06-14 05:13:22.464Z E/TelephonyProvider: [TimeLap] createApnInfoXml +
+2024-06-14 05:13:22.489Z D/TelephonyProvider: getInfoPath : need to make file
+2024-06-14 05:13:22.491Z D/TelephonyProvider: getInfoPath : make file succeed
+2024-06-14 05:13:23.153Z D/TelephonyProvider: changePermission /data/user_de/0/com.android.providers.telephony/databases/apninfo.xml to 604
+2024-06-14 05:13:23.157Z E/TelephonyProvider: [TimeLap] createApnInfoXml -
+2024-06-14 05:13:23.158Z D/TelephonyProvider: [TimeLap] createFastDormancyXml +
+2024-06-14 05:13:23.160Z D/TelephonyProvider: getInfoPath : need to make file
+2024-06-14 05:13:23.161Z D/TelephonyProvider: getInfoPath : make file succeed
+2024-06-14 05:13:23.205Z D/TelephonyProvider: changePermission /data/user_de/0/com.android.providers.telephony/databases/fastdormancy.xml to 604
+2024-06-14 05:13:23.208Z D/TelephonyProvider: [TimeLap] createFastDormancyXml -
+2024-06-14 05:13:23.209Z D/TelephonyProvider: This is Q OS new model or higher. customerPath = /optics/configs/carriers
+2024-06-14 05:13:23.228Z D/TelephonyProvider: Checksum for /optics/configs/carriers/TFV/conf/customer.xml is 3057082818
+2024-06-14 05:13:23.230Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.235Z D/TelephonyProvider: Checksum for /optics/configs/carriers/VZW/conf/customer.xml is 2734764351
+2024-06-14 05:13:23.236Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.241Z D/TelephonyProvider: Checksum for /optics/configs/carriers/XAG/conf/customer.xml is 3400166054
+2024-06-14 05:13:23.243Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.245Z D/TelephonyProvider: Checksum for /optics/configs/carriers/USC/conf/customer.xml is 1426332387
+2024-06-14 05:13:23.246Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.248Z D/TelephonyProvider: Checksum for /optics/configs/carriers/DSH/conf/customer.xml is 2780017656
+2024-06-14 05:13:23.250Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.252Z D/TelephonyProvider: Checksum for /optics/configs/carriers/TMK/conf/customer.xml is 633524173
+2024-06-14 05:13:23.254Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.256Z D/TelephonyProvider: Checksum for /optics/configs/carriers/ATT/conf/customer.xml is 70834340
+2024-06-14 05:13:23.257Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.263Z D/TelephonyProvider: Checksum for /optics/configs/carriers/ACG/conf/customer.xml is 1521827756
+2024-06-14 05:13:23.264Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.266Z D/TelephonyProvider: Checksum for /optics/configs/carriers/CCT/conf/customer.xml is 309777936
+2024-06-14 05:13:23.268Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.273Z D/TelephonyProvider: Checksum for /optics/configs/carriers/LRA/conf/customer.xml is 2675301749
+2024-06-14 05:13:23.274Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.276Z D/TelephonyProvider: Checksum for /optics/configs/carriers/AIO/conf/customer.xml is 2019879963
+2024-06-14 05:13:23.277Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.279Z D/TelephonyProvider: Checksum for /optics/configs/carriers/CHA/conf/customer.xml is 1575853248
+2024-06-14 05:13:23.280Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.282Z D/TelephonyProvider: Checksum for /optics/configs/carriers/FKR/conf/customer.xml is 4166436693
+2024-06-14 05:13:23.283Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.286Z D/TelephonyProvider: Checksum for /optics/configs/carriers/XAR/conf/customer.xml is 28557270
+2024-06-14 05:13:23.288Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.289Z D/TelephonyProvider: Checksum for /optics/configs/carriers/ATC/conf/customer.xml is 1527246083
+2024-06-14 05:13:23.291Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.293Z D/TelephonyProvider: Checksum for /optics/configs/carriers/TMB/conf/customer.xml is 1951228202
+2024-06-14 05:13:23.295Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.299Z D/TelephonyProvider: Checksum for /optics/configs/carriers/XAA/conf/customer.xml is 1276167200
+2024-06-14 05:13:23.300Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.306Z D/TelephonyProvider: Checksum for /optics/configs/carriers/GCF/conf/customer.xml is 1651854201
+2024-06-14 05:13:23.307Z D/TelephonyProvider: Checksum after adding resource is 61296002
+2024-06-14 05:13:23.310Z D/TelephonyProvider: infoRecovery parse apn info called too early. SHOW_SELECT_APN_POPUP broadcast
+2024-06-14 05:13:23.313Z D/TelephonyProvider: initDatabase :: subIds is null
+2024-06-14 05:13:23.315Z D/TelephonyProvider: loadPersistentApnData: persistentFile does not exist
+2024-06-14 05:13:23.316Z D/TelephonyProvider: loadPersistentApnData : ret=false
+2024-06-14 05:13:23.319Z D/TelephonyProvider: dbh.onCreate:- db=SQLiteDatabase: /data/user_de/0/com.android.providers.telephony/databases/telephony.db
+2024-06-14 05:13:23.320Z D/TelephonyProvider: stop logging
+2024-06-14 05:13:23.321Z D/TelephonyProvider: log file saved
+-------- ApnBroadcastReceiver --------
+2024-06-14 05:13:45.317Z D/ApnBroadcastReceiver: Setup Wizard is not finished. Do not restore apn for byod.
+2024-06-14 05:13:45.318Z D/ApnBroadcastReceiver: clearPreferences for slot: 0
+2024-06-14 05:13:45.320Z D/ApnBroadcastReceiver: getSubId: subIds is null
+2024-06-14 05:13:45.321Z D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-121ms what=5 arg1=1 obj=android.app.ReceiverRestrictedContext@45421ee target=com.android.providers.telephony.apn.EventHandler }
+2024-06-14 05:14:06.928Z D/ApnBroadcastReceiver: updateStatus1 = -1, updateStatus2 = -1
+2024-06-14 05:14:06.929Z D/ApnBroadcastReceiver: recoveryShowPopup,nwkinfo.db update
+2024-06-14 05:14:06.930Z D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-31ms what=5 obj=android.app.ReceiverRestrictedContext@45421ee target=com.android.providers.telephony.apn.EventHandler }
+2024-07-26 09:13:32.056Z D/ApnBroadcastReceiver: Setup Wizard is not finished. Do not restore apn for byod.
+2024-07-26 09:13:32.060Z D/ApnBroadcastReceiver: clearPreferences for slot: 0
+2024-07-26 09:13:32.063Z D/ApnBroadcastReceiver: getSubId: subIds is null
+2024-07-26 09:13:32.065Z D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-32ms what=5 arg1=1 obj=android.app.ReceiverRestrictedContext@77efa4b target=com.android.providers.telephony.apn.EventHandler }
+2024-07-26 09:13:44.980Z D/ApnBroadcastReceiver: updateStatus1 = 1, updateStatus2 = 1
+2024-07-26 09:13:44.985Z D/ApnBroadcastReceiver: do not recoveryShowPopup
+2024-07-26 09:13:44.986Z D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-25ms what=5 obj=android.app.ReceiverRestrictedContext@77efa4b target=com.android.providers.telephony.apn.EventHandler }
+2025-05-08 10:30:06.163+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-05-08 10:30:06.164+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-05-08 10:30:06.168+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-05-08 10:30:06.171+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-05-08 10:30:06.171+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-05-08 10:30:06.172+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-05-08 10:30:06.173+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-15ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@fe7020e target=com.android.providers.telephony.apn.EventHandler }
+2025-06-06 21:18:34.072+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-06-06 21:18:34.083+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-06-06 21:18:34.185+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-06-06 21:18:34.192+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-06-06 21:18:34.210+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-06-06 21:18:34.210+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-06-06 21:18:34.239+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-193ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@e45083a target=com.android.providers.telephony.apn.EventHandler }
+2025-07-07 23:14:38.561+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-07-07 23:14:38.564+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-07-07 23:14:38.583+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-07-07 23:14:38.586+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-07-07 23:14:38.587+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-07-07 23:14:38.587+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-07-07 23:14:38.587+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-60ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@39450d8 target=com.android.providers.telephony.apn.EventHandler }
+2025-07-19 13:48:48.165+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-07-19 13:48:48.169+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-07-19 13:48:48.203+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-07-19 13:48:48.209+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-07-19 13:48:48.210+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-07-19 13:48:48.211+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-07-19 13:48:48.212+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-133ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@ecbb80f target=com.android.providers.telephony.apn.EventHandler }
+2025-07-19 13:49:46.025+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-07-19 13:49:46.030+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-07-19 13:49:46.051+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-07-19 13:49:46.072+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-07-19 13:49:46.073+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-07-19 13:49:46.073+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-07-19 13:49:46.076+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-56ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@ec10ebd target=com.android.providers.telephony.apn.EventHandler }
+2025-07-19 14:35:57.737+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-07-19 14:35:57.741+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-07-19 14:35:57.758+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-07-19 14:35:57.762+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-07-19 14:35:57.762+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-07-19 14:35:57.763+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-07-19 14:35:57.764+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-60ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@f8d3312 target=com.android.providers.telephony.apn.EventHandler }
+2025-07-22 14:58:12.914+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-07-22 14:58:12.919+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-07-22 14:58:12.937+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-07-22 14:58:12.940+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-07-22 14:58:12.940+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-07-22 14:58:12.941+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-07-22 14:58:12.941+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-43ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@b0d3fc5 target=com.android.providers.telephony.apn.EventHandler }
+2025-07-22 14:59:42.888+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-07-22 14:59:42.889+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-07-22 14:59:43.075+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-07-22 14:59:43.089+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-07-22 14:59:43.090+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-07-22 14:59:43.090+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-07-22 14:59:43.091+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-223ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@4e1ea0b target=com.android.providers.telephony.apn.EventHandler }
+2025-08-06 22:57:49.826+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-08-06 22:57:49.829+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-08-06 22:57:49.837+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-08-06 22:57:49.841+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-08-06 22:57:49.842+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-08-06 22:57:49.844+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-08-06 22:57:49.846+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-28ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@6664b8c target=com.android.providers.telephony.apn.EventHandler }
+2025-08-09 15:50:55.652+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-08-09 15:50:55.653+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-08-09 15:50:55.664+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-08-09 15:50:55.665+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-08-09 15:50:55.666+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-08-09 15:50:55.666+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-08-09 15:50:55.667+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-21ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@50ed079 target=com.android.providers.telephony.apn.EventHandler }
+2025-09-05 11:24:26.451+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-09-05 11:24:26.452+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-09-05 11:24:26.463+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-09-05 11:24:26.477+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-09-05 11:24:26.477+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-09-05 11:24:26.478+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-09-05 11:24:26.478+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-33ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@3a1e8a2 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-04 07:45:07.063+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-04 07:45:07.067+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-10-04 07:45:07.082+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-10-04 07:45:07.085+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-10-04 07:45:07.085+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-04 07:45:07.086+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-04 07:45:07.094+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-45ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@765100c target=com.android.providers.telephony.apn.EventHandler }
+2025-10-07 18:44:34.750+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-07 18:44:34.757+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-10-07 18:44:34.768+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-10-07 18:44:34.770+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-10-07 18:44:34.770+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-07 18:44:34.770+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-07 18:44:34.771+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-27ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@eb7abfe target=com.android.providers.telephony.apn.EventHandler }
+2025-10-07 19:59:07.488+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-07 19:59:07.492+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-10-07 19:59:07.553+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-10-07 19:59:07.555+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-10-07 19:59:07.556+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-07 19:59:07.556+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-07 19:59:07.557+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-99ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@3354aee target=com.android.providers.telephony.apn.EventHandler }
+2025-10-07 20:25:24.636+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-07 20:25:24.640+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-10-07 20:25:24.701+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-10-07 20:25:24.703+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-10-07 20:25:24.704+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-07 20:25:24.704+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-07 20:25:24.705+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-95ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@4c47602 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-08 07:25:40.637+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-08 07:25:40.643+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-10-08 07:25:40.667+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-10-08 07:25:40.681+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-10-08 07:25:40.683+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-08 07:25:40.684+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-08 07:25:40.688+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-59ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@3017708 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-08 08:39:58.518+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-08 08:39:58.520+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-10-08 08:39:58.536+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-10-08 08:39:58.557+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-10-08 08:39:58.559+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-08 08:39:58.560+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-08 08:39:58.562+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-46ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@66225f1 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-08 08:49:01.342+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-08 08:49:01.343+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-10-08 08:49:01.353+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-10-08 08:49:01.356+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-10-08 08:49:01.357+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-08 08:49:01.357+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-08 08:49:01.358+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-31ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@f88acf6 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-08 10:27:34.219+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-08 10:27:34.220+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-10-08 10:27:34.265+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-10-08 10:27:34.288+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-10-08 10:27:34.288+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-08 10:27:34.289+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-08 10:27:34.291+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-80ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@5440ac1 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-14 11:37:25.750+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-14 11:37:25.754+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-10-14 11:37:25.761+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-10-14 11:37:25.779+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-10-14 11:37:25.780+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-14 11:37:25.780+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-14 11:37:25.811+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-161ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@ec245c3 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-18 08:46:28.562+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-18 08:46:28.566+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 1
+2025-10-18 08:46:28.687+01:00 D/ApnBroadcastReceiver: subId : 1, slotId : 0,numeric : 62402
+2025-10-18 08:46:28.689+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-10-18 08:46:28.689+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-18 08:46:28.690+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-18 08:46:28.691+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-140ms what=0 arg2=1 obj=android.app.ReceiverRestrictedContext@3c63474 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-20 12:06:23.100+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-20 12:06:23.110+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 2
+2025-10-20 12:06:23.118+01:00 D/ApnBroadcastReceiver: subId : 2, slotId : 0,numeric : 62401
+2025-10-20 12:06:23.125+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62401**********
+2025-10-20 12:06:23.126+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-20 12:06:23.127+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-20 12:06:23.130+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-40ms what=0 arg2=2 obj=android.app.ReceiverRestrictedContext@3c63474 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-20 13:58:45.981+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-20 13:58:45.983+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 3
+2025-10-20 13:58:45.984+01:00 D/ApnBroadcastReceiver: subId : 3, slotId : 0,numeric : 62405
+2025-10-20 13:58:45.988+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62405**********
+2025-10-20 13:58:45.989+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-20 13:58:45.989+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-20 13:58:45.990+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-13ms what=0 arg2=3 obj=android.app.ReceiverRestrictedContext@3c63474 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-23 09:13:30.603+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-23 09:13:30.606+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 4
+2025-10-23 09:13:30.608+01:00 D/ApnBroadcastReceiver: subId : 4, slotId : 0,numeric : 62401
+2025-10-23 09:13:30.611+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62401**********
+2025-10-23 09:13:30.612+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-23 09:13:30.613+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-23 09:13:30.614+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-17ms what=0 arg2=4 obj=android.app.ReceiverRestrictedContext@3c63474 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-23 16:15:10.922+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-23 16:15:10.924+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 3
+2025-10-23 16:15:10.925+01:00 D/ApnBroadcastReceiver: subId : 3, slotId : 0,numeric : 62405
+2025-10-23 16:15:10.928+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62405**********
+2025-10-23 16:15:10.928+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-23 16:15:10.928+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-23 16:15:10.929+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-9ms what=0 arg2=3 obj=android.app.ReceiverRestrictedContext@3c63474 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-25 14:05:22.627+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-25 14:05:22.629+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 5
+2025-10-25 14:05:22.631+01:00 D/ApnBroadcastReceiver: subId : 5, slotId : 0,numeric : 62402
+2025-10-25 14:05:22.634+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-10-25 14:05:22.634+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-25 14:05:22.635+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-25 14:05:22.635+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-14ms what=0 arg2=5 obj=android.app.ReceiverRestrictedContext@3c63474 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-25 17:02:52.102+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-25 17:02:52.104+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 3
+2025-10-25 17:02:52.106+01:00 D/ApnBroadcastReceiver: subId : 3, slotId : 0,numeric : 62405
+2025-10-25 17:02:52.109+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62405**********
+2025-10-25 17:02:52.109+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-25 17:02:52.110+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-25 17:02:52.111+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-172ms what=0 arg2=3 obj=android.app.ReceiverRestrictedContext@3c63474 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-25 20:47:28.241+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-25 20:47:28.244+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 6
+2025-10-25 20:47:28.250+01:00 D/ApnBroadcastReceiver: subId : 6, slotId : 0,numeric : 62401
+2025-10-25 20:47:28.257+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62401**********
+2025-10-25 20:47:28.258+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-25 20:47:28.258+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-25 20:47:28.266+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-98ms what=0 arg2=6 obj=android.app.ReceiverRestrictedContext@3c63474 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-28 03:17:58.516+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-28 03:17:58.524+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 6
+2025-10-28 03:17:58.543+01:00 D/ApnBroadcastReceiver: subId : 6, slotId : 0,numeric : 62401
+2025-10-28 03:17:58.552+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62401**********
+2025-10-28 03:17:58.552+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-28 03:17:58.552+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-28 03:17:58.553+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-51ms what=0 arg2=6 obj=android.app.ReceiverRestrictedContext@74abf1 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-28 09:32:50.561+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-28 09:32:50.564+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 3
+2025-10-28 09:32:50.565+01:00 D/ApnBroadcastReceiver: subId : 3, slotId : 0,numeric : 62405
+2025-10-28 09:32:50.571+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62405**********
+2025-10-28 09:32:50.571+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-28 09:32:50.571+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-28 09:32:50.572+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-22ms what=0 arg2=3 obj=android.app.ReceiverRestrictedContext@74abf1 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-28 14:39:41.367+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-28 14:39:41.369+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 3
+2025-10-28 14:39:41.370+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-28 14:39:41.371+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-28 14:39:41.372+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62405, slotId : 0
+2025-10-28 14:39:41.373+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-28 14:39:41.373+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-537ms what=1 arg2=3 obj=android.app.ReceiverRestrictedContext@74abf1 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-28 14:39:53.469+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-28 14:39:53.470+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 3
+2025-10-28 14:39:53.470+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-28 14:39:53.470+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-28 14:39:53.471+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62405, slotId : 0
+2025-10-28 14:39:53.471+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-28 14:39:53.471+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-434ms what=1 arg2=3 obj=android.app.ReceiverRestrictedContext@74abf1 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-28 14:50:01.642+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-28 14:50:01.644+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 3
+2025-10-28 14:50:01.655+01:00 D/ApnBroadcastReceiver: subId : 3, slotId : 0,numeric : 62405
+2025-10-28 14:50:01.657+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62405**********
+2025-10-28 14:50:01.657+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-28 14:50:01.659+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-28 14:50:01.660+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-21ms what=0 arg2=3 obj=android.app.ReceiverRestrictedContext@c3d2d44 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-30 15:01:26.861+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-30 15:01:26.863+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 7
+2025-10-30 15:01:26.865+01:00 D/ApnBroadcastReceiver: subId : 7, slotId : 0,numeric : 62402
+2025-10-30 15:01:26.867+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-10-30 15:01:26.867+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-30 15:01:26.868+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-30 15:01:26.869+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-9ms what=0 arg2=7 obj=android.app.ReceiverRestrictedContext@c3d2d44 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-30 15:18:17.901+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-30 15:18:17.903+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 3
+2025-10-30 15:18:17.904+01:00 D/ApnBroadcastReceiver: subId : 3, slotId : 0,numeric : 62405
+2025-10-30 15:18:17.908+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62405**********
+2025-10-30 15:18:17.909+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-30 15:18:17.910+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-30 15:18:17.912+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-13ms what=0 arg2=3 obj=android.app.ReceiverRestrictedContext@c3d2d44 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-30 15:23:49.437+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-30 15:23:49.438+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 3
+2025-10-30 15:23:49.439+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-30 15:23:49.440+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-30 15:23:49.441+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62405, slotId : 0
+2025-10-30 15:23:49.441+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-30 15:23:49.442+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-383ms what=1 arg2=3 obj=android.app.ReceiverRestrictedContext@c3d2d44 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-30 22:27:10.669+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-30 22:27:10.673+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 3
+2025-10-30 22:27:10.674+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-30 22:27:10.675+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-30 22:27:10.677+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62405, slotId : 0
+2025-10-30 22:27:10.677+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-30 22:27:10.678+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-56ms what=1 arg2=3 obj=android.app.ReceiverRestrictedContext@c3d2d44 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-30 22:35:36.714+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-30 22:35:36.720+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 3
+2025-10-30 22:35:36.739+01:00 D/ApnBroadcastReceiver: subId : 3, slotId : 0,numeric : 62405
+2025-10-30 22:35:36.749+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62405**********
+2025-10-30 22:35:36.750+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-30 22:35:36.751+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-30 22:35:36.751+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-45ms what=0 arg2=3 obj=android.app.ReceiverRestrictedContext@1c8b7a7 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 08:36:14.074+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-31 08:36:14.077+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 8
+2025-10-31 08:36:14.079+01:00 D/ApnBroadcastReceiver: subId : 8, slotId : 0,numeric : 62401
+2025-10-31 08:36:14.081+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62401**********
+2025-10-31 08:36:14.081+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 08:36:14.082+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 08:36:14.082+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-11ms what=0 arg2=8 obj=android.app.ReceiverRestrictedContext@1c8b7a7 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 08:51:37.601+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-31 08:51:37.680+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 8
+2025-10-31 08:51:37.680+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 08:51:37.681+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 08:51:37.682+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62401, slotId : 0
+2025-10-31 08:51:37.682+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-31 08:51:37.683+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-189ms what=1 arg2=8 obj=android.app.ReceiverRestrictedContext@1c8b7a7 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 09:17:32.422+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-31 09:17:32.425+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 9
+2025-10-31 09:17:32.427+01:00 D/ApnBroadcastReceiver: subId : 9, slotId : 0,numeric : 62402
+2025-10-31 09:17:32.430+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-10-31 09:17:32.430+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 09:17:32.431+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 09:17:32.432+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-15ms what=0 arg2=9 obj=android.app.ReceiverRestrictedContext@1c8b7a7 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 09:46:51.832+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-31 09:46:51.840+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 8
+2025-10-31 09:46:51.843+01:00 D/ApnBroadcastReceiver: subId : 8, slotId : 0,numeric : 62401
+2025-10-31 09:46:51.850+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62401**********
+2025-10-31 09:46:51.851+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 09:46:51.852+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 09:46:51.854+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-40ms what=0 arg2=8 obj=android.app.ReceiverRestrictedContext@1c8b7a7 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 09:57:34.606+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-31 09:57:34.609+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 10
+2025-10-31 09:57:34.615+01:00 D/ApnBroadcastReceiver: subId : 10, slotId : 0,numeric : 62405
+2025-10-31 09:57:34.625+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62405**********
+2025-10-31 09:57:34.626+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 09:57:34.626+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 09:57:34.627+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-23ms what=0 arg2=10 obj=android.app.ReceiverRestrictedContext@1c8b7a7 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 10:58:01.218+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-31 10:58:01.221+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 8
+2025-10-31 10:58:01.226+01:00 D/ApnBroadcastReceiver: subId : 8, slotId : 0,numeric : 62401
+2025-10-31 10:58:01.242+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62401**********
+2025-10-31 10:58:01.242+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 10:58:01.243+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 10:58:01.244+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-31ms what=0 arg2=8 obj=android.app.ReceiverRestrictedContext@1c8b7a7 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 11:11:37.397+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-31 11:11:37.403+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 9
+2025-10-31 11:11:37.406+01:00 D/ApnBroadcastReceiver: subId : 9, slotId : 0,numeric : 62402
+2025-10-31 11:11:37.416+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-10-31 11:11:37.418+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 11:11:37.418+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 11:11:37.420+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-28ms what=0 arg2=9 obj=android.app.ReceiverRestrictedContext@1c8b7a7 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 11:37:43.067+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-31 11:37:43.069+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 3
+2025-10-31 11:37:43.071+01:00 D/ApnBroadcastReceiver: subId : 3, slotId : 0,numeric : 62405
+2025-10-31 11:37:43.073+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62405**********
+2025-10-31 11:37:43.073+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 11:37:43.074+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 11:37:43.074+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-12ms what=0 arg2=3 obj=android.app.ReceiverRestrictedContext@1c8b7a7 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 15:28:29.782+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-31 15:28:29.783+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 3
+2025-10-31 15:28:29.840+01:00 D/ApnBroadcastReceiver: subId : 3, slotId : 0,numeric : 62405
+2025-10-31 15:28:29.846+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62405**********
+2025-10-31 15:28:29.847+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 15:28:29.847+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 15:28:29.848+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-71ms what=0 arg2=3 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 17:27:12.045+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-31 17:27:12.047+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 3
+2025-10-31 17:27:12.048+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 17:27:12.048+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 17:27:12.049+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62405, slotId : 0
+2025-10-31 17:27:12.049+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-31 17:27:12.050+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-530ms what=1 arg2=3 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 22:33:27.591+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-31 22:33:27.593+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 3
+2025-10-31 22:33:27.594+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 22:33:27.594+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 22:33:27.594+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62405, slotId : 0
+2025-10-31 22:33:27.595+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-31 22:33:27.595+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-644ms what=1 arg2=3 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 22:36:07.965+01:00 D/ApnBroadcastReceiver: EVENT_CHECK_POPUP
+2025-10-31 22:36:07.967+01:00 D/ApnBroadcastReceiver: slotId : 0, subscriptionId : 11
+2025-10-31 22:36:07.969+01:00 D/ApnBroadcastReceiver: subId : 11, slotId : 0,numeric : 62402
+2025-10-31 22:36:07.994+01:00 D/ApnBroadcastReceiver: isSimChanged imsi : 62402**********
+2025-10-31 22:36:07.998+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 22:36:07.998+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 22:36:07.998+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-37ms what=0 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 22:36:58.413+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-31 22:36:58.414+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-10-31 22:36:58.414+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 22:36:58.415+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 22:36:58.415+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-10-31 22:36:58.416+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-31 22:36:58.416+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-122ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 23:01:21.392+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-31 23:01:21.392+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-10-31 23:01:21.392+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 23:01:21.393+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 23:01:21.393+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-10-31 23:01:21.393+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-31 23:01:21.395+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-140ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 23:17:02.785+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-31 23:17:02.786+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-10-31 23:17:02.786+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 23:17:02.787+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 23:17:02.788+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-10-31 23:17:02.789+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-31 23:17:02.790+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-63ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 23:20:18.143+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-31 23:20:18.145+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-10-31 23:20:18.147+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 23:20:18.148+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 23:20:18.150+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-10-31 23:20:18.151+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-31 23:20:18.152+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-48ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 23:26:07.572+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-31 23:26:07.575+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-10-31 23:26:07.576+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 23:26:07.576+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 23:26:07.577+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-10-31 23:26:07.577+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-31 23:26:07.577+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-14ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 23:28:41.140+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-31 23:28:41.141+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-10-31 23:28:41.142+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 23:28:41.142+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 23:28:41.143+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-10-31 23:28:41.143+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-31 23:28:41.144+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-17ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 23:34:45.812+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-31 23:34:45.813+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-10-31 23:34:45.814+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 23:34:45.815+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 23:34:45.817+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-10-31 23:34:45.818+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-31 23:34:45.819+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-36ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 23:42:01.445+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-31 23:42:01.461+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-10-31 23:42:01.462+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 23:42:01.462+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 23:42:01.463+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-10-31 23:42:01.463+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-31 23:42:01.463+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-136ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 23:47:16.006+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-31 23:47:16.007+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-10-31 23:47:16.008+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 23:47:16.009+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 23:47:16.011+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-10-31 23:47:16.012+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-31 23:47:16.013+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-13ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-10-31 23:56:54.295+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-10-31 23:56:54.296+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-10-31 23:56:54.296+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-10-31 23:56:54.300+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-10-31 23:56:54.301+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-10-31 23:56:54.302+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-10-31 23:56:54.302+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-131ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-11-01 00:00:13.341+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-11-01 00:00:13.341+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-11-01 00:00:13.342+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-11-01 00:00:13.342+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-11-01 00:00:13.342+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-11-01 00:00:13.343+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-11-01 00:00:13.343+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-83ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-11-01 00:05:07.395+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-11-01 00:05:07.398+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-11-01 00:05:07.398+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-11-01 00:05:07.399+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-11-01 00:05:07.399+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-11-01 00:05:07.400+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-11-01 00:05:07.400+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-116ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-11-01 00:13:31.421+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-11-01 00:13:31.423+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-11-01 00:13:31.426+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-11-01 00:13:31.428+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-11-01 00:13:31.430+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-11-01 00:13:31.431+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-11-01 00:13:31.433+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-45ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-11-01 00:15:56.792+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-11-01 00:15:56.793+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-11-01 00:15:56.793+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-11-01 00:15:56.794+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-11-01 00:15:56.794+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-11-01 00:15:56.795+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-11-01 00:15:56.795+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-127ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-11-01 00:41:36.616+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-11-01 00:41:36.621+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-11-01 00:41:36.621+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-11-01 00:41:36.622+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-11-01 00:41:36.622+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-11-01 00:41:36.622+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-11-01 00:41:36.624+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-126ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-11-01 00:48:17.118+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-11-01 00:48:17.149+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-11-01 00:48:17.150+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-11-01 00:48:17.151+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-11-01 00:48:17.174+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-11-01 00:48:17.176+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-11-01 00:48:17.177+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-224ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-11-01 00:56:44.325+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-11-01 00:56:44.345+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-11-01 00:56:44.346+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-11-01 00:56:44.346+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-11-01 00:56:44.347+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-11-01 00:56:44.347+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-11-01 00:56:44.347+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-156ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-11-01 01:02:37.479+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-11-01 01:02:37.482+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-11-01 01:02:37.484+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-11-01 01:02:37.485+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-11-01 01:02:37.487+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-11-01 01:02:37.488+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-11-01 01:02:37.489+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-19ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-11-01 01:19:15.951+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-11-01 01:19:15.954+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-11-01 01:19:15.955+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-11-01 01:19:15.955+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-11-01 01:19:15.956+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-11-01 01:19:15.958+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-11-01 01:19:15.959+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-29ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-11-01 01:29:01.479+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-11-01 01:29:01.484+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-11-01 01:29:01.485+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-11-01 01:29:01.485+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-11-01 01:29:01.486+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-11-01 01:29:01.486+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-11-01 01:29:01.486+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-119ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-11-01 01:39:05.235+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-11-01 01:39:05.240+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-11-01 01:39:05.241+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-11-01 01:39:05.241+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-11-01 01:39:05.242+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-11-01 01:39:05.242+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-11-01 01:39:05.243+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-92ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-11-01 01:46:21.749+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-11-01 01:46:21.753+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-11-01 01:46:21.754+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-11-01 01:46:21.754+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-11-01 01:46:21.755+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-11-01 01:46:21.755+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-11-01 01:46:21.756+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-76ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-11-01 01:49:32.450+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-11-01 01:49:32.452+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-11-01 01:49:32.453+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-11-01 01:49:32.455+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-11-01 01:49:32.456+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-11-01 01:49:32.457+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-11-01 01:49:32.458+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-64ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-11-01 01:52:51.866+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-11-01 01:52:51.868+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-11-01 01:52:51.869+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-11-01 01:52:51.869+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-11-01 01:52:51.870+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-11-01 01:52:51.870+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-11-01 01:52:51.870+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-15ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-11-01 01:57:06.369+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-11-01 01:57:06.370+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-11-01 01:57:06.370+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-11-01 01:57:06.370+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-11-01 01:57:06.371+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-11-01 01:57:06.371+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-11-01 01:57:06.371+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-63ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }
+2025-11-01 02:00:57.990+01:00 D/ApnBroadcastReceiver: EVENT_SHOW_SELECT_APN
+2025-11-01 02:00:58.053+01:00 D/ApnBroadcastReceiver: slotId : 0, subId : 11
+2025-11-01 02:00:58.053+01:00 D/ApnBroadcastReceiver: checkPopup slotId : 0
+2025-11-01 02:00:58.054+01:00 D/ApnBroadcastReceiver: disablePromptPopUp. setProfile is done based on EUR
+2025-11-01 02:00:58.054+01:00 D/ApnBroadcastReceiver: setProfileTestSim : nwkname : XAA, numeric : 62402, slotId : 0
+2025-11-01 02:00:58.055+01:00 D/ApnBroadcastReceiver: setProfileTestSim current simNumeric is not test sim card. Return it.
+2025-11-01 02:00:58.055+01:00 D/ApnBroadcastReceiver: Finished handleMessage msg={ when=-84ms what=1 arg2=11 obj=android.app.ReceiverRestrictedContext@5a50489 target=com.android.providers.telephony.apn.EventHandler }

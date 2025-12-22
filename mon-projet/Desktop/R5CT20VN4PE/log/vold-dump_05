@@ -1,0 +1,54 @@
+2025/12/05-09:10:58(WAT)  659:659 vold VolumeBase::mount()--
+2025/12/05-09:10:58(WAT)  659:689 vold setMpUidForFileSystem : 10248
+2025/12/05-09:10:58(WAT)  659:689 voldUtils Failed to open /sys/fs/f2fs/userdata/mp_uid
+2025/12/05-09:10:58(WAT)  659:689 vold Do not support /sys/fs/f2fs/userdata/mp_uid 
+2025/12/06-12:27:05(WAT)  659:4900 vold idle maintenance started
+2025/12/06-12:27:05(WAT)  659:4900 vold Starting trim of /metadata
+2025/12/06-12:27:05(WAT)  659:4900 vold Trimmed 28155904 bytes on /metadata in 0ms
+2025/12/06-12:27:05(WAT)  659:4900 vold Starting trim of /cache
+2025/12/06-12:27:05(WAT)  659:4900 vold Trimmed 609828864 bytes on /cache in 14ms
+2025/12/06-12:27:05(WAT)  659:4900 vold Starting trim of /data
+2025/12/06-12:27:05(WAT)  659:4900 vold Trimmed 0 bytes on /data in 353ms
+2025/12/06-12:27:05(WAT)  659:4900 vold Starting trim of /mnt/vendor/persist
+2025/12/06-12:27:05(WAT)  659:4900 vold Trimmed 24043520 bytes on /mnt/vendor/persist in 7ms
+2025/12/06-12:27:05(WAT)  659:4900 vold Starting trim of /mnt/vendor/efs
+2025/12/06-12:27:05(WAT)  659:4900 vold Trimmed 5001216 bytes on /mnt/vendor/efs in 5ms
+2025/12/06-12:27:05(WAT)  659:4900 vold Starting trim of /efs
+2025/12/06-12:27:05(WAT)  659:4900 vold Trimmed 2383872 bytes on /efs in 4ms
+2025/12/06-12:27:05(WAT)  659:4900 vold Starting trim of /carrier
+2025/12/06-12:27:05(WAT)  659:4900 vold Trimmed 42205184 bytes on /carrier in 0ms
+2025/12/06-12:27:05(WAT)  659:4900 vold Starting trim of /spu
+2025/12/06-12:27:05(WAT)  659:4900 vold Failed to open /spu: Permission denied
+2025/12/06-12:27:05(WAT)  659:4900 vold Cannot find dev sysfs path
+2025/12/06-12:27:05(WAT)  659:4900 vold idle maintenance completed
+2025/12/12-21:26:12(WAT)  659:689 voldUtils Aborting fuse connection entry /sys/fs/fuse/connections/102/abort
+2025/12/12-21:26:12(WAT)  659:689 voldUtils Skip fsync /sys/fs/fuse/connections/102/abort on a file system does not support synchronization
+2025/12/12-21:26:12(WAT)  659:689 voldUtils read error for checking data
+2025/12/12-21:26:12(WAT)  659:689 voldUtils error  : Invalid argument
+2025/12/12-21:26:12(WAT)  659:689 voldUtils unlink : /sys/fs/fuse/connections/102/abort
+2025/12/12-21:26:12(WAT)  659:689 voldUtils Failed to write to /sys/fs/fuse/connections/102/abort
+2025/12/12-21:26:12(WAT)  659:689 vold VolumeManager::shutdown()++
+2025/12/12-21:26:12(WAT)  659:689 vold VolumeBase::destroy()++ mPath=/storage/emulated
+2025/12/12-21:26:12(WAT)  659:689 vold VolumeBase::unmount()++
+2025/12/12-21:26:12(WAT)  659:689 vold EmulatedVolume::doUnmount()++
+2025/12/12-21:26:12(WAT)  659:689 vold Killing all processes referencing /storage/emulated/0
+2025/12/12-21:26:12(WAT)  659:689 voldUtils KillProcessesUsingPath: path=/storage/emulated/0: Success
+2025/12/12-21:26:12(WAT)  659:689 vold EmulatedVolume::unmountFuseBindMounts()++
+2025/12/12-21:26:12(WAT)  659:689 vold Unmounting /mnt/installer/0/emulated/0/Android/obb
+2025/12/12-21:26:12(WAT)  659:689 vold Unmounting /mnt/user/0/emulated/0/Android/data
+2025/12/12-21:26:12(WAT)  659:689 vold Unmounted /mnt/user/0/emulated/0/Android/data
+2025/12/12-21:26:12(WAT)  659:689 vold Unmounting /mnt/user/0/emulated/0/Android/obb
+2025/12/12-21:26:12(WAT)  659:689 vold Unmounted /mnt/user/0/emulated/0/Android/obb
+2025/12/12-21:26:12(WAT)  659:689 vold EmulatedVolume::unmountFuseBindMounts()--
+2025/12/12-21:26:12(WAT)  659:689 voldUtils Configuring max_ratio of /mnt/user/0/emulated fuse filesystem to 100
+2025/12/12-21:26:12(WAT)  659:689 voldUtils Configuring min_ratio of /mnt/user/0/emulated fuse filesystem to 0
+2025/12/12-21:26:12(WAT)  659:689 voldUtils Writing 100 to /sys/class/bdi/0:102/max_ratio
+2025/12/12-21:26:12(WAT)  659:689 voldUtils Writing 0 to /sys/class/bdi/0:102/min_ratio
+2025/12/12-21:26:12(WAT)  659:689 voldUtils Unmounting fuse path /mnt/user/0/emulated
+2025/12/12-21:26:12(WAT)  659:689 voldUtils /mnt/user/0/emulated in unmounting procedure: Success
+2025/12/12-21:26:12(WAT)  659:689 voldUtils Unmounting pass_through_path /mnt/pass_through/0/emulated
+2025/12/12-21:26:12(WAT)  659:689 voldUtils /mnt/pass_through/0/emulated in unmounting procedure: Success
+2025/12/12-21:26:12(WAT)  659:689 voldUtils /mnt/runtime/default/emulated in unmounting procedure: Success
+2025/12/12-21:26:12(WAT)  659:689 voldUtils /mnt/runtime/read/emulated in unmounting procedure: Success
+2025/12/12-21:26:12(WAT)  659:689 voldUtils /mnt/runtime/write/emulated in unmounting procedure: Success
+2025/12/12-21:26:12(WAT)  659:689 voldUtils /mnt/runtime/full/emulated in unmounting procedure: Success

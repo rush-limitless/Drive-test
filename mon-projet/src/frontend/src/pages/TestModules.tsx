@@ -41,7 +41,6 @@ import {
   AlertTriangle,
   FilePlus,
   Radio as RadioIcon,
-  MessageCircle,
   PhoneCall,
   Activity,
   SignalHigh,
@@ -82,6 +81,7 @@ const PING_CONFIG_STORAGE_KEY = 'pingModuleConfig';
 const WORKFLOW_BUILDER_STORAGE_KEY = 'workflowBuilderDraft';
 const FAVORITES_STORAGE_KEY = 'moduleFavorites';
 const RECENTS_STORAGE_KEY = 'moduleRecents';
+const DEFAULT_DIAL_SECRET_CODE = '*#9900#';
 interface PingConfig {
   target: string;
   duration: number;
@@ -92,11 +92,6 @@ interface PingDialogState {
   target: string;
   duration: string;
   interval: string;
-}
-
-interface SmsSendConfig {
-  recipient: string;
-  message: string;
 }
 
 interface WorkflowBuilderDraftModule {
@@ -168,7 +163,6 @@ const MODULE_ICON_MAP: Record<string, React.ComponentType<any>> = {
   start_rf_logging: RadioIcon,
   stop_rf_logging: RadioIcon,
   dial_secret_code: PhoneCall,
-  sms_send: MessageCircle,
   default: Activity,
 };
 
@@ -345,9 +339,11 @@ const persistRecents = (recents: string[]) => {
 const CUSTOM_CODE_KEY = 'dialSecretCode';
 const readStoredCustomCode = (): string => {
   if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
-    return '';
+    return DEFAULT_DIAL_SECRET_CODE;
   }
-  return window.localStorage.getItem(CUSTOM_CODE_KEY) || '';
+  const stored = window.localStorage.getItem(CUSTOM_CODE_KEY);
+  const trimmed = stored ? stored.trim() : '';
+  return trimmed || DEFAULT_DIAL_SECRET_CODE;
 };
 
 const persistCustomCode = (value: string) => {
@@ -466,7 +462,6 @@ const DEVICE_MODULE_IDS = new Set([
   'stop_rf_logging',
   'pull_rf_logs',
   'dial_secret_code',
-  'sms_send',
 ]);
 
 const sanitizeWaitingTimeDuration = (value: number): number => {
@@ -546,9 +541,6 @@ const WRONG_APN_STORAGE_KEY = 'module.wrongApnValue';
 const DEFAULT_WRONG_APN = 'arnaud';
 const LOG_PULL_STORAGE_KEY = 'module.logPullDestination';
 const DEFAULT_LOG_PULL_DESTINATION = 'C:\\\\Users\\\\rush\\\\Documents\\\\logs';
-const SMS_SEND_STORAGE_KEY = 'module.smsSendConfig';
-const DEFAULT_SMS_RECIPIENT = '+237600000000';
-const DEFAULT_SMS_MESSAGE = 'Automation test SMS';
 
 const readStoredWrongApn = (): string => {
   if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
@@ -604,42 +596,6 @@ const persistLogDestination = (value: string) => {
   }
 };
 
-const defaultSmsConfig = (): SmsSendConfig => ({
-  recipient: DEFAULT_SMS_RECIPIENT,
-  message: DEFAULT_SMS_MESSAGE,
-});
-
-const readStoredSmsConfig = (): SmsSendConfig => {
-  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
-    return defaultSmsConfig();
-  }
-  try {
-    const raw = window.localStorage.getItem(SMS_SEND_STORAGE_KEY);
-    if (!raw) {
-      return defaultSmsConfig();
-    }
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed === 'object' && typeof parsed.recipient === 'string' && typeof parsed.message === 'string') {
-      const recipient = parsed.recipient.trim() || DEFAULT_SMS_RECIPIENT;
-      const message = parsed.message.trim() || DEFAULT_SMS_MESSAGE;
-      return { recipient, message };
-    }
-  } catch {
-    // ignore and fall back to defaults
-  }
-  return defaultSmsConfig();
-};
-
-const persistSmsConfig = (config: SmsSendConfig) => {
-  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
-    return;
-  }
-  try {
-    window.localStorage.setItem(SMS_SEND_STORAGE_KEY, JSON.stringify(config));
-  } catch (error) {
-    console.warn('[SendSMS] Failed to persist configuration', error);
-  }
-};
 
 const cloneModuleForBuilderDraft = (module: ModuleMetadata): ModuleMetadata => {
   let cloned: ModuleMetadata = { ...module };
@@ -822,12 +778,8 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
   const [customScriptDialogOpen, setCustomScriptDialogOpen] = useState(false);
   const [customScriptDraft, setCustomScriptDraft] = useState(customCode);
   const [customScriptDialogError, setCustomScriptDialogError] = useState<string | null>(null);
-  const [smsConfig, setSmsConfig] = useState<SmsSendConfig>(() => readStoredSmsConfig());
-  const [smsDialogOpen, setSmsDialogOpen] = useState(false);
-  const [smsRecipientDraft, setSmsRecipientDraft] = useState(smsConfig.recipient);
-  const [smsMessageDraft, setSmsMessageDraft] = useState(smsConfig.message);
-  const [smsDialogErrors, setSmsDialogErrors] = useState<{ recipient?: string; message?: string }>({});
   const [moduleRunStatuses, setModuleRunStatuses] = useState<Record<string, 'idle' | 'running'>>({});
+  const [moduleStatusEnabled, setModuleStatusEnabled] = useState<Record<string, boolean>>({});
   const [moduleRunProgress, setModuleRunProgress] = useState<Record<string, number>>({});
   const [moduleStatusEntries, setModuleStatusEntries] = useState<
     Record<string, ModuleStatusEntry>
@@ -923,10 +875,6 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
   useEffect(() => {
     persistLogDestination(logPullDestination);
   }, [logPullDestination]);
-
-  useEffect(() => {
-    persistSmsConfig(smsConfig);
-  }, [smsConfig]);
 
   useEffect(() => {
     if (!workflowDraftLoaded) {
@@ -1393,9 +1341,9 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
   const runningModuleIds = useMemo(
     () =>
       Object.entries(moduleRunStatuses)
-        .filter(([, status]) => status === 'running')
+        .filter(([moduleId, status]) => status === 'running' && moduleStatusEnabled[moduleId])
         .map(([moduleId]) => moduleId),
-    [moduleRunStatuses]
+    [moduleRunStatuses, moduleStatusEnabled]
   );
   const runningModulesKey = runningModuleIds.join(',');
 
@@ -1593,18 +1541,6 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
           return;
         }
         sharedParameters.code = code;
-      } else if (module.id === 'sms_send') {
-        const recipient = smsConfig.recipient.trim();
-        const message = smsConfig.message.trim();
-        if (!recipient || !message) {
-          setSnackbar({
-            severity: 'error',
-            message: 'Configure a recipient and message before sending an SMS.',
-          });
-          return;
-        }
-        sharedParameters.recipient = recipient;
-        sharedParameters.message = message;
       }
 
       const buildDeviceResult = (entry: Record<string, any>, fallbackReason?: string): DeviceModuleResult => {
@@ -1630,6 +1566,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
       };
 
       setModuleRunStatuses((prev) => ({ ...prev, [module.id]: 'running' }));
+      setModuleStatusEnabled((prev) => ({ ...prev, [module.id]: false }));
       startProgress(module.id);
       try {
         console.log(
@@ -1697,6 +1634,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         }
 
         if (statusIdFromServer) {
+          setModuleStatusEnabled((prev) => ({ ...prev, [module.id]: true }));
           const finalStatus = await fetchModuleStatus({ statusId: statusIdFromServer });
           if (finalStatus?.module_id) {
             setModuleStatusEntries((prev) => ({
@@ -1704,6 +1642,8 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
               [finalStatus.module_id]: finalStatus,
             }));
           }
+        } else {
+          setModuleStatusEnabled((prev) => ({ ...prev, [module.id]: false }));
         }
 
         console.log(
@@ -1796,7 +1736,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
       });
     }
     },
-    [backendUrl, resolveRunTargets, pingConfig, wrongApnValue, logPullDestination, customCode, smsConfig, appLauncherSelection, fetchModuleStatus]
+    [backendUrl, resolveRunTargets, pingConfig, wrongApnValue, logPullDestination, customCode, appLauncherSelection, fetchModuleStatus]
   );
 
   const handleRun = (module: ModuleMetadata) => {
@@ -1909,14 +1849,6 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
       return;
     }
 
-    if (module.id === 'sms_send') {
-      setSmsRecipientDraft(smsConfig.recipient);
-      setSmsMessageDraft(smsConfig.message);
-      setSmsDialogErrors({});
-      setSmsDialogOpen(true);
-      return;
-    }
-
     if (module.id === 'dial_secret_code') {
       setCustomScriptDraft(customCode);
       setCustomScriptDialogError(null);
@@ -1962,7 +1894,8 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         ? { ...module, waitDurationSeconds: waitingTimeDuration }
         : { ...module };
     if (module.id === 'call_test') {
-      const snapshot = { ...getCallTestValuesForDevice(null) };
+      const preferredDeviceId = liveSelectedDeviceIds[0] ?? null;
+      const snapshot = { ...getCallTestValuesForDevice(preferredDeviceId) };
       hydratedModule = {
         ...hydratedModule,
         callTestParams: snapshot,
@@ -2052,37 +1985,6 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
     });
     setLogPullDialogError(null);
     setLogPullDialogOpen(false);
-  };
-
-  const handleSmsDialogClose = () => {
-    setSmsDialogOpen(false);
-    setSmsDialogErrors({});
-  };
-
-  const handleSmsDialogSave = () => {
-    const trimmedRecipient = (smsRecipientDraft || '').trim();
-    const trimmedMessage = (smsMessageDraft || '').trim();
-    const errors: { recipient?: string; message?: string } = {};
-    if (!trimmedRecipient) {
-      errors.recipient = 'Recipient phone number is required.';
-    }
-    if (!trimmedMessage) {
-      errors.message = 'Message body is required.';
-    }
-    if (Object.keys(errors).length > 0) {
-      setSmsDialogErrors(errors);
-      return;
-    }
-    const nextConfig: SmsSendConfig = { recipient: trimmedRecipient, message: trimmedMessage };
-    setSmsConfig(nextConfig);
-    setSmsRecipientDraft(trimmedRecipient);
-    setSmsMessageDraft(trimmedMessage);
-    setSnackbar({
-      severity: 'success',
-      message: 'SMS template saved.',
-    });
-    setSmsDialogOpen(false);
-    setSmsDialogErrors({});
   };
 
   const renderPingDetails = (response?: Record<string, unknown>) => {
@@ -3017,47 +2919,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={smsDialogOpen} onClose={handleSmsDialogClose} fullWidth maxWidth="xs">
-        <DialogTitle>Send SMS Configuration</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" sx={{ color: '#475569', mb: 2 }}>
-            Define the recipient number and message used when running the Send SMS module.
-          </Typography>
-          <Stack spacing={2}>
-            <TextField
-              label="Recipient phone number"
-              value={smsRecipientDraft}
-              onChange={(event) => {
-                setSmsRecipientDraft(event.target.value);
-                setSmsDialogErrors((prev) => ({ ...prev, recipient: undefined }));
-              }}
-              error={Boolean(smsDialogErrors.recipient)}
-              helperText={smsDialogErrors.recipient ?? 'Include the country code if needed.'}
-              fullWidth
-            />
-            <TextField
-              label="Message body"
-              value={smsMessageDraft}
-              onChange={(event) => {
-                setSmsMessageDraft(event.target.value);
-                setSmsDialogErrors((prev) => ({ ...prev, message: undefined }));
-              }}
-              error={Boolean(smsDialogErrors.message)}
-              helperText={smsDialogErrors.message ?? `${smsMessageDraft.length}/10000 characters`}
-              fullWidth
-              multiline
-              minRows={3}
-              inputProps={{ maxLength: 10000 }}
-            />
-          </Stack>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleSmsDialogClose}>Cancel</Button>
-          <Button variant="contained" onClick={handleSmsDialogSave}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+      
 
       <Dialog open={customScriptDialogOpen} onClose={() => setCustomScriptDialogOpen(false)} fullWidth maxWidth="sm">
         <DialogTitle>Dial Secret/USSD Code</DialogTitle>

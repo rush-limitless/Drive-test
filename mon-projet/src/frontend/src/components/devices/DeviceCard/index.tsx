@@ -11,7 +11,7 @@ const getMeta = (device: Device): DeviceMeta => {
   const status = (device.status || 'unknown').toUpperCase();
   const connectionType = (device.connection_type || 'usb').toUpperCase();
   const simLabel = device.sim_info?.carrier || device.sim_info?.mnc || 'SIM N/A';
-  const network = device.network_operator || 'Unknown';
+  const network = device.network_operator_live || device.network_operator || 'Unknown';
   const lastSeen = device.last_seen || 'Unknown';
 
   return {

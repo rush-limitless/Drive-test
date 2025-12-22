@@ -1,0 +1,97 @@
+-- Slot1 General Information --
+ SIM Phase : 0
+ Card Capability : USIM
+ SIM voltage class : 1.8V SIM
+Slot1 Nas: SIM state :
+- The SIM is available
+Slot1 Nas: Service state :
+- Service available
+ Current_class : UIM_UICC
+----------------------
+ First_inst_class : UMTS
+-- Slot1 QMI status Information --
+ ACTIVE SLOT : SLOT 1
+ CARD_STATE : Present
+ CARD_ERROR : Unknown
+ APP_TYPE : USIM
+ APP_STATE : Ready
+ APP_STATE ILLEGAL? : NO
+ PERSO_STATE : Ready
+ PERSO_FEATURE : Unsupported
+ PIN1_STATE : Disabled
+ pin1_num(3), puk1_num(10)
+ PIN2_STATE : Enabled_Not_Verified
+ pin2_num(3), puk2_num(10)
+ No eps storage on 4G sim : YES
+ Debugging card type: None
+ Debugging card more info: 0 0
+----------------------
+ FINAL IMEI Certi: PASS
+-- Send APDU to card Information --
+ slot1 send apdu ins history:
+F2 F2 F2 F2 F2 F2 F2 F2 F2 F2 F2 F2 F2 F2 F2 F2 F2 F2 F2 F2 
+-- SIM Proactive CMD Information --
+ slot1 Proactive CMD :
+00 00 00 00 00 00 00 00 00 00 
+Slot1 Setup menu title :
+ None
+-- SIM ATR Information --
+ ATR length : 22
+ slot1 - ATR RAW DATA : 3B9F96801FC78031E073FE211357868C228698401886
+-- slot1 PPS information --
+ PPS SIZE : 04
+ PPS RAW DATA : FF109679
+--slot1 SIM TP Information  --
+  TP RAW DATA : FFFFFFFF7F9D00DFBF00001FE2000000C3FB000700006000500000000008408003000000
+----------------------
+HW VERSION SMEM by ap: 11
+Region[256], Group[15], STR[VZW]
+----------------------
+-- UIM_NV information --
+-- RTRE information --
+ SIM based
+-- FTM information --
+ Online Mode
+ Proactive cfg : BIP enabled!
+-- SHA 256 information --
+ SHA256 is ON
+-- UIM_SELECT_DEFAULT_USIM_APP information --
+Auto Provisiooning is ON
+IMSI replacement is disabled
+PBKDF2 ON, E-NCK ON
+-- UIM_HOTSWAP information --
+-- HOTSWAP Configuration --
+num_of_sample_for_insertion = 0x0
+num_of_sample_for_removal = 0xf
+maximum_debounce_retry_counter = 0x2
+-- Slot1 information --
+enableUimHotswap = 1
+uimHotswapPolarity = ACTIVE_LOW
+uimCardDetectGpioPullSetting = NO_PULL
+hotswap.hotswap_notify_card_removed = FALSE
+hotswap.card_status = UIM_CARD_INSERTED
+Single Tray for Dual SIM : supported
+-- Slot1 Tray_DET UIM Controller Config--
+UART_DM_UIM_CFG - 0x1543
+nUIMCFG - 0x1543
+-- HOTSWAP history info('R' is removed and 'I' is inserted) --
+[Slot1]HOTSWAP (insert or remove) history values 0, accumul-cnt 127
+-- UIM_DRIVER debug information --
+Total number of active uim interfaces : 1
+Single Slot&IMEI By FEATURE_SAMSUNG_SYSTEM_SS_DS_BY_IMEI Feature
+-- Slot1 information --
+tot_idle_bytes_count = 0x0
+tot_parity_error_count = 0x0
+tot_overrun_error_count = 0x0
+tot_rx_break_error_count = 0x0
+tot_recovery_count = 0x0
+last_sent_apdu = 0x80 0xf2 0x0 0x1 0x12
+-- UIM_AUTO_SUBSCRIPTION information --
+session 0 - gw pri, session 1 - 1x pri
+session 2 - gw sec, session 3 - 1x sec
+all slot on off match by ap and cp
+SLOT 1 - Cross-mapping: 0x0
+SLOT 1 - USIM session: 0x0
+SLOT 1 - USIM activation: 0x1
+SLOT 1 - CSIM session: 0x1
+SLOT 1 - CSIM activation: 0x1

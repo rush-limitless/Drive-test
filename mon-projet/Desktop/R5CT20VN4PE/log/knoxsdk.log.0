@@ -1,0 +1,294 @@
+06-14 05:13:06.806 EnterpriseDeviceManager : getInstance() : (1265/1265) create an instance with UID 1000
+06-14 05:13:09.789 KnoxCustomManagerService : Checking Upgrade...
+06-14 05:13:09.790 KnoxCustomManagerService : OneUI Version Changed
+06-14 05:13:09.792 KnoxCustomManagerService : OneUI Version : 5.1
+06-14 05:13:47.841 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+06-14 05:13:47.841 KnoxCustomManagerService : cPN: android/system
+06-14 05:13:47.841 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+06-14 05:13:47.842 KnoxCustomManagerService : uID: 0
+06-14 05:13:47.842 KnoxCustomManagerService : rES: Bundle[{}]
+06-14 05:13:47.842 KnoxCustomManagerService : kAS: Bundle[{}]
+06-16 08:59:45.655 EnterpriseDeviceManager : getInstance() : (1266/1266) create an instance with UID 1000
+06-16 09:00:15.071 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+06-16 09:00:15.072 KnoxCustomManagerService : cPN: android/system
+06-16 09:00:15.072 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+06-16 09:00:15.072 KnoxCustomManagerService : uID: 0
+06-16 09:00:15.072 KnoxCustomManagerService : rES: Bundle[{}]
+06-16 09:00:15.073 KnoxCustomManagerService : kAS: Bundle[{}]
+07-26 09:13:09.866 EnterpriseDeviceManager : getInstance() : (1258/1258) create an instance with UID 1000
+07-26 09:13:39.718 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+07-26 09:13:39.718 KnoxCustomManagerService : cPN: android/system
+07-26 09:13:39.719 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+07-26 09:13:39.719 KnoxCustomManagerService : uID: 0
+07-26 09:13:39.719 KnoxCustomManagerService : rES: Bundle[{}]
+07-26 09:13:39.719 KnoxCustomManagerService : kAS: Bundle[{}]
+08-16 15:28:56.477 EnterpriseDeviceManager : getInstance() : (1238/1238) create an instance with UID 1000
+08-16 15:29:25.721 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+08-16 15:29:25.723 KnoxCustomManagerService : cPN: android/system
+08-16 15:29:25.724 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+08-16 15:29:25.724 KnoxCustomManagerService : uID: 0
+08-16 15:29:25.724 KnoxCustomManagerService : rES: Bundle[{}]
+08-16 15:29:25.725 KnoxCustomManagerService : kAS: Bundle[{}]
+06-06 21:18:57.679 EnterpriseDeviceManager : getInstance() : (1247/1247) create an instance with UID 1000
+06-06 21:18:49.676 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+06-06 21:18:49.678 KnoxCustomManagerService : cPN: android/system
+06-06 21:18:49.678 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+06-06 21:18:49.678 KnoxCustomManagerService : uID: 0
+06-06 21:18:49.679 KnoxCustomManagerService : rES: Bundle[{}]
+06-06 21:18:49.679 KnoxCustomManagerService : kAS: Bundle[{}]
+07-07 23:15:00.875 EnterpriseDeviceManager : getInstance() : (1258/1258) create an instance with UID 1000
+07-07 23:14:51.262 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+07-07 23:14:51.263 KnoxCustomManagerService : cPN: android/system
+07-07 23:14:51.263 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+07-07 23:14:51.263 KnoxCustomManagerService : uID: 0
+07-07 23:14:51.264 KnoxCustomManagerService : rES: Bundle[{}]
+07-07 23:14:51.264 KnoxCustomManagerService : kAS: Bundle[{}]
+07-19 13:48:37.444 EnterpriseDeviceManager : getInstance() : (1233/1233) create an instance with UID 1000
+07-19 13:49:33.063 EnterpriseDeviceManager : getInstance() : (1253/1253) create an instance with UID 1000
+07-19 14:35:45.193 EnterpriseDeviceManager : getInstance() : (1266/1266) create an instance with UID 1000
+07-19 14:36:13.854 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+07-19 14:36:13.856 KnoxCustomManagerService : cPN: android/system
+07-19 14:36:13.857 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+07-19 14:36:13.857 KnoxCustomManagerService : uID: 0
+07-19 14:36:13.857 KnoxCustomManagerService : rES: Bundle[{}]
+07-19 14:36:13.857 KnoxCustomManagerService : kAS: Bundle[{}]
+07-22 14:58:01.593 EnterpriseDeviceManager : getInstance() : (1266/1266) create an instance with UID 1000
+07-22 14:59:30.036 EnterpriseDeviceManager : getInstance() : (1254/1254) create an instance with UID 1000
+07-22 14:59:58.588 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+07-22 14:59:58.589 KnoxCustomManagerService : cPN: android/system
+07-22 14:59:58.589 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+07-22 14:59:58.589 KnoxCustomManagerService : uID: 0
+07-22 14:59:58.589 KnoxCustomManagerService : rES: Bundle[{}]
+07-22 14:59:58.590 KnoxCustomManagerService : kAS: Bundle[{}]
+08-06 22:57:52.848 EnterpriseDeviceManager : getInstance() : (1255/1255) create an instance with UID 1000
+08-06 22:58:09.066 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+08-06 22:58:09.103 KnoxCustomManagerService : cPN: android/system
+08-06 22:58:09.105 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+08-06 22:58:09.105 KnoxCustomManagerService : uID: 0
+08-06 22:58:09.106 KnoxCustomManagerService : rES: Bundle[{}]
+08-06 22:58:09.106 KnoxCustomManagerService : kAS: Bundle[{}]
+08-09 15:50:46.815 EnterpriseDeviceManager : getInstance() : (1259/1259) create an instance with UID 1000
+08-09 15:51:16.366 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+08-09 15:51:16.367 KnoxCustomManagerService : cPN: android/system
+08-09 15:51:16.367 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+08-09 15:51:16.367 KnoxCustomManagerService : uID: 0
+08-09 15:51:16.368 KnoxCustomManagerService : rES: Bundle[{}]
+08-09 15:51:16.368 KnoxCustomManagerService : kAS: Bundle[{}]
+09-05 11:24:41.165 EnterpriseDeviceManager : getInstance() : (1295/1295) create an instance with UID 1000
+09-05 11:24:46.208 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+09-05 11:24:46.210 KnoxCustomManagerService : cPN: android/system
+09-05 11:24:46.210 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+09-05 11:24:46.210 KnoxCustomManagerService : uID: 0
+09-05 11:24:46.210 KnoxCustomManagerService : rES: Bundle[{}]
+09-05 11:24:46.210 KnoxCustomManagerService : kAS: Bundle[{}]
+10-04 07:45:26.959 EnterpriseDeviceManager : getInstance() : (1224/1224) create an instance with UID 1000
+10-04 07:45:26.532 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+10-04 07:45:26.536 KnoxCustomManagerService : cPN: android/system
+10-04 07:45:26.536 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+10-04 07:45:26.536 KnoxCustomManagerService : uID: 0
+10-04 07:45:26.537 KnoxCustomManagerService : rES: Bundle[{}]
+10-04 07:45:26.537 KnoxCustomManagerService : kAS: Bundle[{}]
+10-07 18:44:25.350 EnterpriseDeviceManager : getInstance() : (1247/1247) create an instance with UID 1000
+10-07 18:44:54.015 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+10-07 18:44:54.016 KnoxCustomManagerService : cPN: android/system
+10-07 18:44:54.016 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+10-07 18:44:54.017 KnoxCustomManagerService : uID: 0
+10-07 18:44:54.017 KnoxCustomManagerService : rES: Bundle[{}]
+10-07 18:44:54.017 KnoxCustomManagerService : kAS: Bundle[{}]
+10-07 19:58:52.981 EnterpriseDeviceManager : getInstance() : (1437/1437) create an instance with UID 1000
+10-07 19:59:21.850 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+10-07 19:59:21.852 KnoxCustomManagerService : cPN: android/system
+10-07 19:59:21.852 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+10-07 19:59:21.854 KnoxCustomManagerService : uID: 0
+10-07 19:59:21.855 KnoxCustomManagerService : rES: Bundle[{}]
+10-07 19:59:21.855 KnoxCustomManagerService : kAS: Bundle[{}]
+10-07 20:25:10.539 EnterpriseDeviceManager : getInstance() : (1263/1263) create an instance with UID 1000
+10-07 20:25:40.567 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+10-07 20:25:40.570 KnoxCustomManagerService : cPN: android/system
+10-07 20:25:40.570 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+10-07 20:25:40.570 KnoxCustomManagerService : uID: 0
+10-07 20:25:40.570 KnoxCustomManagerService : rES: Bundle[{}]
+10-07 20:25:40.570 KnoxCustomManagerService : kAS: Bundle[{}]
+10-08 07:25:28.284 EnterpriseDeviceManager : getInstance() : (1270/1270) create an instance with UID 1000
+10-08 07:25:59.335 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+10-08 07:25:59.336 KnoxCustomManagerService : cPN: android/system
+10-08 07:25:59.336 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+10-08 07:25:59.336 KnoxCustomManagerService : uID: 0
+10-08 07:25:59.336 KnoxCustomManagerService : rES: Bundle[{}]
+10-08 07:25:59.337 KnoxCustomManagerService : kAS: Bundle[{}]
+10-08 08:39:47.736 EnterpriseDeviceManager : getInstance() : (1263/1263) create an instance with UID 1000
+10-08 08:40:19.191 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+10-08 08:40:19.203 KnoxCustomManagerService : cPN: android/system
+10-08 08:40:19.203 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+10-08 08:40:19.204 KnoxCustomManagerService : uID: 0
+10-08 08:40:19.204 KnoxCustomManagerService : rES: Bundle[{}]
+10-08 08:40:19.204 KnoxCustomManagerService : kAS: Bundle[{}]
+10-08 08:48:51.133 EnterpriseDeviceManager : getInstance() : (1254/1254) create an instance with UID 1000
+10-08 08:49:21.213 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+10-08 08:49:21.214 KnoxCustomManagerService : cPN: android/system
+10-08 08:49:21.214 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+10-08 08:49:21.214 KnoxCustomManagerService : uID: 0
+10-08 08:49:21.214 KnoxCustomManagerService : rES: Bundle[{}]
+10-08 08:49:21.214 KnoxCustomManagerService : kAS: Bundle[{}]
+10-08 10:27:19.904 EnterpriseDeviceManager : getInstance() : (1334/1334) create an instance with UID 1000
+10-08 10:27:49.161 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+10-08 10:27:49.162 KnoxCustomManagerService : cPN: android/system
+10-08 10:27:49.162 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+10-08 10:27:49.162 KnoxCustomManagerService : uID: 0
+10-08 10:27:49.162 KnoxCustomManagerService : rES: Bundle[{}]
+10-08 10:27:49.163 KnoxCustomManagerService : kAS: Bundle[{}]
+10-14 11:37:14.045 EnterpriseDeviceManager : getInstance() : (1353/1353) create an instance with UID 1000
+10-14 11:37:39.479 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+10-14 11:37:39.481 KnoxCustomManagerService : cPN: android/system
+10-14 11:37:39.481 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+10-14 11:37:39.482 KnoxCustomManagerService : uID: 0
+10-14 11:37:39.483 KnoxCustomManagerService : rES: Bundle[{}]
+10-14 11:37:39.483 KnoxCustomManagerService : kAS: Bundle[{}]
+10-18 08:46:17.182 EnterpriseDeviceManager : getInstance() : (1291/1291) create an instance with UID 1000
+10-18 08:46:43.208 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+10-18 08:46:43.210 KnoxCustomManagerService : cPN: android/system
+10-18 08:46:43.212 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+10-18 08:46:43.212 KnoxCustomManagerService : uID: 0
+10-18 08:46:43.213 KnoxCustomManagerService : rES: Bundle[{}]
+10-18 08:46:43.213 KnoxCustomManagerService : kAS: Bundle[{}]
+10-28 03:17:45.478 EnterpriseDeviceManager : getInstance() : (15976/15976) create an instance with UID 1000
+10-28 03:18:17.626 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+10-28 03:18:17.627 KnoxCustomManagerService : cPN: android/system
+10-28 03:18:17.627 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+10-28 03:18:17.627 KnoxCustomManagerService : uID: 0
+10-28 03:18:17.627 KnoxCustomManagerService : rES: Bundle[{}]
+10-28 03:18:17.627 KnoxCustomManagerService : kAS: Bundle[{}]
+10-28 14:49:50.710 EnterpriseDeviceManager : getInstance() : (1319/1319) create an instance with UID 1000
+10-28 14:50:22.336 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+10-28 14:50:22.337 KnoxCustomManagerService : cPN: android/system
+10-28 14:50:22.337 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+10-28 14:50:22.338 KnoxCustomManagerService : uID: 0
+10-28 14:50:22.338 KnoxCustomManagerService : rES: Bundle[{}]
+10-28 14:50:22.338 KnoxCustomManagerService : kAS: Bundle[{}]
+10-30 22:35:26.417 EnterpriseDeviceManager : getInstance() : (1475/1475) create an instance with UID 1000
+10-30 22:35:56.549 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+10-30 22:35:56.551 KnoxCustomManagerService : cPN: android/system
+10-30 22:35:56.552 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+10-30 22:35:56.552 KnoxCustomManagerService : uID: 0
+10-30 22:35:56.552 KnoxCustomManagerService : rES: Bundle[{}]
+10-30 22:35:56.552 KnoxCustomManagerService : kAS: Bundle[{}]
+10-31 15:28:18.230 EnterpriseDeviceManager : getInstance() : (1239/1239) create an instance with UID 1000
+10-31 15:28:48.380 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+10-31 15:28:48.382 KnoxCustomManagerService : cPN: android/system
+10-31 15:28:48.383 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+10-31 15:28:48.385 KnoxCustomManagerService : uID: 0
+10-31 15:28:48.385 KnoxCustomManagerService : rES: Bundle[{}]
+10-31 15:28:48.386 KnoxCustomManagerService : kAS: Bundle[{}]
+11-01 02:18:05.604 EnterpriseDeviceManager : getInstance() : (1262/1262) create an instance with UID 1000
+11-01 02:18:36.895 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+11-01 02:18:36.899 KnoxCustomManagerService : cPN: android/system
+11-01 02:18:36.901 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+11-01 02:18:36.902 KnoxCustomManagerService : uID: 0
+11-01 02:18:36.903 KnoxCustomManagerService : rES: Bundle[{}]
+11-01 02:18:36.903 KnoxCustomManagerService : kAS: Bundle[{}]
+11-01 02:47:05.174 EnterpriseDeviceManager : getInstance() : (1227/1227) create an instance with UID 1000
+11-01 02:47:35.165 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+11-01 02:47:35.166 KnoxCustomManagerService : cPN: android/system
+11-01 02:47:35.166 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+11-01 02:47:35.166 KnoxCustomManagerService : uID: 0
+11-01 02:47:35.168 KnoxCustomManagerService : rES: Bundle[{}]
+11-01 02:47:35.168 KnoxCustomManagerService : kAS: Bundle[{}]
+11-01 09:56:02.069 EnterpriseDeviceManager : getInstance() : (1345/1345) create an instance with UID 1000
+11-01 09:56:31.852 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+11-01 09:56:31.852 KnoxCustomManagerService : cPN: android/system
+11-01 09:56:31.853 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+11-01 09:56:31.853 KnoxCustomManagerService : uID: 0
+11-01 09:56:31.853 KnoxCustomManagerService : rES: Bundle[{}]
+11-01 09:56:31.853 KnoxCustomManagerService : kAS: Bundle[{}]
+11-01 14:06:37.957 EnterpriseDeviceManager : getInstance() : (1253/1253) create an instance with UID 1000
+11-01 14:07:07.183 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+11-01 14:07:07.185 KnoxCustomManagerService : cPN: android/system
+11-01 14:07:07.186 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+11-01 14:07:07.186 KnoxCustomManagerService : uID: 0
+11-01 14:07:07.186 KnoxCustomManagerService : rES: Bundle[{}]
+11-01 14:07:07.187 KnoxCustomManagerService : kAS: Bundle[{}]
+11-05 15:09:24.379 EnterpriseDeviceManager : getInstance() : (1232/1232) create an instance with UID 1000
+11-05 15:09:51.832 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+11-05 15:09:51.834 KnoxCustomManagerService : cPN: android/system
+11-05 15:09:51.835 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+11-05 15:09:51.835 KnoxCustomManagerService : uID: 0
+11-05 15:09:51.835 KnoxCustomManagerService : rES: Bundle[{}]
+11-05 15:09:51.835 KnoxCustomManagerService : kAS: Bundle[{}]
+11-07 12:14:53.107 EnterpriseDeviceManager : getInstance() : (1251/1251) create an instance with UID 1000
+11-07 12:15:23.872 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+11-07 12:15:23.877 KnoxCustomManagerService : cPN: android/system
+11-07 12:15:23.877 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+11-07 12:15:23.878 KnoxCustomManagerService : uID: 0
+11-07 12:15:23.879 KnoxCustomManagerService : rES: Bundle[{}]
+11-07 12:15:23.879 KnoxCustomManagerService : kAS: Bundle[{}]
+11-07 12:43:59.444 EnterpriseDeviceManager : getInstance() : (1243/1243) create an instance with UID 1000
+11-07 12:44:29.729 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+11-07 12:44:29.741 KnoxCustomManagerService : cPN: android/system
+11-07 12:44:29.741 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+11-07 12:44:29.742 KnoxCustomManagerService : uID: 0
+11-07 12:44:29.747 KnoxCustomManagerService : rES: Bundle[{}]
+11-07 12:44:29.747 KnoxCustomManagerService : kAS: Bundle[{}]
+11-07 12:46:22.885 EnterpriseDeviceManager : getInstance() : (1238/1238) create an instance with UID 1000
+11-07 12:47:15.769 EnterpriseDeviceManager : getInstance() : (1261/1261) create an instance with UID 1000
+11-07 12:47:44.998 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+11-07 12:47:45.001 KnoxCustomManagerService : cPN: android/system
+11-07 12:47:45.001 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+11-07 12:47:45.001 KnoxCustomManagerService : uID: 0
+11-07 12:47:45.001 KnoxCustomManagerService : rES: Bundle[{}]
+11-07 12:47:45.002 KnoxCustomManagerService : kAS: Bundle[{}]
+11-07 12:48:20.553 EnterpriseDeviceManager : getInstance() : (1235/1235) create an instance with UID 1000
+11-07 12:48:49.911 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+11-07 12:48:49.913 KnoxCustomManagerService : cPN: android/system
+11-07 12:48:49.913 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+11-07 12:48:49.913 KnoxCustomManagerService : uID: 0
+11-07 12:48:49.913 KnoxCustomManagerService : rES: Bundle[{}]
+11-07 12:48:49.913 KnoxCustomManagerService : kAS: Bundle[{}]
+11-07 13:45:56.355 EnterpriseDeviceManager : getInstance() : (1470/1470) create an instance with UID 1000
+11-07 13:46:27.046 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+11-07 13:46:27.048 KnoxCustomManagerService : cPN: android/system
+11-07 13:46:27.048 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+11-07 13:46:27.049 KnoxCustomManagerService : uID: 0
+11-07 13:46:27.049 KnoxCustomManagerService : rES: Bundle[{}]
+11-07 13:46:27.049 KnoxCustomManagerService : kAS: Bundle[{}]
+11-27 14:39:49.456 EnterpriseDeviceManager : getInstance() : (1260/1260) create an instance with UID 1000
+11-27 14:40:04.498 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+11-27 14:40:04.500 KnoxCustomManagerService : cPN: android/system
+11-27 14:40:04.502 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+11-27 14:40:04.503 KnoxCustomManagerService : uID: 0
+11-27 14:40:04.504 KnoxCustomManagerService : rES: Bundle[{}]
+11-27 14:40:04.505 KnoxCustomManagerService : kAS: Bundle[{}]
+11-27 16:57:55.072 EnterpriseDeviceManager : getInstance() : (1315/1315) create an instance with UID 1000
+11-27 16:58:24.355 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+11-27 16:58:24.356 KnoxCustomManagerService : cPN: android/system
+11-27 16:58:24.356 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+11-27 16:58:24.356 KnoxCustomManagerService : uID: 0
+11-27 16:58:24.356 KnoxCustomManagerService : rES: Bundle[{}]
+11-27 16:58:24.357 KnoxCustomManagerService : kAS: Bundle[{}]
+12-03 11:40:44.739 EnterpriseDeviceManager : getInstance() : (1269/1269) create an instance with UID 1000
+12-03 11:41:14.554 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+12-03 11:41:14.555 KnoxCustomManagerService : cPN: android/system
+12-03 11:41:14.555 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+12-03 11:41:14.556 KnoxCustomManagerService : uID: 0
+12-03 11:41:14.556 KnoxCustomManagerService : rES: Bundle[{}]
+12-03 11:41:14.556 KnoxCustomManagerService : kAS: Bundle[{}]
+12-05 09:10:43.141 EnterpriseDeviceManager : getInstance() : (1277/1277) create an instance with UID 1000
+12-05 09:11:13.863 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+12-05 09:11:13.864 KnoxCustomManagerService : cPN: android/system
+12-05 09:11:13.864 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+12-05 09:11:13.864 KnoxCustomManagerService : uID: 0
+12-05 09:11:13.864 KnoxCustomManagerService : rES: Bundle[{}]
+12-05 09:11:13.865 KnoxCustomManagerService : kAS: Bundle[{}]
+12-12 21:26:54.618 EnterpriseDeviceManager : getInstance() : (1252/1252) create an instance with UID 1000
+12-12 21:27:18.860 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+12-12 21:27:18.861 KnoxCustomManagerService : cPN: android/system
+12-12 21:27:18.862 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+12-12 21:27:18.863 KnoxCustomManagerService : uID: 0
+12-12 21:27:18.863 KnoxCustomManagerService : rES: Bundle[{}]
+12-12 21:27:18.864 KnoxCustomManagerService : kAS: Bundle[{}]
+12-17 17:29:03.647 EnterpriseDeviceManager : getInstance() : (1242/1242) create an instance with UID 1000
+12-17 17:29:32.753 KnoxCustomManagerService : API: ARM-setApplicationRestrictions
+12-17 17:29:32.754 KnoxCustomManagerService : cPN: android/system
+12-17 17:29:32.754 KnoxCustomManagerService : tPN: com.samsung.android.SettingsReceiver.feedback
+12-17 17:29:32.754 KnoxCustomManagerService : uID: 0
+12-17 17:29:32.754 KnoxCustomManagerService : rES: Bundle[{}]
+12-17 17:29:32.754 KnoxCustomManagerService : kAS: Bundle[{}]

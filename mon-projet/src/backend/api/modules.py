@@ -589,6 +589,96 @@ async def get_module_run(run_id: str, db: Session = Depends(get_db)):
 
 def _execute_catalog_module(definition: ModuleDefinition, execution: ModuleExecute, db: Session) -> Dict[str, Any]:
     """Execute a Spec-defined module and persist a run record."""
+    targets = _collect_device_targets(execution)
+    if targets:
+        device_results: List[Dict[str, Any]] = []
+        success_count = 0
+        failure_count = 0
+        for device_id in targets:
+            per_device_params = dict(execution.parameters or {})
+            per_device_params.update(execution.parameters_by_device.get(device_id) or {})
+            try:
+                _validate_catalog_parameters(definition, per_device_params)
+            except HTTPException as exc:
+                failure_count += 1
+                device_results.append({
+                    "device_id": device_id,
+                    "success": False,
+                    "result": {"error": exc.detail},
+                    "error": exc.detail,
+                })
+                continue
+
+            run = ModuleRun(
+                module_id=definition.id,
+                module_name=definition.name,
+                device_id=device_id,
+                parameters_json=json.dumps(per_device_params or {}),
+            )
+            db.add(run)
+            db.commit()
+            db.refresh(run)
+
+            run.mark_running()
+            db.commit()
+
+            try:
+                result = module_catalog.execute_module(
+                    definition.id,
+                    device_id=device_id,
+                    parameters=per_device_params or {},
+                )
+            except ModuleExecutionError as exc:
+                run.mark_failed(str(exc))
+                db.commit()
+                failure_count += 1
+                device_results.append({
+                    "device_id": device_id,
+                    "success": False,
+                    "result": {"error": str(exc)},
+                    "error": str(exc),
+                })
+                continue
+            except Exception as exc:  # pragma: no cover - defensive logging
+                run.mark_failed(str(exc))
+                db.commit()
+                failure_count += 1
+                device_results.append({
+                    "device_id": device_id,
+                    "success": False,
+                    "result": {"error": "Module execution failed"},
+                    "error": "Module execution failed",
+                })
+                continue
+
+            run.mark_completed(
+                success=result.success,
+                result_json=json.dumps(result.result),
+                duration_ms=int(result.duration_ms),
+            )
+            db.commit()
+            db.refresh(run)
+
+            if result.success:
+                success_count += 1
+            else:
+                failure_count += 1
+            device_results.append({
+                "device_id": device_id,
+                "success": result.success,
+                "result": result.result,
+            })
+
+        summary = _default_stage_message(definition.name, success_count, failure_count)
+        return {
+            "module_id": definition.id,
+            "module_name": definition.name,
+            "success": failure_count == 0 and success_count > 0,
+            "device_results": device_results,
+            "result": {"device_results": device_results},
+            "summary": summary,
+        }
+
     _validate_catalog_parameters(definition, execution.parameters or {})
 
     run = ModuleRun(

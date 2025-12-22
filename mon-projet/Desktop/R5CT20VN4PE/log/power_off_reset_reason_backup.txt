@@ -1,0 +1,189 @@
+25/11/07 12:20:50
+reason : userrequested
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+	at com.android.server.power.ShutdownThread.shutdownInner(ShutdownThread.java:344)
+	at com.android.server.power.ShutdownThread.shutdown(ShutdownThread.java:240)
+	at com.android.server.statusbar.StatusBarManagerService.lambda$shutdown$4(StatusBarManagerService.java:2210)
+	at com.android.server.statusbar.StatusBarManagerService.$r8$lambda$2ndFA8HNezCsgX2sySFgr4QHJWQ(Unknown Source:0)
+	at com.android.server.statusbar.StatusBarManagerService$$ExternalSyntheticLambda8.run(Unknown Source:2)
+	at android.os.Handler.handleCallback(Handler.java:942)
+	at android.os.Handler.dispatchMessage(Handler.java:99)
+	at android.os.Looper.loopOnce(Looper.java:226)
+	at android.os.Looper.loop(Looper.java:313)
+	at com.android.server.SystemServer.run(SystemServer.java:1346)
+	at com.android.server.SystemServer.main(SystemServer.java:989)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:604)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1045)
+12:20:53  2025-11-07 12:20:53+0100 | SHUTDOWN |       | REASON: userrequested
+12:20:53  terminating init service start
+12:20:54  terminating init service end
+12:20:54  volume shutdown start
+12:20:55  volume shutdown end
+2025-11-07 12:44:33+0100 |    ON    | MP    | A426U1UEU9EXF3 / OFFSRC:(PS_HOLD,SOFT) / ONSRC:(HARDRST,PON1)
+ /  
+
+25/11/07 12:45:36
+reason : userrequested
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+	at com.android.server.power.ShutdownThread.shutdownInner(ShutdownThread.java:344)
+	at com.android.server.power.ShutdownThread.shutdown(ShutdownThread.java:240)
+	at com.android.server.statusbar.StatusBarManagerService.lambda$shutdown$4(StatusBarManagerService.java:2210)
+	at com.android.server.statusbar.StatusBarManagerService.$r8$lambda$2ndFA8HNezCsgX2sySFgr4QHJWQ(Unknown Source:0)
+	at com.android.server.statusbar.StatusBarManagerService$$ExternalSyntheticLambda8.run(Unknown Source:2)
+	at android.os.Handler.handleCallback(Handler.java:942)
+	at android.os.Handler.dispatchMessage(Handler.java:99)
+	at android.os.Looper.loopOnce(Looper.java:226)
+	at android.os.Looper.loop(Looper.java:313)
+	at com.android.server.SystemServer.run(SystemServer.java:1346)
+	at com.android.server.SystemServer.main(SystemServer.java:989)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:604)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1045)
+12:45:39  2025-11-07 12:45:39+0100 | SHUTDOWN |       | REASON: userrequested
+12:45:39  terminating init service start
+12:45:40  terminating init service end
+12:45:40  volume shutdown start
+12:45:41  volume shutdown end
+25/11/07 12:46:37
+reason : userrequested
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+	at com.android.server.power.ShutdownThread.shutdownInner(ShutdownThread.java:344)
+	at com.android.server.power.ShutdownThread.shutdown(ShutdownThread.java:240)
+	at com.android.server.statusbar.StatusBarManagerService.lambda$shutdown$4(StatusBarManagerService.java:2210)
+	at com.android.server.statusbar.StatusBarManagerService.$r8$lambda$2ndFA8HNezCsgX2sySFgr4QHJWQ(Unknown Source:0)
+	at com.android.server.statusbar.StatusBarManagerService$$ExternalSyntheticLambda8.run(Unknown Source:2)
+	at android.os.Handler.handleCallback(Handler.java:942)
+	at android.os.Handler.dispatchMessage(Handler.java:99)
+	at android.os.Looper.loopOnce(Looper.java:226)
+	at android.os.Looper.loop(Looper.java:313)
+	at com.android.server.SystemServer.run(SystemServer.java:1346)
+	at com.android.server.SystemServer.main(SystemServer.java:989)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:604)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1045)
+12:46:44  2025-11-07 12:46:44+0100 | SHUTDOWN |       | REASON: userrequested
+12:46:44  terminating init service start
+12:46:45  terminating init service end
+12:46:45  volume shutdown start
+12:46:45  volume shutdown end
+25/11/07 12:47:44
+reason : userrequested
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+	at com.android.server.power.ShutdownThread.shutdownInner(ShutdownThread.java:344)
+	at com.android.server.power.ShutdownThread.shutdown(ShutdownThread.java:240)
+	at com.android.server.statusbar.StatusBarManagerService.lambda$shutdown$4(StatusBarManagerService.java:2210)
+	at com.android.server.statusbar.StatusBarManagerService.$r8$lambda$2ndFA8HNezCsgX2sySFgr4QHJWQ(Unknown Source:0)
+	at com.android.server.statusbar.StatusBarManagerService$$ExternalSyntheticLambda8.run(Unknown Source:2)
+	at android.os.Handler.handleCallback(Handler.java:942)
+	at android.os.Handler.dispatchMessage(Handler.java:99)
+	at android.os.Looper.loopOnce(Looper.java:226)
+	at android.os.Looper.loop(Looper.java:313)
+	at com.android.server.SystemServer.run(SystemServer.java:1346)
+	at com.android.server.SystemServer.main(SystemServer.java:989)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:604)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1045)
+2025-11-07 12:47:44+0100 |    ON    | NP    | A426U1UEU9EXF3 / OFFSRC:(PS_HOLD,SOFT) / ONSRC:(KPD,PON1)
+ 
+
+12:47:47  2025-11-07 12:47:47+0100 | SHUTDOWN |       | REASON: userrequested
+12:47:47  terminating init service start
+12:47:48  terminating init service end
+12:47:48  volume shutdown start
+12:47:49  volume shutdown end
+2025-11-07 12:48:52+0100 |    ON    | NP    | A426U1UEU9EXF3 / OFFSRC:(PS_HOLD,SOFT) / ONSRC:(KPD,PON1)
+ 
+
+13:43:46  2025-11-07 13:43:46+0100 |  REBOOT  |       | REASON: bootloader
+13:43:46  terminating init service start
+13:43:47  terminating init service end
+13:43:47  volume shutdown start
+13:43:47  volume shutdown end
+2025-11-07 13:46:25+0100 |    ON    | NP    | A426U1UEU9EXF3 / OFFSRC:(PS_HOLD,SOFT) / ONSRC:(HARDRST,PON1)
+ 
+
+25/11/27 14:38:55
+reason : no power
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+	at com.android.server.power.ShutdownThread.shutdownInner(ShutdownThread.java:344)
+	at com.android.server.power.ShutdownThread.systemShutdown(ShutdownThread.java:276)
+	at com.android.server.BatteryService$15.run(BatteryService.java:1973)
+	at android.os.Handler.handleCallback(Handler.java:942)
+	at android.os.Handler.dispatchMessage(Handler.java:99)
+	at android.os.Looper.loopOnce(Looper.java:226)
+	at android.os.Looper.loop(Looper.java:313)
+	at com.android.server.SystemServer.run(SystemServer.java:1346)
+	at com.android.server.SystemServer.main(SystemServer.java:989)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:604)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1045)
+14:38:59  2025-11-27 14:38:59+0100 | SHUTDOWN |       | REASON: no power
+14:38:59  terminating init service start
+14:39:00  terminating init service end
+14:39:00  volume shutdown start
+14:39:01  volume shutdown end
+2025-11-27 14:39:59+0100 |    ON    | NP    | A426U1UEU9EXF3 / OFFSRC:(PS_HOLD,SOFT) / ONSRC:(KPD,PON1)
+ 
+
+25/11/27 14:40:10
+reason : no power
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+	at com.android.server.power.ShutdownThread.shutdownInner(ShutdownThread.java:344)
+	at com.android.server.power.ShutdownThread.systemShutdown(ShutdownThread.java:276)
+	at com.android.server.BatteryService$15.run(BatteryService.java:1973)
+	at android.os.Handler.handleCallback(Handler.java:942)
+	at android.os.Handler.dispatchMessage(Handler.java:99)
+	at android.os.Looper.loopOnce(Looper.java:226)
+	at android.os.Looper.loop(Looper.java:313)
+	at com.android.server.SystemServer.run(SystemServer.java:1346)
+	at com.android.server.SystemServer.main(SystemServer.java:989)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:604)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1045)
+14:40:14  2025-11-27 14:40:14+0100 | SHUTDOWN |       | REASON: no power
+14:40:14  terminating init service start
+14:40:15  terminating init service end
+14:40:15  volume shutdown start
+14:40:16  volume shutdown end
+2025-11-27 16:01:43+0100 |          | NP    | OFFSRC:(PS_HOLD,SOFT) / ONSRC:(CBL,PON1)
+ /  / 3482000(0%) 
+
+2025-11-27 16:01:43+0100 |   LPM    |
+
+2025-11-27 16:58:25+0100 |    ON    | NP    | A426U1UEU9EXF3 / OFFSRC:(PS_HOLD,SOFT) / ONSRC:(HARDRST,PON1)
+ 
+
+11:40:08  2025-12-03 11:40:08+0100 |  REBOOT  |       | REASON: shell
+11:40:08  terminating init service start
+11:40:11  terminating init service end
+11:40:11  volume shutdown start
+11:40:12  volume shutdown end
+2025-12-03 11:41:13+0100 |    ON    | NP    | A426U1UEU9EXF3 / OFFSRC:(PS_HOLD,SOFT) / ONSRC:(HARDRST,PON1)
+ 
+
+25/12/05 09:10:06
+reason : userrequested
+java.lang.Exception: It is not an exception!! just save the trace for process which called shutdown thread!! ShutdownThread.shutdown
+	at com.android.server.power.ShutdownThread.shutdownInner(ShutdownThread.java:344)
+	at com.android.server.power.ShutdownThread.reboot(ShutdownThread.java:444)
+	at com.android.server.statusbar.StatusBarManagerService.lambda$reboot$5(StatusBarManagerService.java:2234)
+	at com.android.server.statusbar.StatusBarManagerService.$r8$lambda$OwBHc8REiqmJuTXfrcUSjpBgn3s(Unknown Source:0)
+	at com.android.server.statusbar.StatusBarManagerService$$ExternalSyntheticLambda5.run(Unknown Source:4)
+	at android.os.Handler.handleCallback(Handler.java:942)
+	at android.os.Handler.dispatchMessage(Handler.java:99)
+	at android.os.Looper.loopOnce(Looper.java:226)
+	at android.os.Looper.loop(Looper.java:313)
+	at com.android.server.SystemServer.run(SystemServer.java:1346)
+	at com.android.server.SystemServer.main(SystemServer.java:989)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:604)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1045)
+09:10:09  2025-12-05 09:10:09+0100 |  REBOOT  |       | REASON: userrequested
+09:10:09  terminating init service start
+09:10:12  terminating init service end
+09:10:12  volume shutdown start
+09:10:12  volume shutdown end
+2025-12-05 09:11:15+0100 |    ON    | RP    | A426U1UEU9EXF3 / OFFSRC:(PS_HOLD,SOFT) / ONSRC:(HARDRST,PON1)
+ 
+

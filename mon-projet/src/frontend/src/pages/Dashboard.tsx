@@ -744,7 +744,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
   };
 
   const resolveOperatorLabel = (device: Device) => {
-    const candidates = [device.network_operator, device.carrier, device?.sim_info?.carrier];
+    const candidates = [device.network_operator_live, device.network_operator, device.carrier, device?.sim_info?.carrier];
     for (const candidate of candidates) {
       const sanitized = sanitizeOperatorValue(candidate);
       if (sanitized) {
@@ -752,6 +752,19 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
       }
     }
     return 'Not detected';
+  };
+
+  const resolveSimSlotLines = (device: Device): string[] | null => {
+    if (!device.sim_slots || device.sim_slots.length === 0) {
+      return null;
+    }
+    return device.sim_slots.map((slot, index) => {
+      const slotIndex = slot.slot_index ?? index;
+      const slotName = `SIM${slotIndex + 1}`;
+      const operator = sanitizeOperatorValue(slot.operator) || slot.operator_numeric || 'Unknown';
+      const tech = slot.network_technology ? formatNetworkTechnology(slot.network_technology) : null;
+      return tech ? `${slotName}: ${operator} • ${tech}` : `${slotName}: ${operator}`;
+    });
   };
 
   const formatNetworkTechnology = (value?: string | null): string => {
@@ -1991,15 +2004,32 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                               Network Operator
                             </Typography>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
-                              <Typography
-                                sx={{
-                                  fontSize: '11px',
-                                  fontWeight: 600,
-                                  color: '#0F172A'
-                                }}
-                              >
-                                {resolveOperatorLabel(device)}
-                              </Typography>
+                              {resolveSimSlotLines(device) ? (
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.35 }}>
+                                  {resolveSimSlotLines(device)?.map((line, index) => (
+                                    <Typography
+                                      key={`${device.id}-sim-${index}`}
+                                      sx={{
+                                        fontSize: '11px',
+                                        fontWeight: 600,
+                                        color: '#0F172A'
+                                      }}
+                                    >
+                                      {line}
+                                    </Typography>
+                                  ))}
+                                </Box>
+                              ) : (
+                                <Typography
+                                  sx={{
+                                    fontSize: '11px',
+                                    fontWeight: 600,
+                                    color: '#0F172A'
+                                  }}
+                                >
+                                  {resolveOperatorLabel(device)}
+                                </Typography>
+                              )}
                               <Chip
                                 label={formatNetworkTechnology(device.network_technology)}
                                 size="small"

@@ -39,6 +39,19 @@ async def list_devices(
         else:
             devices = await device_manager.get_all_devices()
             
+        for device in devices:
+            status_value = (device.get("status") or "").lower()
+            if status_value in {"connected", "busy"}:
+                live_info = await adb_manager.get_device_info(device.get("id"), force_refresh=True)
+                if live_info:
+                    for key in ("battery_level", "network_technology", "connection_type"):
+                        value = live_info.get(key)
+                        if value is not None:
+                            device[key] = value
+                live_operator = await adb_manager.get_network_operator_live(device.get("id"))
+                if live_operator:
+                    device["network_operator_live"] = live_operator
+
         # Filter by status if specified
         if status:
             devices = [d for d in devices if d['status'] == status]

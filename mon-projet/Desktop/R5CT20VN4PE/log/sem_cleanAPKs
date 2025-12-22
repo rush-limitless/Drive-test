@@ -1,0 +1,4 @@
+01-Jan-2020 00:00 installd salescodepath: /prism/etc/carriers/VZW
+01-Jan-2020 00:00 installd Start removing apks from /prism/etc/carriers/VZW/enforcedeletepackage.txt
+01-Jan-2020 00:00 installd Failed to open file: /prism/etc/carriers/VZW/enforcedeletepackage.txt
+01-Jan-2020 00:00 installd CleanApk version changed from 0 to 2

@@ -451,7 +451,9 @@ function DeviceManager({ backendUrl }: DeviceManagerProps) {
               </Box>
               <Box>
                 <Typography variant="subtitle2" color="text.secondary">Network Operator</Typography>
-                <Typography variant="body1">{selectedDevice.network_operator || selectedDevice.carrier || 'Unknown'}</Typography>
+                <Typography variant="body1">
+                  {selectedDevice.network_operator_live || selectedDevice.network_operator || selectedDevice.carrier || 'Unknown'}
+                </Typography>
               </Box>
               <Box>
                 <Typography variant="subtitle2" color="text.secondary">Network Technology</Typography>

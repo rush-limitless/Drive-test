@@ -1,0 +1,1 @@
+{"model_name":"SM-A426U","project_name":"A42XMMW","chipset_name":"SM7225","region_name":"USA","build_uuid":"_SAMSUNGBUILDUUID_5e3df7c4ae884f79963a11e5dba7e5c4","build_id":"QB_26757818","build_cl":"2747695","mob_sw_rev":"MPSS.HI.2.5.1-00739.1-BITRA_GEN_PACK-1.3086.218.70326.9"}

@@ -1,0 +1,300 @@
+2025/11/08-15:18:36(WAT)  666:31249 vold Starting trim of /metadata
+2025/11/08-15:18:36(WAT)  666:31249 vold Trimmed 28155904 bytes on /metadata in 0ms
+2025/11/08-15:18:36(WAT)  666:31249 vold Starting trim of /cache
+2025/11/08-15:18:36(WAT)  666:31249 vold Trimmed 608849920 bytes on /cache in 11ms
+2025/11/08-15:18:36(WAT)  666:31249 vold Starting trim of /data
+2025/11/08-15:18:36(WAT)  666:31249 vold Trimmed 0 bytes on /data in 270ms
+2025/11/08-15:18:36(WAT)  666:31249 vold Starting trim of /mnt/vendor/persist
+2025/11/08-15:18:36(WAT)  666:31249 vold Trimmed 24043520 bytes on /mnt/vendor/persist in 16ms
+2025/11/08-15:18:36(WAT)  666:31249 vold Starting trim of /mnt/vendor/efs
+2025/11/08-15:18:36(WAT)  666:31249 vold Trimmed 3092480 bytes on /mnt/vendor/efs in 4ms
+2025/11/08-15:18:36(WAT)  666:31249 vold Starting trim of /efs
+2025/11/08-15:18:36(WAT)  666:31249 vold Trimmed 1249280 bytes on /efs in 6ms
+2025/11/08-15:18:36(WAT)  666:31249 vold Starting trim of /carrier
+2025/11/08-15:18:36(WAT)  666:31249 vold Trimmed 42205184 bytes on /carrier in 0ms
+2025/11/08-15:18:36(WAT)  666:31249 vold Starting trim of /spu
+2025/11/08-15:18:36(WAT)  666:31249 vold Failed to open /spu: Permission denied
+2025/11/08-15:18:36(WAT)  666:31249 vold Cannot find dev sysfs path
+2025/11/08-15:18:36(WAT)  666:31249 vold idle maintenance completed
+2025/11/10-14:26:24(WAT)  666:16054 vold idle maintenance started
+2025/11/10-14:26:24(WAT)  666:16054 vold Starting trim of /metadata
+2025/11/10-14:26:24(WAT)  666:16054 vold Trimmed 0 bytes on /metadata in 0ms
+2025/11/10-14:26:24(WAT)  666:16054 vold Starting trim of /cache
+2025/11/10-14:26:24(WAT)  666:16054 vold Trimmed 0 bytes on /cache in 0ms
+2025/11/10-14:26:24(WAT)  666:16054 vold Starting trim of /data
+2025/11/10-14:26:24(WAT)  666:16054 vold Trimmed 0 bytes on /data in 1ms
+2025/11/10-14:26:24(WAT)  666:16054 vold Starting trim of /mnt/vendor/persist
+2025/11/10-14:26:24(WAT)  666:16054 vold Trimmed 0 bytes on /mnt/vendor/persist in 0ms
+2025/11/10-14:26:24(WAT)  666:16054 vold Starting trim of /mnt/vendor/efs
+2025/11/10-14:26:24(WAT)  666:16054 vold Trimmed 0 bytes on /mnt/vendor/efs in 0ms
+2025/11/10-14:26:24(WAT)  666:16054 vold Starting trim of /efs
+2025/11/10-14:26:24(WAT)  666:16054 vold Trimmed 0 bytes on /efs in 0ms
+2025/11/10-14:26:24(WAT)  666:16054 vold Starting trim of /carrier
+2025/11/10-14:26:24(WAT)  666:16054 vold Trimmed 0 bytes on /carrier in 0ms
+2025/11/10-14:26:24(WAT)  666:16054 vold Starting trim of /spu
+2025/11/10-14:26:24(WAT)  666:16054 vold Failed to open /spu: Permission denied
+2025/11/10-14:26:24(WAT)  666:16054 vold Cannot find dev sysfs path
+2025/11/10-14:26:24(WAT)  666:16054 vold idle maintenance completed
+2025/11/11-11:19:04(WAT)  666:27717 vold idle maintenance started
+2025/11/11-11:19:04(WAT)  666:27717 vold Starting trim of /metadata
+2025/11/11-11:19:04(WAT)  666:27717 vold Trimmed 0 bytes on /metadata in 0ms
+2025/11/11-11:19:04(WAT)  666:27717 vold Starting trim of /cache
+2025/11/11-11:19:04(WAT)  666:27717 vold Trimmed 0 bytes on /cache in 1ms
+2025/11/11-11:19:04(WAT)  666:27717 vold Starting trim of /data
+2025/11/11-11:19:04(WAT)  666:27717 vold Trimmed 0 bytes on /data in 25ms
+2025/11/11-11:19:04(WAT)  666:27717 vold Starting trim of /mnt/vendor/persist
+2025/11/11-11:19:04(WAT)  666:27717 vold Trimmed 0 bytes on /mnt/vendor/persist in 0ms
+2025/11/11-11:19:04(WAT)  666:27717 vold Starting trim of /mnt/vendor/efs
+2025/11/11-11:19:04(WAT)  666:27717 vold Trimmed 0 bytes on /mnt/vendor/efs in 0ms
+2025/11/11-11:19:04(WAT)  666:27717 vold Starting trim of /efs
+2025/11/11-11:19:04(WAT)  666:27717 vold Trimmed 0 bytes on /efs in 0ms
+2025/11/11-11:19:04(WAT)  666:27717 vold Starting trim of /carrier
+2025/11/11-11:19:04(WAT)  666:27717 vold Trimmed 0 bytes on /carrier in 0ms
+2025/11/11-11:19:04(WAT)  666:27717 vold Starting trim of /spu
+2025/11/11-11:19:04(WAT)  666:27717 vold Failed to open /spu: Permission denied
+2025/11/11-11:19:04(WAT)  666:27717 vold Cannot find dev sysfs path
+2025/11/11-11:19:04(WAT)  666:27717 vold idle maintenance completed
+2025/11/12-09:27:27(WAT)  666:24296 vold idle maintenance started
+2025/11/12-09:27:27(WAT)  666:24296 vold Starting trim of /metadata
+2025/11/12-09:27:27(WAT)  666:24296 vold Trimmed 0 bytes on /metadata in 0ms
+2025/11/12-09:27:27(WAT)  666:24296 vold Starting trim of /cache
+2025/11/12-09:27:27(WAT)  666:24296 vold Trimmed 0 bytes on /cache in 1ms
+2025/11/12-09:27:27(WAT)  666:24296 vold Starting trim of /data
+2025/11/12-09:27:27(WAT)  666:24296 vold Trimmed 0 bytes on /data in 13ms
+2025/11/12-09:27:27(WAT)  666:24296 vold Starting trim of /mnt/vendor/persist
+2025/11/12-09:27:27(WAT)  666:24296 vold Trimmed 0 bytes on /mnt/vendor/persist in 0ms
+2025/11/12-09:27:27(WAT)  666:24296 vold Starting trim of /mnt/vendor/efs
+2025/11/12-09:27:27(WAT)  666:24296 vold Trimmed 0 bytes on /mnt/vendor/efs in 0ms
+2025/11/12-09:27:27(WAT)  666:24296 vold Starting trim of /efs
+2025/11/12-09:27:27(WAT)  666:24296 vold Trimmed 0 bytes on /efs in 0ms
+2025/11/12-09:27:27(WAT)  666:24296 vold Starting trim of /carrier
+2025/11/12-09:27:27(WAT)  666:24296 vold Trimmed 0 bytes on /carrier in 0ms
+2025/11/12-09:27:27(WAT)  666:24296 vold Starting trim of /spu
+2025/11/12-09:27:27(WAT)  666:24296 vold Failed to open /spu: Permission denied
+2025/11/12-09:27:27(WAT)  666:24296 vold Cannot find dev sysfs path
+2025/11/12-09:27:27(WAT)  666:24296 vold idle maintenance completed
+2025/11/13-15:48:56(WAT)  666:8921 vold idle maintenance started
+2025/11/13-15:48:56(WAT)  666:8921 vold Starting trim of /metadata
+2025/11/13-15:48:56(WAT)  666:8921 vold Trimmed 0 bytes on /metadata in 0ms
+2025/11/13-15:48:56(WAT)  666:8921 vold Starting trim of /cache
+2025/11/13-15:48:56(WAT)  666:8921 vold Trimmed 0 bytes on /cache in 1ms
+2025/11/13-15:48:56(WAT)  666:8921 vold Starting trim of /data
+2025/11/13-15:48:56(WAT)  666:8921 vold Trimmed 0 bytes on /data in 2ms
+2025/11/13-15:48:56(WAT)  666:8921 vold Starting trim of /mnt/vendor/persist
+2025/11/13-15:48:56(WAT)  666:8921 vold Trimmed 0 bytes on /mnt/vendor/persist in 0ms
+2025/11/13-15:48:56(WAT)  666:8921 vold Starting trim of /mnt/vendor/efs
+2025/11/13-15:48:56(WAT)  666:8921 vold Trimmed 0 bytes on /mnt/vendor/efs in 0ms
+2025/11/13-15:48:56(WAT)  666:8921 vold Starting trim of /efs
+2025/11/13-15:48:56(WAT)  666:8921 vold Trimmed 0 bytes on /efs in 0ms
+2025/11/13-15:48:56(WAT)  666:8921 vold Starting trim of /carrier
+2025/11/13-15:48:56(WAT)  666:8921 vold Trimmed 0 bytes on /carrier in 0ms
+2025/11/13-15:48:56(WAT)  666:8921 vold Starting trim of /spu
+2025/11/13-15:48:56(WAT)  666:8921 vold Failed to open /spu: Permission denied
+2025/11/13-15:48:56(WAT)  666:8921 vold Cannot find dev sysfs path
+2025/11/13-15:48:56(WAT)  666:8921 vold idle maintenance completed
+2025/11/14-10:19:29(WAT)  666:27427 vold idle maintenance started
+2025/11/14-10:19:29(WAT)  666:27427 vold Starting trim of /metadata
+2025/11/14-10:19:29(WAT)  666:27427 vold Trimmed 0 bytes on /metadata in 0ms
+2025/11/14-10:19:29(WAT)  666:27427 vold Starting trim of /cache
+2025/11/14-10:19:29(WAT)  666:27427 vold Trimmed 0 bytes on /cache in 3ms
+2025/11/14-10:19:29(WAT)  666:27427 vold Starting trim of /data
+2025/11/14-10:19:29(WAT)  666:27427 vold Trimmed 0 bytes on /data in 11ms
+2025/11/14-10:19:29(WAT)  666:27427 vold Starting trim of /mnt/vendor/persist
+2025/11/14-10:19:29(WAT)  666:27427 vold Trimmed 0 bytes on /mnt/vendor/persist in 0ms
+2025/11/14-10:19:29(WAT)  666:27427 vold Starting trim of /mnt/vendor/efs
+2025/11/14-10:19:29(WAT)  666:27427 vold Trimmed 0 bytes on /mnt/vendor/efs in 0ms
+2025/11/14-10:19:29(WAT)  666:27427 vold Starting trim of /efs
+2025/11/14-10:19:29(WAT)  666:27427 vold Trimmed 0 bytes on /efs in 0ms
+2025/11/14-10:19:29(WAT)  666:27427 vold Starting trim of /carrier
+2025/11/14-10:19:29(WAT)  666:27427 vold Trimmed 0 bytes on /carrier in 0ms
+2025/11/14-10:19:29(WAT)  666:27427 vold Starting trim of /spu
+2025/11/14-10:19:29(WAT)  666:27427 vold Failed to open /spu: Permission denied
+2025/11/14-10:19:29(WAT)  666:27427 vold Cannot find dev sysfs path
+2025/11/14-10:19:29(WAT)  666:27427 vold idle maintenance completed
+2025/11/14-19:41:53(WAT)  666:666 incfs IncFs_Unmount: umount(force) failed, detaching '/proc/self/fd/15': Device or resource busy
+2025/11/14-19:41:53(WAT)  666:666 incfs IncFs_Unmount: umount(force) failed, detaching '/proc/self/fd/16': Device or resource busy
+2025/11/15-08:27:07(WAT)  666:25313 vold idle maintenance started
+2025/11/15-08:27:07(WAT)  666:25313 vold Starting trim of /metadata
+2025/11/15-08:27:07(WAT)  666:25313 vold Trimmed 0 bytes on /metadata in 3ms
+2025/11/15-08:27:07(WAT)  666:25313 vold Starting trim of /cache
+2025/11/15-08:27:07(WAT)  666:25313 vold Trimmed 0 bytes on /cache in 1ms
+2025/11/15-08:27:07(WAT)  666:25313 vold Starting trim of /data
+2025/11/15-08:27:07(WAT)  666:25313 vold Trimmed 0 bytes on /data in 9ms
+2025/11/15-08:27:07(WAT)  666:25313 vold Starting trim of /mnt/vendor/persist
+2025/11/15-08:27:07(WAT)  666:25313 vold Trimmed 0 bytes on /mnt/vendor/persist in 0ms
+2025/11/15-08:27:07(WAT)  666:25313 vold Starting trim of /mnt/vendor/efs
+2025/11/15-08:27:07(WAT)  666:25313 vold Trimmed 0 bytes on /mnt/vendor/efs in 0ms
+2025/11/15-08:27:07(WAT)  666:25313 vold Starting trim of /efs
+2025/11/15-08:27:07(WAT)  666:25313 vold Trimmed 0 bytes on /efs in 0ms
+2025/11/15-08:27:07(WAT)  666:25313 vold Starting trim of /carrier
+2025/11/15-08:27:07(WAT)  666:25313 vold Trimmed 0 bytes on /carrier in 0ms
+2025/11/15-08:27:07(WAT)  666:25313 vold Starting trim of /spu
+2025/11/15-08:27:07(WAT)  666:25313 vold Failed to open /spu: Permission denied
+2025/11/15-08:27:07(WAT)  666:25313 vold Cannot find dev sysfs path
+2025/11/15-08:27:07(WAT)  666:25313 vold idle maintenance completed
+2025/11/15-08:27:07(WAT)  666:25355 vold idle maintenance stopped
+2025/11/16-23:45:40(WAT)  666:16937 vold idle maintenance started
+2025/11/16-23:45:40(WAT)  666:16937 vold Starting trim of /metadata
+2025/11/16-23:45:40(WAT)  666:16937 vold Trimmed 0 bytes on /metadata in 0ms
+2025/11/16-23:45:40(WAT)  666:16937 vold Starting trim of /cache
+2025/11/16-23:45:40(WAT)  666:16937 vold Trimmed 0 bytes on /cache in 1ms
+2025/11/16-23:45:40(WAT)  666:16937 vold Starting trim of /data
+2025/11/16-23:45:40(WAT)  666:16937 vold Trimmed 0 bytes on /data in 9ms
+2025/11/16-23:45:40(WAT)  666:16937 vold Starting trim of /mnt/vendor/persist
+2025/11/16-23:45:40(WAT)  666:16937 vold Trimmed 0 bytes on /mnt/vendor/persist in 1ms
+2025/11/16-23:45:40(WAT)  666:16937 vold Starting trim of /mnt/vendor/efs
+2025/11/16-23:45:40(WAT)  666:16937 vold Trimmed 0 bytes on /mnt/vendor/efs in 0ms
+2025/11/16-23:45:40(WAT)  666:16937 vold Starting trim of /efs
+2025/11/16-23:45:40(WAT)  666:16937 vold Trimmed 0 bytes on /efs in 0ms
+2025/11/16-23:45:40(WAT)  666:16937 vold Starting trim of /carrier
+2025/11/16-23:45:40(WAT)  666:16937 vold Trimmed 0 bytes on /carrier in 0ms
+2025/11/16-23:45:40(WAT)  666:16937 vold Starting trim of /spu
+2025/11/16-23:45:40(WAT)  666:16937 vold Failed to open /spu: Permission denied
+2025/11/16-23:45:40(WAT)  666:16937 vold Cannot find dev sysfs path
+2025/11/16-23:45:40(WAT)  666:16937 vold idle maintenance completed
+2025/11/16-23:45:40(WAT)  666:16971 vold idle maintenance stopped
+2025/11/17-07:59:03(WAT)  666:7915 vold idle maintenance started
+2025/11/17-07:59:03(WAT)  666:7915 vold Starting trim of /metadata
+2025/11/17-07:59:03(WAT)  666:7915 vold Trimmed 0 bytes on /metadata in 0ms
+2025/11/17-07:59:03(WAT)  666:7915 vold Starting trim of /cache
+2025/11/17-07:59:03(WAT)  666:7915 vold Trimmed 0 bytes on /cache in 1ms
+2025/11/17-07:59:03(WAT)  666:7915 vold Starting trim of /data
+2025/11/17-07:59:03(WAT)  666:7915 vold Trimmed 0 bytes on /data in 3ms
+2025/11/17-07:59:03(WAT)  666:7915 vold Starting trim of /mnt/vendor/persist
+2025/11/17-07:59:03(WAT)  666:7915 vold Trimmed 0 bytes on /mnt/vendor/persist in 0ms
+2025/11/17-07:59:03(WAT)  666:7915 vold Starting trim of /mnt/vendor/efs
+2025/11/17-07:59:03(WAT)  666:7915 vold Trimmed 0 bytes on /mnt/vendor/efs in 0ms
+2025/11/17-07:59:03(WAT)  666:7915 vold Starting trim of /efs
+2025/11/17-07:59:03(WAT)  666:7915 vold Trimmed 0 bytes on /efs in 0ms
+2025/11/17-07:59:03(WAT)  666:7915 vold Starting trim of /carrier
+2025/11/17-07:59:03(WAT)  666:7915 vold Trimmed 0 bytes on /carrier in 0ms
+2025/11/17-07:59:03(WAT)  666:7915 vold Starting trim of /spu
+2025/11/17-07:59:03(WAT)  666:7915 vold Failed to open /spu: Permission denied
+2025/11/17-07:59:03(WAT)  666:7915 vold Cannot find dev sysfs path
+2025/11/17-07:59:03(WAT)  666:7915 vold idle maintenance completed
+2025/11/18-17:03:17(WAT)  666:9920 vold idle maintenance started
+2025/11/18-17:03:17(WAT)  666:9920 vold Starting trim of /metadata
+2025/11/18-17:03:17(WAT)  666:9920 vold Trimmed 0 bytes on /metadata in 0ms
+2025/11/18-17:03:17(WAT)  666:9920 vold Starting trim of /cache
+2025/11/18-17:03:17(WAT)  666:9920 vold Trimmed 0 bytes on /cache in 1ms
+2025/11/18-17:03:17(WAT)  666:9920 vold Starting trim of /data
+2025/11/18-17:03:17(WAT)  666:9920 vold Trimmed 0 bytes on /data in 2ms
+2025/11/18-17:03:17(WAT)  666:9920 vold Starting trim of /mnt/vendor/persist
+2025/11/18-17:03:17(WAT)  666:9920 vold Trimmed 0 bytes on /mnt/vendor/persist in 0ms
+2025/11/18-17:03:17(WAT)  666:9920 vold Starting trim of /mnt/vendor/efs
+2025/11/18-17:03:17(WAT)  666:9920 vold Trimmed 0 bytes on /mnt/vendor/efs in 3ms
+2025/11/18-17:03:17(WAT)  666:9920 vold Starting trim of /efs
+2025/11/18-17:03:17(WAT)  666:9920 vold Trimmed 0 bytes on /efs in 0ms
+2025/11/18-17:03:17(WAT)  666:9920 vold Starting trim of /carrier
+2025/11/18-17:03:17(WAT)  666:9920 vold Trimmed 0 bytes on /carrier in 0ms
+2025/11/18-17:03:17(WAT)  666:9920 vold Starting trim of /spu
+2025/11/18-17:03:17(WAT)  666:9920 vold Failed to open /spu: Permission denied
+2025/11/18-17:03:17(WAT)  666:9920 vold Cannot find dev sysfs path
+2025/11/18-17:03:17(WAT)  666:9920 vold idle maintenance completed
+2025/11/19-07:50:38(WAT)  666:5437 vold idle maintenance started
+2025/11/19-07:50:38(WAT)  666:5437 vold Starting trim of /metadata
+2025/11/19-07:50:38(WAT)  666:5437 vold Trimmed 0 bytes on /metadata in 0ms
+2025/11/19-07:50:38(WAT)  666:5437 vold Starting trim of /cache
+2025/11/19-07:50:38(WAT)  666:5437 vold Trimmed 0 bytes on /cache in 0ms
+2025/11/19-07:50:38(WAT)  666:5437 vold Starting trim of /data
+2025/11/19-07:50:38(WAT)  666:5437 vold Trimmed 0 bytes on /data in 6ms
+2025/11/19-07:50:38(WAT)  666:5437 vold Starting trim of /mnt/vendor/persist
+2025/11/19-07:50:38(WAT)  666:5437 vold Trimmed 0 bytes on /mnt/vendor/persist in 0ms
+2025/11/19-07:50:38(WAT)  666:5437 vold Starting trim of /mnt/vendor/efs
+2025/11/19-07:50:38(WAT)  666:5437 vold Trimmed 0 bytes on /mnt/vendor/efs in 0ms
+2025/11/19-07:50:38(WAT)  666:5437 vold Starting trim of /efs
+2025/11/19-07:50:38(WAT)  666:5437 vold Trimmed 0 bytes on /efs in 0ms
+2025/11/19-07:50:38(WAT)  666:5437 vold Starting trim of /carrier
+2025/11/19-07:50:38(WAT)  666:5437 vold Trimmed 0 bytes on /carrier in 0ms
+2025/11/19-07:50:38(WAT)  666:5437 vold Starting trim of /spu
+2025/11/19-07:50:38(WAT)  666:5437 vold Failed to open /spu: Permission denied
+2025/11/19-07:50:38(WAT)  666:5437 vold Cannot find dev sysfs path
+2025/11/19-07:50:38(WAT)  666:5437 vold idle maintenance completed
+2025/11/20-10:07:38(WAT)  666:18512 vold idle maintenance started
+2025/11/20-10:07:38(WAT)  666:18512 vold Starting trim of /metadata
+2025/11/20-10:07:38(WAT)  666:18512 vold Trimmed 0 bytes on /metadata in 0ms
+2025/11/20-10:07:38(WAT)  666:18512 vold Starting trim of /cache
+2025/11/20-10:07:38(WAT)  666:18512 vold Trimmed 0 bytes on /cache in 0ms
+2025/11/20-10:07:38(WAT)  666:18512 vold Starting trim of /data
+2025/11/20-10:07:38(WAT)  666:18512 vold Trimmed 0 bytes on /data in 7ms
+2025/11/20-10:07:38(WAT)  666:18512 vold Starting trim of /mnt/vendor/persist
+2025/11/20-10:07:38(WAT)  666:18512 vold Trimmed 0 bytes on /mnt/vendor/persist in 0ms
+2025/11/20-10:07:38(WAT)  666:18512 vold Starting trim of /mnt/vendor/efs
+2025/11/20-10:07:38(WAT)  666:18512 vold Trimmed 0 bytes on /mnt/vendor/efs in 0ms
+2025/11/20-10:07:38(WAT)  666:18512 vold Starting trim of /efs
+2025/11/20-10:07:38(WAT)  666:18512 vold Trimmed 0 bytes on /efs in 0ms
+2025/11/20-10:07:38(WAT)  666:18512 vold Starting trim of /carrier
+2025/11/20-10:07:38(WAT)  666:18512 vold Trimmed 0 bytes on /carrier in 0ms
+2025/11/20-10:07:38(WAT)  666:18512 vold Starting trim of /spu
+2025/11/20-10:07:38(WAT)  666:18512 vold Failed to open /spu: Permission denied
+2025/11/20-10:07:38(WAT)  666:18512 vold Cannot find dev sysfs path
+2025/11/20-10:07:38(WAT)  666:18512 vold idle maintenance completed
+2025/11/22-14:43:45(WAT)  666:20754 vold idle maintenance started
+2025/11/22-14:43:45(WAT)  666:20754 vold Starting trim of /metadata
+2025/11/22-14:43:45(WAT)  666:20754 vold Trimmed 0 bytes on /metadata in 0ms
+2025/11/22-14:43:45(WAT)  666:20754 vold Starting trim of /cache
+2025/11/22-14:43:45(WAT)  666:20754 vold Trimmed 0 bytes on /cache in 2ms
+2025/11/22-14:43:45(WAT)  666:20754 vold Starting trim of /data
+2025/11/22-14:43:45(WAT)  666:20754 vold Trimmed 0 bytes on /data in 12ms
+2025/11/22-14:43:45(WAT)  666:20754 vold Starting trim of /mnt/vendor/persist
+2025/11/22-14:43:45(WAT)  666:20754 vold Trimmed 0 bytes on /mnt/vendor/persist in 0ms
+2025/11/22-14:43:45(WAT)  666:20754 vold Starting trim of /mnt/vendor/efs
+2025/11/22-14:43:45(WAT)  666:20754 vold Trimmed 0 bytes on /mnt/vendor/efs in 0ms
+2025/11/22-14:43:45(WAT)  666:20754 vold Starting trim of /efs
+2025/11/22-14:43:45(WAT)  666:20754 vold Trimmed 0 bytes on /efs in 0ms
+2025/11/22-14:43:45(WAT)  666:20754 vold Starting trim of /carrier
+2025/11/22-14:43:45(WAT)  666:20754 vold Trimmed 0 bytes on /carrier in 0ms
+2025/11/22-14:43:45(WAT)  666:20754 vold Starting trim of /spu
+2025/11/22-14:43:45(WAT)  666:20754 vold Failed to open /spu: Permission denied
+2025/11/22-14:43:45(WAT)  666:20754 vold Cannot find dev sysfs path
+2025/11/22-14:43:45(WAT)  666:20754 vold idle maintenance completed
+2025/11/25-12:34:00(WAT)  666:12130 vold idle maintenance started
+2025/11/25-12:34:00(WAT)  666:12130 vold Starting trim of /metadata
+2025/11/25-12:34:00(WAT)  666:12130 vold Trimmed 0 bytes on /metadata in 0ms
+2025/11/25-12:34:00(WAT)  666:12130 vold Starting trim of /cache
+2025/11/25-12:34:00(WAT)  666:12130 vold Trimmed 0 bytes on /cache in 0ms
+2025/11/25-12:34:00(WAT)  666:12130 vold Starting trim of /data
+2025/11/25-12:34:00(WAT)  666:12130 vold Trimmed 0 bytes on /data in 36ms
+2025/11/25-12:34:00(WAT)  666:12130 vold Starting trim of /mnt/vendor/persist
+2025/11/25-12:34:00(WAT)  666:12130 vold Trimmed 0 bytes on /mnt/vendor/persist in 0ms
+2025/11/25-12:34:00(WAT)  666:12130 vold Starting trim of /mnt/vendor/efs
+2025/11/25-12:34:00(WAT)  666:12130 vold Trimmed 0 bytes on /mnt/vendor/efs in 0ms
+2025/11/25-12:34:00(WAT)  666:12130 vold Starting trim of /efs
+2025/11/25-12:34:00(WAT)  666:12130 vold Trimmed 0 bytes on /efs in 0ms
+2025/11/25-12:34:00(WAT)  666:12130 vold Starting trim of /carrier
+2025/11/25-12:34:00(WAT)  666:12130 vold Trimmed 0 bytes on /carrier in 0ms
+2025/11/25-12:34:00(WAT)  666:12130 vold Starting trim of /spu
+2025/11/25-12:34:00(WAT)  666:12130 vold Failed to open /spu: Permission denied
+2025/11/25-12:34:00(WAT)  666:12130 vold Cannot find dev sysfs path
+2025/11/25-12:34:00(WAT)  666:12130 vold idle maintenance completed
+2025/11/27-14:39:00(WAT)  666:730 voldUtils Aborting fuse connection entry /sys/fs/fuse/connections/108/abort
+2025/11/27-14:39:00(WAT)  666:730 voldUtils Skip fsync /sys/fs/fuse/connections/108/abort on a file system does not support synchronization
+2025/11/27-14:39:00(WAT)  666:730 voldUtils read error for checking data
+2025/11/27-14:39:00(WAT)  666:730 voldUtils error  : Invalid argument
+2025/11/27-14:39:00(WAT)  666:730 voldUtils unlink : /sys/fs/fuse/connections/108/abort
+2025/11/27-14:39:00(WAT)  666:730 voldUtils Failed to write to /sys/fs/fuse/connections/108/abort
+2025/11/27-14:39:00(WAT)  666:730 vold VolumeManager::shutdown()++
+2025/11/27-14:39:00(WAT)  666:730 vold VolumeBase::destroy()++ mPath=/storage/emulated
+2025/11/27-14:39:00(WAT)  666:730 vold VolumeBase::unmount()++
+2025/11/27-14:39:00(WAT)  666:730 vold EmulatedVolume::doUnmount()++
+2025/11/27-14:39:00(WAT)  666:730 vold Killing all processes referencing /storage/emulated/0
+2025/11/27-14:39:00(WAT)  666:730 voldUtils KillProcessesUsingPath: path=/storage/emulated/0: Success
+2025/11/27-14:39:01(WAT)  666:730 vold EmulatedVolume::unmountFuseBindMounts()++
+2025/11/27-14:39:01(WAT)  666:730 vold Unmounting /mnt/installer/0/emulated/0/Android/obb
+2025/11/27-14:39:01(WAT)  666:730 vold Unmounting /mnt/user/0/emulated/0/Android/data
+2025/11/27-14:39:01(WAT)  666:730 vold Unmounted /mnt/user/0/emulated/0/Android/data
+2025/11/27-14:39:01(WAT)  666:730 vold Unmounting /mnt/user/0/emulated/0/Android/obb
+2025/11/27-14:39:01(WAT)  666:730 vold Unmounted /mnt/user/0/emulated/0/Android/obb
+2025/11/27-14:39:01(WAT)  666:730 vold EmulatedVolume::unmountFuseBindMounts()--
+2025/11/27-14:39:01(WAT)  666:730 voldUtils Configuring max_ratio of /mnt/user/0/emulated fuse filesystem to 100
+2025/11/27-14:39:01(WAT)  666:730 voldUtils Configuring min_ratio of /mnt/user/0/emulated fuse filesystem to 0
+2025/11/27-14:39:01(WAT)  666:730 voldUtils Writing 100 to /sys/class/bdi/0:108/max_ratio
+2025/11/27-14:39:01(WAT)  666:730 voldUtils Writing 0 to /sys/class/bdi/0:108/min_ratio
+2025/11/27-14:39:01(WAT)  666:730 voldUtils Unmounting fuse path /mnt/user/0/emulated
+2025/11/27-14:39:01(WAT)  666:730 voldUtils /mnt/user/0/emulated in unmounting procedure: Success
+2025/11/27-14:39:01(WAT)  666:730 voldUtils Unmounting pass_through_path /mnt/pass_through/0/emulated
+2025/11/27-14:39:01(WAT)  666:730 voldUtils /mnt/pass_through/0/emulated in unmounting procedure: Success
+2025/11/27-14:39:01(WAT)  666:730 voldUtils /mnt/runtime/default/emulated in unmounting procedure: Success
+2025/11/27-14:39:01(WAT)  666:730 voldUtils /mnt/runtime/read/emulated in unmounting procedure: Success
+2025/11/27-14:39:01(WAT)  666:730 voldUtils /mnt/runtime/write/emulated in unmounting procedure: Success
+2025/11/27-14:39:01(WAT)  666:730 voldUtils /mnt/runtime/full/emulated in unmounting procedure: Success

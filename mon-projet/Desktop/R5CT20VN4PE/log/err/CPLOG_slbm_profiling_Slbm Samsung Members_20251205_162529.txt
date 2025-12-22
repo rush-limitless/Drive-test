@@ -1,0 +1,27 @@
+
+Cur Time : 2025/12/05 16:25:33
+
+slbm name = "Slbm Samsung Members"
+Drop_cnt by spinlock = 0
+Drop_cnt by no mem = 0
+Drop_cnt by req over size = 0
+Drop_time = 0.000000sec
+Uncomp_cnt = 2
+Comp_cnt = 580
+High_wtrmrk_of_procblock = 1
+High_wtrmrk_numb_of_procblock = 0
+log_high_wtrmrk_time = 0.000000sec
+
+Accumulated bytes= 9983916
+Brate = 0.200 kbyte/sec
+
+Spin lock fail cnt = 0
+Spin lock fail time = 0.000000sec
+Spin Lock high water mark = 27
+
+Current Mask Sets = 0
+
+<Storage Info>
+Version = 4
+Size = 32505776
+Current Position = 3792524

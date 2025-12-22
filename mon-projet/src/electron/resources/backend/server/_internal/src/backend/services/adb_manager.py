@@ -76,6 +76,12 @@ def _normalize_network_prop(value: Optional[str]) -> Optional[str]:
     return primary
 
 
+def _split_prop_list(value: Optional[str]) -> List[str]:
+    if not value:
+        return []
+    return [entry.strip() for entry in value.split(',') if entry.strip()]
+
+
 def _network_label_from_code(code: int) -> Optional[str]:
     label = NETWORK_TYPE_CODE_MAP.get(code)
     if not label:
@@ -229,6 +235,24 @@ class ADBConnection:
             logger.error(f"ADB command failed for device {self.device_id}: {e}")
             self.connection_health = False
             raise
+
+    async def get_network_operator_live(self) -> Optional[str]:
+        """Return operator from dumpsys telephony.registry when available."""
+        try:
+            stdout, _, _ = await self.execute_command("shell dumpsys telephony.registry")
+        except Exception:
+            return None
+        if not stdout:
+            return None
+        long_match = re.search(r'mOperatorAlphaLong=([^\r\n,]+)', stdout)
+        if long_match:
+            value = _clean_operator_label(long_match.group(1))
+            if value:
+                return value
+        short_match = re.search(r'mOperatorAlphaShort=([^\r\n,]+)', stdout)
+        if short_match:
+            return _clean_operator_label(short_match.group(1))
+        return None
     
     async def _detect_network_technology(self) -> Optional[str]:
         """Return the current network/radio technology for this device."""
@@ -349,6 +373,10 @@ class ADBConnection:
             
             # Get SIM info if available
             try:
+                async def _getprop(prop: str) -> str:
+                    stdout, _, _ = await self.execute_command(f"shell getprop {prop}")
+                    return stdout.strip()
+
                 stdout, _, _ = await self.execute_command("shell getprop gsm.operator.numeric")
                 if stdout.strip():
                     mcc_mnc = stdout.strip()
@@ -358,7 +386,7 @@ class ADBConnection:
                         
                 # Get operator name using dumpsys commands
                 operator_found = False
-                
+
                 # Method 1: dumpsys telephony.registry for network operator
                 stdout, _, _ = await self.execute_command("shell dumpsys telephony.registry | grep -i operator")
                 if stdout.strip():
@@ -374,6 +402,14 @@ class ADBConnection:
                                     info['network_operator'] = operator_name
                                     operator_found = True
                                     break
+
+                if not operator_found:
+                    sim_operator_alpha, _, _ = await self.execute_command("shell getprop gsm.sim.operator.alpha")
+                    sim_operator_name = _clean_operator_label(sim_operator_alpha)
+                    if sim_operator_name:
+                        info['carrier'] = sim_operator_name
+                        info['network_operator'] = sim_operator_name
+                        operator_found = True
                 
                 if not operator_found:
                     # Method 2: dumpsys telephony for SIM operator
@@ -451,6 +487,73 @@ class ADBConnection:
                             info['network_operator'] = operator_name
                             operator_found = True
                             break
+
+                operator_list = _split_prop_list(await _getprop("gsm.operator.alpha"))
+                if not operator_list:
+                    operator_list = _split_prop_list(await _getprop("gsm.sim.operator.alpha"))
+                if not operator_list:
+                    operator_list = []
+                    for idx in (1, 2):
+                        value = await _getprop(f"gsm.operator.alpha.{idx}")
+                        if not value:
+                            value = await _getprop(f"gsm.sim.operator.alpha.{idx}")
+                        if value:
+                            operator_list.append(value)
+
+                numeric_list = _split_prop_list(await _getprop("gsm.operator.numeric"))
+                if not numeric_list:
+                    numeric_list = _split_prop_list(await _getprop("gsm.sim.operator.numeric"))
+                if not numeric_list:
+                    numeric_list = []
+                    for idx in (1, 2):
+                        value = await _getprop(f"gsm.operator.numeric.{idx}")
+                        if not value:
+                            value = await _getprop(f"gsm.sim.operator.numeric.{idx}")
+                        if value:
+                            numeric_list.append(value)
+
+                data_type_list = _split_prop_list(await _getprop("gsm.data.network.type"))
+                if not data_type_list:
+                    data_type_list = []
+                    for idx in (1, 2):
+                        value = await _getprop(f"gsm.data.network.type.{idx}")
+                        if value:
+                            data_type_list.append(value)
+
+                voice_type_list = _split_prop_list(await _getprop("gsm.network.type"))
+                if not voice_type_list:
+                    voice_type_list = _split_prop_list(await _getprop("gsm.voice.network.type"))
+                if not voice_type_list:
+                    voice_type_list = []
+                    for idx in (1, 2):
+                        value = await _getprop(f"gsm.network.type.{idx}")
+                        if not value:
+                            value = await _getprop(f"gsm.voice.network.type.{idx}")
+                        if value:
+                            voice_type_list.append(value)
+
+                slot_count = max(
+                    len(operator_list),
+                    len(numeric_list),
+                    len(data_type_list),
+                    len(voice_type_list),
+                )
+                sim_slots: List[Dict[str, str]] = []
+                for idx in range(slot_count):
+                    operator = operator_list[idx] if idx < len(operator_list) else None
+                    operator_numeric = numeric_list[idx] if idx < len(numeric_list) else None
+                    data_net = data_type_list[idx] if idx < len(data_type_list) else None
+                    voice_net = voice_type_list[idx] if idx < len(voice_type_list) else None
+                    slot = {
+                        "slot_index": idx,
+                        "operator": _clean_operator_label(operator),
+                        "operator_numeric": operator_numeric,
+                        "network_technology": _normalize_network_prop(data_net or voice_net),
+                    }
+                    sim_slots.append({k: v for k, v in slot.items() if v is not None})
+
+                if sim_slots:
+                    info["sim_slots"] = sim_slots
                 
                 # Final fallback - set to Unknown if still not found
                 if not operator_found:
@@ -570,6 +673,16 @@ class ADBManager:
         
         self.device_info_cache[device_id] = info
         return info
+
+    async def get_network_operator_live(self, device_id: str) -> Optional[str]:
+        """Read operator live from the device without writing to cache/DB."""
+        connection = await self.get_device_connection(device_id)
+        if not connection:
+            return None
+        try:
+            return await connection.get_network_operator_live()
+        except Exception:
+            return None
         
     async def execute_on_device(self, device_id: str, command: str, timeout: int = None) -> Tuple[str, str, int]:
         """Execute command on specific device."""

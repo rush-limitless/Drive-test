@@ -1,0 +1,20 @@
+06-14 05:14:14:535 FactoryTest : [FactoryTestBroadcastReceiver$ModuleCommon](11768) EFS_FACTORYAPP_ROOT PATH : /efs/FactoryApp/
+06-14 05:14:14:557 FactoryTest : [FactoryTestBroadcastReceiver$requestKeyStringBlock](11768) KEYSTRING_BLOCK is already existed...
+06-14 05:14:14:564 FactoryTest : [FactoryTestBroadcastReceiver$initFailhist](11768) Failhist Version is not V3
+06-14 05:14:14:570 FactoryTest : [FactoryTestBroadcastReceiver$onReceive](11768) onReceive boot mode = 0
+06-14 05:14:15:934 FactoryTest : [FactoryTestBroadcastReceiver$onReceive](11768) onReceive action=android.intent.action.BOOT_COMPLETED
+06-14 05:14:15:937 FactoryTest : [FactoryTestBroadcastReceiver$processIntentBootCompleted](11768) [MSP_SEQ][BOOTING: ][ING : received IntentBootCompleted -> waiting connect FtClient]
+06-14 05:14:15:946 FactoryTest : [FactoryTestBroadcastReceiver$ModuleCommon](11768) EFS_FACTORYAPP_ROOT PATH : /efs/FactoryApp/
+06-14 05:14:15:977 FactoryTest : [FactoryTestBroadcastReceiver$requestKeyStringBlock](11768) KEYSTRING_BLOCK is already existed...
+06-14 05:14:16:001 FactoryTest : [FactoryTestBroadcastReceiver$processIntentBootCompletedWhenUserBinary](11768) Boot completed, IS_FACTORY_BINARY = USER MODE
+06-14 05:14:16:074 FactoryTest : [FactoryTestBroadcastReceiver$onReceive](11768) onReceive boot mode = 0
+06-16 09:00:25:322 FactoryTest : [FactoryTestBroadcastReceiver$ModuleCommon](8162) EFS_FACTORYAPP_ROOT PATH : /efs/FactoryApp/
+06-16 09:00:25:350 FactoryTest : [FactoryTestBroadcastReceiver$requestKeyStringBlock](8162) KEYSTRING_BLOCK is already existed...
+06-16 09:00:25:357 FactoryTest : [FactoryTestBroadcastReceiver$initFailhist](8162) Failhist Version is not V3
+06-16 09:00:25:364 FactoryTest : [FactoryTestBroadcastReceiver$onReceive](8162) onReceive boot mode = 0
+06-16 09:00:26:967 FactoryTest : [FactoryTestBroadcastReceiver$onReceive](8162) onReceive action=android.intent.action.BOOT_COMPLETED
+06-16 09:00:26:969 FactoryTest : [FactoryTestBroadcastReceiver$processIntentBootCompleted](8162) [MSP_SEQ][BOOTING: ][ING : received IntentBootCompleted -> waiting connect FtClient]
+06-16 09:00:26:976 FactoryTest : [FactoryTestBroadcastReceiver$ModuleCommon](8162) EFS_FACTORYAPP_ROOT PATH : /efs/FactoryApp/
+06-16 09:00:26:992 FactoryTest : [FactoryTestBroadcastReceiver$requestKeyStringBlock](8162) KEYSTRING_BLOCK is already existed...
+06-16 09:00:27:021 FactoryTest : [FactoryTestBroadcastReceiver$processIntentBootCompletedWhenUserBinary](8162) Boot completed, IS_FACTORY_BINARY = USER MODE
+06-16 09:00:27:066 FactoryTest : [FactoryTestBroadcastReceiver$onReceive](8162) onReceive boot mode = 0

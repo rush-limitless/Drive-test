@@ -237,10 +237,17 @@ const resolveModuleExecutionId = (moduleId: string): string | null => {
 };
 
 const resolveCallTestValuesForModule = (module: ModuleMetadata, deviceId?: string | null): StoredCallTestValues => {
+  const map = readCallTestStorageMap();
+  if (deviceId && map[deviceId]) {
+    return map[deviceId];
+  }
   if (module.id === 'call_test' && module.callTestParams) {
     return sanitizeCallTestValues(module.callTestParams);
   }
-  return resolveCallTestValuesForDevice(deviceId);
+  if (map[GLOBAL_CALL_TEST_KEY]) {
+    return map[GLOBAL_CALL_TEST_KEY];
+  }
+  return CALL_TEST_DEFAULTS;
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

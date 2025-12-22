@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?><FDs version="1">
+  <FD plmn="00101" nwkname="Anritsu" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="DSH"/>
+  <FD plmn="99999" nwkname="Dish" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="DSH"/>
+  <FD plmn="310240" nwkname="Dish" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="DSH"/>
+  <FD plmn="310240" nwkname="Dish MVNO" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="DSH"/>
+  <FD plmn="00101" nwkname="Anritsu" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="310160" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="310200" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="310210" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="310220" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="310230" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="310240" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="310250" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="310260" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="310270" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="310310" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="310490" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="310660" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="310800" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="311490" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="311660" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="311882" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="312250" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="99999" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMB"/>
+  <FD plmn="00101" nwkname="Anritsu" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="310160" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="310200" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="310210" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="310220" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="310230" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="310240" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="310250" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="310260" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="310270" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="310310" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="310490" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="310660" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="310800" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="311490" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="311660" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="311882" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="312250" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="99999" nwkname="Metro" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="TMK"/>
+  <FD plmn="00101" nwkname="Anritsu" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="XAA"/>
+  <FD plmn="00101" nwkname="Anritsu" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="XAG"/>
+  <FD plmn="310240" nwkname="Tracfone - T Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="XAG"/>
+  <FD plmn="310260" nwkname="Tracfone - T Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="XAG"/>
+  <FD plmn="310240" nwkname="Simple" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="XAG"/>
+  <FD plmn="310260" nwkname="Simple" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="XAG"/>
+  <FD plmn="310240" nwkname="WalMart Family Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="XAG"/>
+  <FD plmn="310260" nwkname="WalMart Family Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="0" lcdofffdtime_Rel8="2.5" salesCode="XAG"/>
+  <FD plmn="31026" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310160" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310200" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310210" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310220" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310230" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310240" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310250" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310260" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310270" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310310" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310330" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310490" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310660" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310800" nwkname="T-Mobile" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="31038" nwkname="Vodafone" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="31090" nwkname="Vodafone" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310150" nwkname="ATT" lcdonfdtime="0" lcdofffdtime="3" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310410" nwkname="ATT" lcdonfdtime="0" lcdofffdtime="3" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310560" nwkname="Vodafone" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310680" nwkname="Vodafone" lcdonfdtime="0" lcdofffdtime="0" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="310980" nwkname="ATT" lcdonfdtime="0" lcdofffdtime="3" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+  <FD plmn="311180" nwkname="ATT" lcdonfdtime="0" lcdofffdtime="3" lcdonfdtime_Rel8="-1" lcdofffdtime_Rel8="-1" salesCode="-1"/>
+</FDs>
