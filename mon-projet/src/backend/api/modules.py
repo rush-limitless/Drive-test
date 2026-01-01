@@ -62,7 +62,12 @@ module_retry_queue: Optional["ModuleRetryQueue"] = None
 
 def _emit_module_status(entry: Dict[str, Any]):
     snapshot = dict(entry)
-    asyncio.create_task(
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        logger.debug("No running event loop; skipping module status emit.")
+        return
+    loop.create_task(
         connection_manager.send_module_status(
             snapshot.get("execution_id", f"exec_{snapshot.get('module_id', '')}"),
             snapshot.get("module_id", ""),

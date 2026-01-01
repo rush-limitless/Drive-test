@@ -5,6 +5,8 @@ import sys
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from core.adb_path import ADB_EXECUTABLE as DEFAULT_ADB_EXECUTABLE
+
 
 def _determine_runtime_root() -> Path:
     """Resolve a writable runtime directory for packaged and dev builds."""
@@ -55,8 +57,11 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379"
     
     # ADB configuration
-    ADB_PATH: str = "adb"
+    ADB_PATH: str = DEFAULT_ADB_EXECUTABLE
     ADB_TIMEOUT: int = 30
+    ADB_RETRY_ATTEMPTS: int = 2
+    ADB_RETRY_BASE_DELAY: float = 0.5
+    ADB_RETRY_MAX_DELAY: float = 2.0
     
     # scrcpy configuration
     SCRCPY_PATH: str = "scrcpy"

@@ -205,36 +205,65 @@ class ADBConnection:
             timeout = settings.ADB_TIMEOUT
             
         full_command = [settings.ADB_PATH, '-s', self.device_id] + command.split()
-        
-        try:
-            process = await asyncio.create_subprocess_exec(
-                *full_command,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
-            )
-            
-            stdout, stderr = await asyncio.wait_for(
-                process.communicate(),
-                timeout=timeout
-            )
-            
-            self.last_used = datetime.now(timezone.utc)
-            self.connection_health = True
-            
-            return (
-                stdout.decode('utf-8', errors='ignore'),
-                stderr.decode('utf-8', errors='ignore'),
-                process.returncode or 0
-            )
-            
-        except asyncio.TimeoutError:
-            logger.error(f"ADB command timeout for device {self.device_id}: {command}")
-            self.connection_health = False
-            raise
-        except Exception as e:
-            logger.error(f"ADB command failed for device {self.device_id}: {e}")
-            self.connection_health = False
-            raise
+
+        attempts = max(1, settings.ADB_RETRY_ATTEMPTS)
+        delay = settings.ADB_RETRY_BASE_DELAY
+        for attempt in range(1, attempts + 1):
+            process = None
+            try:
+                process = await asyncio.create_subprocess_exec(
+                    *full_command,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE
+                )
+
+                stdout, stderr = await asyncio.wait_for(
+                    process.communicate(),
+                    timeout=timeout
+                )
+
+                self.last_used = datetime.now(timezone.utc)
+                self.connection_health = True
+
+                return (
+                    stdout.decode('utf-8', errors='ignore'),
+                    stderr.decode('utf-8', errors='ignore'),
+                    process.returncode or 0
+                )
+
+            except asyncio.TimeoutError:
+                if process and process.returncode is None:
+                    process.kill()
+                    await process.communicate()
+                if attempt >= attempts:
+                    logger.error(f"ADB command timeout for device {self.device_id}: {command}")
+                    self.connection_health = False
+                    raise
+                logger.warning(
+                    "ADB command timeout for device %s (attempt %s/%s): %s",
+                    self.device_id,
+                    attempt,
+                    attempts,
+                    command
+                )
+            except Exception as e:
+                if process and process.returncode is None:
+                    process.kill()
+                    await process.communicate()
+                if attempt >= attempts:
+                    logger.error(f"ADB command failed for device {self.device_id}: {e}")
+                    self.connection_health = False
+                    raise
+                logger.warning(
+                    "ADB command failed for device %s (attempt %s/%s): %s",
+                    self.device_id,
+                    attempt,
+                    attempts,
+                    e
+                )
+
+            await asyncio.sleep(min(delay, settings.ADB_RETRY_MAX_DELAY))
+            delay = min(delay * 2, settings.ADB_RETRY_MAX_DELAY)
 
     async def get_network_operator_live(self) -> Optional[str]:
         """Return operator from dumpsys telephony.registry when available."""
@@ -370,6 +399,14 @@ class ADBConnection:
                 info['connection_type'] = 'USB'
             except Exception:
                 info['connection_type'] = 'USB'  # Default to USB
+
+            # Get airplane mode state (best effort)
+            try:
+                stdout, _, _ = await self.execute_command("shell settings get global airplane_mode_on")
+                if stdout is not None:
+                    info['airplane_mode'] = stdout.strip() == "1"
+            except Exception:
+                pass
             
             # Get SIM info if available
             try:

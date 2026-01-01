@@ -1,7 +1,7 @@
 """Device manager service for handling device operations."""
 
 import asyncio
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 import logging
@@ -22,6 +22,8 @@ class DeviceManager:
         self.scan_interval = 5  # seconds
         self.scan_task = None
         self.is_scanning = False
+        self._device_logs_cache: Dict[Tuple[str, int, int], Dict[str, object]] = {}
+        self._device_logs_cache_ttl = timedelta(seconds=5)
         
     async def start_monitoring(self):
         """Start continuous device monitoring."""
@@ -93,6 +95,8 @@ class DeviceManager:
                             "connection_type": device_info.get('connection_type'),
                             "carrier": device_info.get('carrier'),
                         })
+                        if 'airplane_mode' in device_info:
+                            capabilities["airplane_mode"] = device_info.get('airplane_mode')
                         device.capabilities = {k: v for k, v in capabilities.items() if v is not None}
                         
                         # Log status change if needed
@@ -134,6 +138,8 @@ class DeviceManager:
                             "connection_type": device_info.get('connection_type'),
                             "carrier": device_info.get('carrier'),
                         }
+                        if 'airplane_mode' in device_info:
+                            device.capabilities["airplane_mode"] = device_info.get('airplane_mode')
                         device.capabilities = {k: v for k, v in (device.capabilities or {}).items() if v is not None}
                         
                     updated_devices.append(device.to_dict())
@@ -244,13 +250,54 @@ class DeviceManager:
         finally:
             db.close()
             
-    async def get_device_logs(self, device_id: str, limit: int = 100) -> List[Dict]:
+    async def get_device_logs(self, device_id: str, limit: int = 100, offset: int = 0) -> List[Dict]:
         """Get recent logs for a device."""
+        cache_key = (device_id, limit, offset)
+        now = datetime.utcnow()
+        cached = self._device_logs_cache.get(cache_key)
+        if cached and cached["expires_at"] > now:
+            return cached["logs"]
+
         db = next(get_db())
         try:
             logs = (db.query(DeviceLog)
                    .filter(DeviceLog.device_id == device_id)
                    .order_by(DeviceLog.created_at.desc())
+                   .limit(limit)
+                   .offset(offset)
+                   .all())
+            payload = [log.to_dict() for log in logs]
+            self._device_logs_cache[cache_key] = {
+                "expires_at": now + self._device_logs_cache_ttl,
+                "logs": payload,
+            }
+            if len(self._device_logs_cache) > 512:
+                self._device_logs_cache = {
+                    key: value
+                    for key, value in self._device_logs_cache.items()
+                    if value["expires_at"] > now
+                }
+                if len(self._device_logs_cache) > 512:
+                    self._device_logs_cache.clear()
+            return payload
+        finally:
+            db.close()
+
+    async def get_device_logs_in_range(
+        self,
+        device_id: str,
+        start: datetime,
+        end: datetime,
+        limit: int = 1000
+    ) -> List[Dict]:
+        """Get logs for a device within a datetime range."""
+        db = next(get_db())
+        try:
+            logs = (db.query(DeviceLog)
+                   .filter(DeviceLog.device_id == device_id)
+                   .filter(DeviceLog.created_at >= start)
+                   .filter(DeviceLog.created_at <= end)
+                   .order_by(DeviceLog.created_at.asc())
                    .limit(limit)
                    .all())
             return [log.to_dict() for log in logs]

@@ -42,6 +42,8 @@ import {
   Copy,
   Download,
   Tag,
+  Lock,
+  Unlock,
 } from 'lucide-react';
 
 import Layout from '../components/Layout';
@@ -66,6 +68,14 @@ type WorkflowEditorData = {
   description: string;
   modules: ModuleMetadata[];
   repeatSettings: RepeatDurationSettings;
+  tags: string[];
+};
+
+type WorkflowTemplate = {
+  id: string;
+  name: string;
+  description: string;
+  moduleIds: string[];
   tags: string[];
 };
 
@@ -117,6 +127,8 @@ const DEFAULT_WAIT_DURATION_SECONDS = 5;
 const MIN_WAIT_DURATION_SECONDS = 1;
 const MAX_WAIT_DURATION_SECONDS = 600;
 const WAITING_TIME_STORAGE_KEY = 'waitingTimeDurationSeconds';
+const MAX_SCHEDULE_DELAY_MINUTES = 1440;
+const EXECUTION_RETRY_OPTIONS = { retries: 3, backoffMs: 600, retryOn: [408, 429, 500, 502, 503, 504] };
 
 const REPEAT_UNIT_TO_SECONDS = {
   minutes: 60,
@@ -142,6 +154,37 @@ const convertDurationToSeconds = (value: number, unit: DurationUnit): number => 
   const normalizedValue = Number.isFinite(value) ? Math.max(0, Math.trunc(value)) : 0;
   return normalizedValue * REPEAT_UNIT_TO_SECONDS[unit];
 };
+
+const WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
+  {
+    id: 'smoke_test',
+    name: 'Smoke Test',
+    description: 'Quick validation of data connectivity and app launch.',
+    moduleIds: ['ping', 'activate_data', 'launch_app'],
+    tags: ['smoke', 'baseline'],
+  },
+  {
+    id: 'network_recovery',
+    name: 'Network Recovery',
+    description: 'Toggle airplane mode and verify connectivity recovery.',
+    moduleIds: ['enable_airplane_mode', 'disable_airplane_mode', 'ping'],
+    tags: ['network', 'recovery'],
+  },
+  {
+    id: 'log_collection',
+    name: 'Log Collection',
+    description: 'Collect device and RF logs for triage.',
+    moduleIds: ['pull_device_logs', 'pull_rf_logs'],
+    tags: ['logs'],
+  },
+  {
+    id: 'rf_logging',
+    name: 'RF Logging Session',
+    description: 'Start RF logging, run a check, then pull logs.',
+    moduleIds: ['start_rf_logging', 'ping', 'stop_rf_logging', 'pull_rf_logs'],
+    tags: ['rf', 'logs'],
+  },
+];
 
 
 type StoredCallTestValues = CallTestValues;
@@ -252,6 +295,42 @@ const resolveCallTestValuesForModule = (module: ModuleMetadata, deviceId?: strin
 };
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const formatExecutionError = (error: unknown): { message: string; action?: string } => {
+  if (error && typeof error === 'object') {
+    const status = (error as { status?: number }).status;
+    const rawText = (error as { text?: unknown }).text;
+    const text = typeof rawText === 'string' ? rawText.trim().slice(0, 200) : '';
+    if (typeof status === 'number') {
+      const message = text ? `Backend error (HTTP ${status}): ${text}` : `Backend error (HTTP ${status}).`;
+      const action =
+        status >= 500
+          ? 'Check backend logs and retry.'
+          : status === 401 || status === 403
+            ? 'Verify credentials and permissions.'
+            : 'Check request parameters and retry.';
+      return { message, action };
+    }
+  }
+  if (error instanceof Error) {
+    const lowered = error.message.toLowerCase();
+    if (lowered.includes('failed to fetch') || lowered.includes('network') || lowered.includes('load failed')) {
+      return {
+        message: 'Network error while contacting the backend.',
+        action: 'Check connectivity and backend status, then retry.',
+      };
+    }
+    return {
+      message: error.message || 'Backend error during workflow execution.',
+      action: 'Retry. If it persists, check backend logs.',
+    };
+  }
+  return {
+    message: 'Unexpected error while running the workflow.',
+    action: 'Retry. If it persists, check backend logs.',
+  };
+};
+
 
 const isWaitingModule = (module?: ModuleMetadata | null): boolean => module?.id === WAITING_TIME_MODULE_ID;
 
@@ -405,16 +484,25 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
   const [workflowTagFilter, setWorkflowTagFilter] = useState<string>('all');
   const [exportMenuAnchor, setExportMenuAnchor] = useState<HTMLElement | null>(null);
   const [exportMenuWorkflow, setExportMenuWorkflow] = useState<StoredWorkflow | null>(null);
+  const [templateMenuAnchor, setTemplateMenuAnchor] = useState<HTMLElement | null>(null);
   const moduleCatalogMap = useMemo(() => new Map(MODULE_CATALOG.map((m) => [m.id, m])), []);
   const normalizedBackendUrl = useMemo(() => (backendUrl ? backendUrl.replace(/\/$/, '') : ''), [backendUrl]);
+  const userTimeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone || 'local', []);
   const schedulePreviewTime = useMemo(() => {
     const minutes = Number(scheduleDelayMinutes);
     if (!Number.isFinite(minutes) || minutes <= 0) {
       return null;
     }
     const future = new Date(Date.now() + minutes * 60 * 1000);
-    return future.toLocaleString([], { hour: '2-digit', minute: '2-digit' });
-  }, [scheduleDelayMinutes]);
+    return future.toLocaleString([], {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: userTimeZone,
+    });
+  }, [scheduleDelayMinutes, userTimeZone]);
 
   const availableWorkflowTags = useMemo(() => {
     const tagSet = new Set<string>();
@@ -425,11 +513,49 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
         }
       });
     });
-    return Array.from(tagSet).sort((a, b) => a.localeCompare(b));
+    return ['all', ...Array.from(tagSet).sort((a, b) => a.localeCompare(b))];
   }, [workflows]);
+
+  const openTemplateMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setTemplateMenuAnchor(event.currentTarget);
+  };
+
+  const closeTemplateMenu = () => {
+    setTemplateMenuAnchor(null);
+  };
+
+  const handleCreateFromTemplate = useCallback(
+    (template: WorkflowTemplate) => {
+      const modules = template.moduleIds
+        .map((moduleId) => moduleCatalogMap.get(moduleId))
+        .filter((module): module is ModuleMetadata => Boolean(module))
+        .map((module) => cloneModuleForWorkflow(module));
+      if (modules.length === 0) {
+        setSnackbar({ severity: 'error', message: 'Template modules not available in this build.' });
+        closeTemplateMenu();
+        return;
+      }
+      addStoredWorkflow({
+        name: template.name,
+        description: template.description,
+        modules,
+        runCount: 0,
+        lastRunAt: null,
+        tags: template.tags,
+      });
+      setWorkflows(getStoredWorkflows());
+      setSnackbar({ severity: 'success', message: `Workflow "${template.name}" created.` });
+      closeTemplateMenu();
+    },
+    [moduleCatalogMap]
+  );
 
   const handleCloneWorkflow = useCallback(
     (workflow: StoredWorkflow) => {
+      if (workflow.locked) {
+        setSnackbar({ severity: 'warning', message: 'Unlock the workflow before cloning it.' });
+        return;
+      }
       const cloneName = `${workflow.name} (Copy)`;
       addStoredWorkflow({
         name: cloneName,
@@ -444,6 +570,16 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
     },
     []
   );
+
+  const handleToggleWorkflowLock = useCallback((workflow: StoredWorkflow) => {
+    const nextLocked = !workflow.locked;
+    updateStoredWorkflow(workflow.id, { locked: nextLocked });
+    setWorkflows(getStoredWorkflows());
+    setSnackbar({
+      severity: 'info',
+      message: nextLocked ? `Workflow "${workflow.name}" locked.` : `Workflow "${workflow.name}" unlocked.`,
+    });
+  }, []);
 
   useEffect(() => {
     const syncWorkflows = () => setWorkflows(getStoredWorkflows());
@@ -586,11 +722,19 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
   const filteredWorkflows = sortedWorkflows.filter((workflow) => {
     const matchesStatus = filterStatus === 'all' ? true : workflow.status === filterStatus;
     const query = searchQuery.trim().toLowerCase();
+    const tagMatches =
+      workflowTagFilter === 'all' || (workflow.tags ?? []).some((tag) => tag.toLowerCase() === workflowTagFilter.toLowerCase());
+    const moduleLabels = workflow.modules
+      .map((module) => (module.name || module.id || '').toLowerCase())
+      .join(' ');
+    const tagLabels = (workflow.tags ?? []).map((tag) => tag.toLowerCase()).join(' ');
     const matchesSearch =
       query.length === 0 ||
       workflow.name.toLowerCase().includes(query) ||
-      (workflow.description || '').toLowerCase().includes(query);
-    return matchesStatus && matchesSearch;
+      (workflow.description || '').toLowerCase().includes(query) ||
+      moduleLabels.includes(query) ||
+      tagLabels.includes(query);
+    return matchesStatus && matchesSearch && tagMatches;
   });
 
   const getStatusColor = (status: string) => {
@@ -809,6 +953,10 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
 
   const handleOpenScheduleDialog = useCallback(
     (workflow: StoredWorkflow) => {
+      if (workflow.locked) {
+        setSnackbar({ severity: 'warning', message: 'Unlock the workflow before scheduling it.' });
+        return;
+      }
       const devices = selectedDeviceIds.length > 0 ? selectedDeviceIds : readSelectedDeviceIds();
       if (devices.length === 0) {
         setSnackbar({
@@ -843,6 +991,10 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
     const parsedMinutes = Number(scheduleDelayMinutes);
     if (!Number.isFinite(parsedMinutes) || parsedMinutes <= 0) {
       setScheduleDialogError('Delay must be at least 1 minute.');
+      return;
+    }
+    if (parsedMinutes > MAX_SCHEDULE_DELAY_MINUTES) {
+      setScheduleDialogError(`Delay must be ${MAX_SCHEDULE_DELAY_MINUTES} minutes or less.`);
       return;
     }
     if (scheduleDeviceIds.length === 0) {
@@ -890,7 +1042,8 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
           message: `Workflow "${scheduleTargetWorkflow.name}" scheduled for ${new Date(runAtIso).toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
-          })}.`,
+            timeZone: userTimeZone,
+          })} (${userTimeZone}).`,
         });
         setScheduleDialogOpen(false);
         setScheduleTargetWorkflow(null);
@@ -907,6 +1060,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
     scheduleDelayMinutes,
     scheduleDeviceIds,
     scheduleTargetWorkflow,
+    userTimeZone,
   ]);
 
   const handleCancelSchedule = useCallback(
@@ -942,8 +1096,15 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
     if (Number.isNaN(date.getTime())) {
       return iso;
     }
-    return date.toLocaleString([], { hour: '2-digit', minute: '2-digit' });
-  }, []);
+    return date.toLocaleString([], {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: userTimeZone,
+    });
+  }, [userTimeZone]);
 
   const handleCloseEditor = () => {
     setEditorOpen(false);
@@ -956,6 +1117,10 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
   };
 
   const handleDeleteWorkflow = (workflow: StoredWorkflow) => {
+    if (workflow.locked) {
+      setSnackbar({ severity: 'warning', message: 'Unlock the workflow before deleting it.' });
+      return;
+    }
     if (runningWorkflows[workflow.id]) {
       setSnackbar({
         severity: 'warning',
@@ -1026,14 +1191,18 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
       if (!normalizedBackendUrl) {
         throw new Error('Backend unavailable: no URL configured.');
       }
-      const response = await fetchWithRetry(`${normalizedBackendUrl}/api/modules/preflight_check/execute`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ device_ids: deviceIds }),
-      });
+      const response = await fetchWithRetry(
+        `${normalizedBackendUrl}/api/modules/preflight_check/execute`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ device_ids: deviceIds }),
+        },
+        EXECUTION_RETRY_OPTIONS
+      );
       if (!response.ok) {
         const text = await response.text();
-        throw new Error(text || `Preflight check failed for workflow ${workflowId}.`);
+        throw { status: response.status, text };
       }
       const data = await response.json();
       const deviceResults: WorkflowExecutionDeviceResult[] = (data.result?.device_results ?? []).map((entry: any) => ({
@@ -1104,25 +1273,29 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
             }
 
             try {
-              const response = await fetchWithRetry(`${normalizedBackendUrl}/api/modules/${apiModuleId}/execute`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  device_ids: groupDeviceIds,
-                  parameters,
-                  workflow_id: workflow.id,
-                  workflow_name: workflow.name,
-                  module_id: module.id,
-                  repeat_count: repeatCountMeta,
-                  duration_seconds: durationSecondsMeta,
-                  run_iteration: runIteration,
-                }),
-                signal: abortSignal,
-              });
+              const response = await fetchWithRetry(
+                `${normalizedBackendUrl}/api/modules/${apiModuleId}/execute`,
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    device_ids: groupDeviceIds,
+                    parameters,
+                    workflow_id: workflow.id,
+                    workflow_name: workflow.name,
+                    module_id: module.id,
+                    repeat_count: repeatCountMeta,
+                    duration_seconds: durationSecondsMeta,
+                    run_iteration: runIteration,
+                  }),
+                  signal: abortSignal,
+                },
+                EXECUTION_RETRY_OPTIONS
+              );
 
               if (!response.ok) {
                 const text = await response.text();
-                throw { deviceIds: groupDeviceIds, message: text || `Backend failure (HTTP ${response.status})` };
+                throw { deviceIds: groupDeviceIds, status: response.status, text };
               }
 
               const data = await response.json();
@@ -1167,28 +1340,32 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
 
       let results: PromiseSettledResult<{ deviceId: string; success: boolean; message?: string }[]>[] | null = null;
       try {
-        const response = await fetchWithRetry(`${normalizedBackendUrl}/api/modules/${apiModuleId}/execute`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            device_ids: deviceIds,
-            parameters_by_device: parametersByDevice,
-            workflow_id: workflow.id,
-            workflow_name: workflow.name,
-            module_id: module.id,
-            repeat_count: repeatCountMeta,
-            duration_seconds: durationSecondsMeta,
-            run_iteration: runIteration,
-          }),
-          signal: abortSignal,
-        });
+        const response = await fetchWithRetry(
+          `${normalizedBackendUrl}/api/modules/${apiModuleId}/execute`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              device_ids: deviceIds,
+              parameters_by_device: parametersByDevice,
+              workflow_id: workflow.id,
+              workflow_name: workflow.name,
+              module_id: module.id,
+              repeat_count: repeatCountMeta,
+              duration_seconds: durationSecondsMeta,
+              run_iteration: runIteration,
+            }),
+            signal: abortSignal,
+          },
+          EXECUTION_RETRY_OPTIONS
+        );
 
         if (!response.ok) {
           const text = await response.text();
           if (response.status === 422 || (response.status === 400 && text.toLowerCase().includes('parameters_by_device'))) {
             results = await executeGroupedRequests();
           } else {
-            throw new Error(text || `Backend failure (HTTP ${response.status})`);
+            throw { status: response.status, text };
           }
         } else {
           const data = await response.json();
@@ -1250,9 +1427,11 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
           });
         } else {
           const deviceIds = (result.reason && result.reason.deviceIds) || ['unknown'];
-          const reason =
+          const formatted = formatExecutionError(result.reason);
+          const baseReason =
             (result.reason && result.reason.message) ||
-            (result.reason instanceof Error ? result.reason.message : `Module "${module.name}" execution failed.`);
+            (result.reason instanceof Error ? result.reason.message : formatted.message);
+          const reason = formatted.action ? `${baseReason} Action: ${formatted.action}` : baseReason;
           deviceIds.forEach((deviceId: string) => {
             failures.push({ deviceId, reason });
           });
@@ -1269,15 +1448,19 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
       if (!normalizedBackendUrl) {
         throw new Error('Backend unavailable: no URL configured.');
       }
-      const response = await fetchWithRetry(`${normalizedBackendUrl}/api/workflows/${backendWorkflowId}/execute`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ device_ids: deviceIds }),
-        signal,
-      });
+      const response = await fetchWithRetry(
+        `${normalizedBackendUrl}/api/workflows/${backendWorkflowId}/execute`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ device_ids: deviceIds }),
+          signal,
+        },
+        EXECUTION_RETRY_OPTIONS
+      );
       if (!response.ok) {
         const text = await response.text();
-        throw new Error(text || `Workflow execution failed (HTTP ${response.status}).`);
+        throw { status: response.status, text };
       }
       return response.json();
     },
@@ -1380,6 +1563,10 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
   );
 
   const handleRunWorkflow = async (workflow: StoredWorkflow) => {
+    if (workflow.locked) {
+      setSnackbar({ severity: 'warning', message: 'Unlock the workflow before running it.' });
+      return;
+    }
     if (!backendUrl) {
       setSnackbar({ severity: 'error', message: 'Backend unavailable: no URL configured.' });
       return;
@@ -1459,6 +1646,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
 
         runCounter += 1;
         const runLabel = `Run #${runCounter}`;
+        const runStartedAt = Date.now();
 
         setWorkflowCompletedModules((prev) => ({ ...prev, [workflow.id]: [] }));
         setWorkflowActiveModuleIndex((prev) => ({
@@ -1637,7 +1825,9 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
           [workflow.id]: `Workflow "${workflow.name}" cancelled after ${completedRuns} completed run${completedRuns === 1 ? '' : 's'}.`,
         }));
       } else {
-        const message = error instanceof Error ? error.message : 'Unknown error while communicating with the backend.';
+        const detail = formatExecutionError(error);
+        const actionSuffix = detail.action ? ` Action: ${detail.action}` : '';
+        const message = `${detail.message}${actionSuffix}`;
         setSnackbar({ severity: 'error', message: `Failed to run workflow "${workflow.name}": ${message}` });
         setWorkflowRunStatus((prev) => ({
           ...prev,
@@ -1731,6 +1921,26 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
               <MenuItem value="draft">Draft ({draftWorkflows.length})</MenuItem>
             </Select>
           </FormControl>
+          <FormControl size="small">
+            <Select
+              value={workflowTagFilter}
+              onChange={(e) => setWorkflowTagFilter(String(e.target.value))}
+              sx={{
+                height: 36,
+                borderRadius: '10px',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#E5E7EB'
+                }
+              }}
+              IconComponent={ChevronDown}
+            >
+              {availableWorkflowTags.map((tag) => (
+                <MenuItem key={tag} value={tag}>
+                  {tag === 'all' ? 'All tags' : tag}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
           <Chip
             label={`${selectedDeviceIds.length} device${selectedDeviceIds.length === 1 ? '' : 's'} selected`}
@@ -1784,8 +1994,37 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
           >
             New Workflow
           </Button>
+          <Button
+            variant="outlined"
+            startIcon={<ChevronDown size={18} />}
+            onClick={openTemplateMenu}
+            sx={{
+              height: 40,
+              borderRadius: '10px',
+              textTransform: 'none',
+              fontWeight: 600,
+            }}
+          >
+            Templates
+          </Button>
         </Box>
       </Box>
+      <Menu
+        anchorEl={templateMenuAnchor}
+        open={Boolean(templateMenuAnchor)}
+        onClose={closeTemplateMenu}
+      >
+        {WORKFLOW_TEMPLATES.map((template) => (
+          <MenuItem key={template.id} onClick={() => handleCreateFromTemplate(template)}>
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Typography sx={{ fontWeight: 600 }}>{template.name}</Typography>
+              <Typography variant="caption" sx={{ color: '#64748B' }}>
+                {template.description}
+              </Typography>
+            </Box>
+          </MenuItem>
+        ))}
+      </Menu>
 
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -1903,11 +2142,12 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
                 const base = moduleCatalogMap.get(module.id);
                 const label = base?.name || module.name || module.id;
                 const paramCount = module.callTestParams ? Object.keys(module.callTestParams).length : 0;
-                const suffix = paramCount > 0 ? ` Ã‚Â· ${paramCount} param${paramCount > 1 ? 's' : ''}` : '';
+                const suffix = paramCount > 0 ? ` - ${paramCount} param${paramCount > 1 ? 's' : ''}` : '';
                 return `${index + 1}. ${label}${suffix}`;
               });
               const extraModules = workflow.modules.length - modulePreview.length;
               const isRunning = Boolean(runningWorkflows[workflow.id]);
+              const isLocked = Boolean(workflow.locked);
               const runStatusMessage = workflowRunStatus[workflow.id];
               const activeModuleIndex = workflowActiveModuleIndex[workflow.id];
               const completedModules = workflowCompletedModules[workflow.id] || [];
@@ -1946,6 +2186,18 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
                                 textTransform: 'capitalize'
                               }}
                             />
+                            {isLocked && (
+                              <Chip
+                                label="Locked"
+                                size="small"
+                                sx={{
+                                  backgroundColor: '#FEE2E2',
+                                  color: '#991B1B',
+                                  fontWeight: 600,
+                                  fontSize: '11px',
+                                }}
+                              />
+                            )}
                           </Box>
                           
                           <Typography variant="body2" sx={{
@@ -2050,9 +2302,27 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
 
                         <Box display="flex" flexDirection="column" alignItems="flex-end" gap={1.5}>
                           <Box display="flex" gap={1}>
+                            <Tooltip title={isLocked ? 'Unlock Workflow' : 'Lock Workflow'}>
+                              <IconButton
+                                onClick={() => handleToggleWorkflowLock(workflow)}
+                                disabled={isRunning}
+                                sx={{
+                                  backgroundColor: isLocked ? '#FEE2E2' : '#E2E8F0',
+                                  color: isLocked ? '#991B1B' : '#0F172A',
+                                  width: 36,
+                                  height: 36,
+                                  '&:hover': {
+                                    backgroundColor: isLocked ? '#FECACA' : '#CBD5E1'
+                                  }
+                                }}
+                              >
+                                {isLocked ? <Lock size={16} /> : <Unlock size={16} />}
+                              </IconButton>
+                            </Tooltip>
                             <Tooltip title="Clone Workflow">
                               <IconButton
                                 onClick={() => handleCloneWorkflow(workflow)}
+                                disabled={isLocked}
                                 sx={{
                                   backgroundColor: '#E2E8F0',
                                   color: '#0F172A',
@@ -2069,6 +2339,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
                             <Tooltip title="Schedule Workflow">
                               <IconButton
                                 onClick={() => handleOpenScheduleDialog(workflow)}
+                                disabled={isLocked}
                                 sx={{
                                   backgroundColor: '#E0E7FF',
                                   color: '#1E3A8A',
@@ -2084,7 +2355,9 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
                             </Tooltip>
                             <Tooltip
                               title={
-                                !isRunning
+                                isLocked
+                                  ? 'Workflow locked'
+                                  : !isRunning
                                   ? 'Run Workflow'
                                   : isWorkflowPaused(workflow.id)
                                     ? 'Resume Workflow'
@@ -2093,6 +2366,9 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
                             >
                               <IconButton
                                 onClick={() => {
+                                  if (isLocked) {
+                                    return;
+                                  }
                                   if (!isRunning) {
                                     handleRunWorkflow(workflow);
                                   } else if (isWorkflowPaused(workflow.id)) {
@@ -2101,6 +2377,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
                                     handlePauseWorkflow(workflow.id);
                                   }
                                 }}
+                                disabled={isLocked}
                                 sx={{
                                   backgroundColor: !isRunning
                                     ? '#2563EB'
@@ -2151,6 +2428,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
                                   setEditingWorkflow(workflow);
                                   setEditorOpen(true);
                                 }}
+                                disabled={isLocked}
                                 sx={{
                                   backgroundColor: '#F1F5F9',
                                   color: '#475569',
@@ -2167,7 +2445,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
                             <Tooltip title="Delete Workflow">
                               <IconButton
                                 onClick={() => handleDeleteWorkflow(workflow)}
-                                disabled={isRunning}
+                                disabled={isRunning || isLocked}
                                 sx={{
                                   backgroundColor: '#FEF2F2',
                                   color: '#DC2626',
@@ -2208,13 +2486,17 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
                 setScheduleDelayMinutes(event.target.value);
                 setScheduleDialogError(null);
               }}
-              inputProps={{ min: 1 }}
+              inputProps={{ min: 1, max: MAX_SCHEDULE_DELAY_MINUTES }}
+              helperText={`1-${MAX_SCHEDULE_DELAY_MINUTES} minutes`}
             />
             {schedulePreviewTime && (
               <Typography variant="caption" sx={{ color: '#475569' }}>
-                Will run around {schedulePreviewTime}.
+                Will run around {schedulePreviewTime} ({userTimeZone}).
               </Typography>
             )}
+            <Typography variant="caption" sx={{ color: '#94A3B8' }}>
+              Timezone: {userTimeZone}
+            </Typography>
             <Typography variant="body2" sx={{ color: '#475569' }}>
               Devices targeted: {scheduleDeviceIds.length}
             </Typography>

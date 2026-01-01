@@ -80,8 +80,11 @@ import { telemetry } from '../utils/telemetry';
 const SEARCH_DEBOUNCE_MS = 350;
 const ACTIVITY_PAGE_SIZE = 4;
 const MAX_ACTIVITY_ENTRIES = 20;
+const ACTIVITY_POLL_MS = 30000;
+const HEALTH_POLL_MS = 20000;
 const DISCONNECTED_DEVICES_STORAGE_KEY = 'dashboardDisconnectedDevices';
 const ACTIVITY_CLEAR_THRESHOLD_STORAGE_KEY = 'dashboardActivityClearedAt';
+const AUTO_SELECT_STORAGE_KEY = 'dashboardAutoSelectDisabled';
 const tokens = dashboardTheme;
 const cardBaseSx = {
   backgroundColor: tokens.colors.panel,
@@ -122,11 +125,51 @@ type ActivityItem = {
   ts?: string | null;
 };
 
+type ExecutionRecord = {
+  id?: string;
+  type?: string;
+  workflow_id?: string;
+  workflow_name?: string;
+  status?: string;
+  device_id?: string;
+  device_name?: string;
+  started_at?: string;
+  completed_at?: string | null;
+};
+
+type HealthCheck = {
+  ok?: boolean;
+  latency_ms?: number;
+  error?: string;
+};
+
+type HealthSnapshot = {
+  status?: string;
+  version?: string;
+  checks?: {
+    adb?: HealthCheck;
+    database?: HealthCheck;
+  };
+};
+
 type QuickAction = {
   icon: React.ReactNode;
   label: string;
   active: boolean;
   path: string;
+};
+
+const normalizeExecutionsPayload = (payload: unknown): ExecutionRecord[] => {
+  if (Array.isArray(payload)) {
+    return payload as ExecutionRecord[];
+  }
+  if (payload && typeof payload === 'object') {
+    const record = payload as { executions?: unknown };
+    if (Array.isArray(record.executions)) {
+      return record.executions as ExecutionRecord[];
+    }
+  }
+  return [];
 };
 
 const readStoredDisconnectedDevices = (): Set<string> => {
@@ -197,6 +240,29 @@ const persistActivityClearThreshold = (value: number | null): void => {
   }
 };
 
+const readAutoSelectDisabled = (): boolean => {
+  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+    return false;
+  }
+  try {
+    return window.localStorage.getItem(AUTO_SELECT_STORAGE_KEY) === 'true';
+  } catch (error) {
+    console.warn('[Dashboard] Failed to read auto-select setting', error);
+    return false;
+  }
+};
+
+const writeAutoSelectDisabled = (value: boolean) => {
+  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+    return;
+  }
+  try {
+    window.localStorage.setItem(AUTO_SELECT_STORAGE_KEY, value ? 'true' : 'false');
+  } catch (error) {
+    console.warn('[Dashboard] Failed to persist auto-select setting', error);
+  }
+};
+
 const filterActivitiesByThreshold = (items: ActivityItem[], threshold: number | null): ActivityItem[] => {
   if (!threshold) {
     return items;
@@ -264,7 +330,7 @@ const buildLocalSearchResults = (
       return {
         type: 'device',
         id: device.id,
-        label: alias ? `${alias} â€¢ ${baseLabel} (${statusLabel})` : `${baseLabel} (${statusLabel})`,
+        label: alias ? `${alias} - ${baseLabel} (${statusLabel})` : `${baseLabel} (${statusLabel})`,
         href: `/devices/${device.id}`,
       };
     });
@@ -288,6 +354,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
   const [showDeviceDetails, setShowDeviceDetails] = useState(false);
   const [workflows, setWorkflows] = useState<StoredWorkflow[]>(() => getStoredWorkflows());
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>(() => readSelectedDeviceIds());
+  const autoSelectDisabledRef = useRef(readAutoSelectDisabled());
   const [searchResults, setSearchResults] = useState<SearchResultItem[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -308,6 +375,9 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
   const [deviceAliases, setDeviceAliases] = useState<Record<string, string>>(() => readDeviceAliasMap());
   const [aliasEditor, setAliasEditor] = useState<{ deviceId: string; value: string; name: string } | null>(null);
   const [aliasSaving, setAliasSaving] = useState(false);
+  const [activityLastUpdated, setActivityLastUpdated] = useState<number | null>(null);
+  const [activityError, setActivityError] = useState<string | null>(null);
+  const [healthSnapshot, setHealthSnapshot] = useState<HealthSnapshot | null>(null);
 
   useEffect(() => {
     syncDevicesToRegistry(devices);
@@ -358,9 +428,25 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
   const searchAbortRef = useRef<AbortController | null>(null);
   const searchContainerRef = useRef<HTMLDivElement | null>(null);
   const lastSearchTrackedRef = useRef<string | null>(null);
+  const activityLoadingRef = useRef(false);
+  const activityHasLoadedRef = useRef(false);
 
   const normalizedBackendUrl = useMemo(() => (backendUrl ? resolveBaseUrl(backendUrl) : null), [backendUrl]);
   const deviceWorkflowHistories = useMemo(() => getAllDeviceWorkflowHistories(), [historyVersion]);
+
+  const resolveApiKey = useCallback((): string | null => {
+    const envKey =
+      (import.meta as any).env?.VITE_API_KEY ||
+      (import.meta as any).env?.VITE_REACT_APP_API_KEY ||
+      (typeof process !== 'undefined' ? process.env.REACT_APP_API_KEY || process.env.API_KEY : undefined);
+    const stored = typeof window !== 'undefined' ? window.localStorage.getItem('API_KEY') : null;
+    return (stored && stored.trim()) || (envKey && envKey.trim()) || null;
+  }, []);
+
+  const authHeaders = useCallback((): HeadersInit => {
+    const key = resolveApiKey();
+    return key ? { 'X-API-Key': key } : {};
+  }, [resolveApiKey]);
 
   const recordSearchTelemetry = useCallback((query: string, results: SearchResultItem[]) => {
     const trimmed = query.trim();
@@ -457,7 +543,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
       };
     });
 
-  const mapExecutionActivityItems = (executions: any[]): ActivityItem[] => {
+  const mapExecutionActivityItems = (executions: ExecutionRecord[]): ActivityItem[] => {
     const iconForStatus = (status: string) => {
       const normalized = (status || '').toLowerCase();
       if (normalized === 'completed' || normalized === 'success') {
@@ -474,15 +560,10 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
 
     return (Array.isArray(executions) ? executions : [])
       .map((execution, index) => {
-        const status = execution?.status ?? execution?.state ?? 'completed';
-        const flowName =
-          execution?.flow_name ||
-          execution?.flow?.name ||
-          execution?.flow_id ||
-          execution?.flow?.id ||
-          'Workflow';
+        const status = execution?.status ?? 'completed';
+        const flowName = execution?.workflow_name || execution?.workflow_id || 'Workflow';
         const devicePart = execution?.device_id ? ` on ${execution.device_id}` : '';
-        const ts = execution?.updated_at || execution?.end_time || execution?.start_time || execution?.created_at || null;
+        const ts = execution?.completed_at || execution?.started_at || null;
         return {
           id: execution?.execution_id ?? execution?.id ?? `exec-${index}`,
           icon: iconForStatus(status),
@@ -540,29 +621,38 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
     return entries;
   }, [deviceWorkflowHistories, workflows]);
 
-  useEffect(() => {
-    const controller = new AbortController();
+  const loadActivities = useCallback(
+    async (signal?: AbortSignal) => {
+      if (activityLoadingRef.current) {
+        return;
+      }
+      activityLoadingRef.current = true;
+      setActivityLoading(true);
+      setActivityError(null);
+      let nextItems: ActivityItem[] | null = null;
+      let usedRemote = false;
 
-    const fetchRecentActivity = async (): Promise<ActivityItem[] | null> => {
-      if (!normalizedBackendUrl) {
+      const fetchRecentActivity = async (): Promise<ActivityItem[] | null> => {
+        if (!normalizedBackendUrl) {
+          return null;
+        }
+        try {
+          const response = await fetchWithRetry(`${normalizedBackendUrl}/api/dashboard/activity/recent`, {
+            signal,
+            headers: authHeaders(),
+          });
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          const data = await response.json();
+          return mapActivityItems(data.items || []);
+        } catch (error) {
+          if (!signal?.aborted) {
+            console.warn('[Dashboard] Failed to fetch /activity/recent', error);
+          }
+        }
         return null;
-      }
-      try {
-        const response = await fetchWithRetry(`${normalizedBackendUrl}/api/dashboard/activity/recent`, {
-          signal: controller.signal,
-        });
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-        const data = await response.json();
-        return mapActivityItems(data.items || []);
-      } catch (error) {
-        if (!controller.signal.aborted) {
-          console.warn('[Dashboard] Failed to fetch /activity/recent', error);
-        }
-      }
-      return null;
-    };
+      };
 
     const fetchExecutionActivity = async (): Promise<ActivityItem[] | null> => {
       if (!normalizedBackendUrl) {
@@ -570,52 +660,72 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
       }
       try {
         const response = await fetchWithRetry(`${normalizedBackendUrl}/api/v1/executions`, {
-          signal: controller.signal,
+          signal,
+          headers: authHeaders(),
         });
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}`);
         }
         const data = await response.json();
-        return mapExecutionActivityItems(Array.isArray(data) ? data : []);
+        return mapExecutionActivityItems(normalizeExecutionsPayload(data));
       } catch (error) {
-        if (!controller.signal.aborted) {
+        if (!signal?.aborted) {
           console.warn('[Dashboard] Failed to fetch executions for activity', error);
         }
       }
       return null;
-    };
-
-    const loadActivities = async () => {
-      setActivityLoading(true);
-      let nextItems: ActivityItem[] | null = null;
+      };
 
       if (normalizedBackendUrl) {
+        usedRemote = true;
         nextItems = await fetchRecentActivity();
-        if ((!nextItems || nextItems.length === 0) && !controller.signal.aborted) {
+        if ((!nextItems || nextItems.length === 0) && !signal?.aborted) {
           nextItems = await fetchExecutionActivity();
         }
       }
 
-      if ((!nextItems || nextItems.length === 0) && !controller.signal.aborted) {
+      if ((!nextItems || nextItems.length === 0) && !signal?.aborted) {
         nextItems = buildLocalActivityItems();
+        if (usedRemote) {
+          setActivityError('Using local activity cache');
+        }
       }
 
-      if (!controller.signal.aborted) {
+      if (!signal?.aborted) {
         const filteredItems = filterActivitiesByThreshold(nextItems ?? [], activityClearThreshold);
         const limitedItems =
           filteredItems.length > MAX_ACTIVITY_ENTRIES
             ? filteredItems.slice(0, MAX_ACTIVITY_ENTRIES)
             : filteredItems;
         setActivityItems(limitedItems);
-        setActivityPage(0);
-        setActivityViewAll(false);
+        if (!activityHasLoadedRef.current) {
+          setActivityPage(0);
+          setActivityViewAll(false);
+          activityHasLoadedRef.current = true;
+        }
+        setActivityLastUpdated(Date.now());
         setActivityLoading(false);
       }
-    };
+      activityLoadingRef.current = false;
+    },
+    [normalizedBackendUrl, buildLocalActivityItems, activityClearThreshold, authHeaders]
+  );
 
-    loadActivities();
-    return () => controller.abort();
-  }, [normalizedBackendUrl, buildLocalActivityItems, activityClearThreshold]);
+  useEffect(() => {
+    if (!normalizedBackendUrl) {
+      loadActivities();
+      return;
+    }
+    const controller = new AbortController();
+    loadActivities(controller.signal);
+    const intervalId = window.setInterval(() => {
+      loadActivities(controller.signal);
+    }, ACTIVITY_POLL_MS);
+    return () => {
+      controller.abort();
+      window.clearInterval(intervalId);
+    };
+  }, [normalizedBackendUrl, loadActivities]);
 
   useEffect(() => {
     if (activityViewAll) {
@@ -626,6 +736,48 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
       return prev > maxPage ? maxPage : prev;
     });
   }, [activityItems.length, activityViewAll]);
+
+  const loadHealth = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!normalizedBackendUrl) {
+        return;
+      }
+      try {
+        const response = await fetchWithRetry(
+          `${normalizedBackendUrl}/api/health/`,
+          { signal, headers: authHeaders() },
+          { retries: 1, backoffMs: 300 }
+        );
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        setHealthSnapshot(data);
+      } catch (error) {
+        if (!signal?.aborted) {
+          console.warn('[Dashboard] Failed to fetch /health', error);
+        }
+      }
+    },
+    [normalizedBackendUrl, authHeaders]
+  );
+
+  useEffect(() => {
+    if (!normalizedBackendUrl) {
+      setHealthSnapshot(null);
+      return;
+    }
+    const controller = new AbortController();
+    loadHealth(controller.signal);
+    const intervalId = window.setInterval(() => {
+      loadHealth(controller.signal);
+    }, HEALTH_POLL_MS);
+    return () => {
+      controller.abort();
+      window.clearInterval(intervalId);
+    };
+  }, [normalizedBackendUrl, loadHealth]);
+
 
   useEffect(() => {
     const handleClickAway = (event: MouseEvent) => {
@@ -744,6 +896,9 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
   };
 
   const resolveOperatorLabel = (device: Device) => {
+    if (device.airplane_mode) {
+      return 'Unknown';
+    }
     const candidates = [device.network_operator_live, device.network_operator, device.carrier, device?.sim_info?.carrier];
     for (const candidate of candidates) {
       const sanitized = sanitizeOperatorValue(candidate);
@@ -761,10 +916,34 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
     return device.sim_slots.map((slot, index) => {
       const slotIndex = slot.slot_index ?? index;
       const slotName = `SIM${slotIndex + 1}`;
-      const operator = sanitizeOperatorValue(slot.operator) || slot.operator_numeric || 'Unknown';
-      const tech = slot.network_technology ? formatNetworkTechnology(slot.network_technology) : null;
-      return tech ? `${slotName}: ${operator} â€¢ ${tech}` : `${slotName}: ${operator}`;
+      const operator = device.airplane_mode
+        ? 'Unknown'
+        : sanitizeOperatorValue(slot.operator) || slot.operator_numeric || 'Unknown';
+      const tech = device.airplane_mode
+        ? 'Unknown'
+        : slot.network_technology
+          ? formatNetworkTechnology(slot.network_technology)
+          : null;
+      return tech ? `${slotName}: ${operator} - ${tech}` : `${slotName}: ${operator}`;
     });
+  };
+
+  const resolveNetworkTechnologyLabel = (device: Device): string => {
+    if (device.airplane_mode) {
+      return 'Unknown';
+    }
+    if (device.network_technology) {
+      return formatNetworkTechnology(device.network_technology);
+    }
+    if (device.sim_slots && device.sim_slots.length > 0) {
+      const slotTech = device.sim_slots
+        .map((slot) => slot.network_technology)
+        .find((value) => typeof value === 'string' && value.trim().length > 0);
+      if (slotTech) {
+        return formatNetworkTechnology(slotTech);
+      }
+    }
+    return 'Unknown';
   };
 
   const formatNetworkTechnology = (value?: string | null): string => {
@@ -877,17 +1056,51 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
 
   const handleToggleSelectAllVisible = () => {
     updateSelectedDeviceIds((prev) => {
+      let nextIds = prev;
       if (visibleDeviceIds.length === 0) {
         return prev;
       }
       if (allVisibleSelected) {
         const visibleSet = new Set(visibleDeviceIds);
-        return prev.filter((id) => !visibleSet.has(id));
+        nextIds = prev.filter((id) => !visibleSet.has(id));
+      } else {
+        const nextSet = new Set(prev);
+        visibleDeviceIds.forEach((id) => nextSet.add(id));
+        nextIds = Array.from(nextSet);
       }
-      const nextSet = new Set(prev);
-      visibleDeviceIds.forEach((id) => nextSet.add(id));
-      return Array.from(nextSet);
+      const disableAutoSelect = nextIds.length === 0;
+      autoSelectDisabledRef.current = disableAutoSelect;
+      writeAutoSelectDisabled(disableAutoSelect);
+      return nextIds;
     });
+  };
+
+  const formatRelativeTime = (value?: string | number | Date | null): string => {
+    if (!value) {
+      return 'Just now';
+    }
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return 'Just now';
+    }
+    const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+    if (seconds < 60) {
+      return seconds <= 1 ? 'Just now' : `${seconds} seconds ago`;
+    }
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) {
+      return minutes === 1 ? '1 minute ago' : `${minutes} minutes ago`;
+    }
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) {
+      return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
+    }
+    const days = Math.floor(hours / 24);
+    if (days < 7) {
+      return days === 1 ? '1 day ago' : `${days} days ago`;
+    }
+    const weeks = Math.floor(days / 7);
+    return weeks === 1 ? '1 week ago' : `${weeks} weeks ago`;
   };
 
   const activeDevicesCount = readyDevices.filter((device) =>
@@ -897,6 +1110,21 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
   const workflowsActiveCount = workflows.filter((workflow) => workflow.runCount > 0).length;
   const workflowsDraftCount = workflows.length - workflowsActiveCount;
   const workflowExecutionCount = workflows.reduce((total, workflow) => total + (workflow.runCount || 0), 0);
+  const appVersion = useMemo(() => {
+    const fromHealth = healthSnapshot?.version?.trim();
+    if (fromHealth) {
+      return fromHealth;
+    }
+    const envVersion =
+      (import.meta as any).env?.VITE_APP_VERSION ||
+      (import.meta as any).env?.VITE_REACT_APP_APP_VERSION ||
+      (typeof process !== 'undefined' ? process.env.REACT_APP_APP_VERSION : undefined);
+    return typeof envVersion === 'string' && envVersion.trim() ? envVersion.trim() : null;
+  }, [healthSnapshot?.version]);
+  const versionLabel = appVersion ? `v${appVersion}` : 'v1.0';
+  const activityUpdatedLabel = activityLastUpdated
+    ? `Updated ${formatRelativeTime(activityLastUpdated)}`
+    : 'Not updated yet';
 
   const handleDisconnect = async (device: Device) => {
     const isDisconnected = disconnectedDevices.has(device.id);
@@ -939,7 +1167,13 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
       setSnackbar({ severity: 'error', message: 'Reconnect the device before using it for tests.' });
       return;
     }
-    updateSelectedDeviceIds((prev) => toggleSelectedDeviceId(prev, device.id));
+    updateSelectedDeviceIds((prev) => {
+      const next = toggleSelectedDeviceId(prev, device.id);
+      const disableAutoSelect = next.length === 0;
+      autoSelectDisabledRef.current = disableAutoSelect;
+      writeAutoSelectDisabled(disableAutoSelect);
+      return next;
+    });
   };
 
   useEffect(() => {
@@ -964,7 +1198,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
       }
     }
 
-    if (selectedDeviceIds.length === 0 && readyDeviceIds.length === 1) {
+    if (!autoSelectDisabledRef.current && selectedDeviceIds.length === 0 && readyDeviceIds.length === 1) {
       const autoId = readyDeviceIds[0];
       const device = readyDevices.find((entry) => entry.id === autoId);
       if (device) {
@@ -1037,6 +1271,10 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
     telemetry.track('dashboard_activity_cleared', { scopeId: 'default' });
   };
 
+  const handleRefreshActivity = useCallback(() => {
+    loadActivities();
+  }, [loadActivities]);
+
   const handleNextActivityPage = () => {
     setActivityPage((prev) => Math.min(prev + 1, activityTotalPages - 1));
   };
@@ -1095,7 +1333,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
     if (statusHints.some((value) => value.includes('offline'))) {
       reasons.push('Reconnect the device');
     }
-    return reasons.length > 0 ? reasons.join(' â€¢ ') : 'Device not ready';
+    return reasons.length > 0 ? reasons.join(' - ') : 'Device not ready';
   };
 
   const formatBatteryLevel = (value: Device['battery_level']) => {
@@ -1192,35 +1430,6 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
       setRefreshingDevices(false);
     }
   };
-
-  const formatRelativeTime = (value?: string | number | Date | null): string => {
-    if (!value) {
-      return 'Just now';
-    }
-    const date = value instanceof Date ? value : new Date(value);
-    if (Number.isNaN(date.getTime())) {
-      return 'Just now';
-    }
-    const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
-    if (seconds < 60) {
-      return seconds <= 1 ? 'Just now' : `${seconds} seconds ago`;
-    }
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) {
-      return minutes === 1 ? '1 minute ago' : `${minutes} minutes ago`;
-    }
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) {
-      return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
-    }
-    const days = Math.floor(hours / 24);
-    if (days < 7) {
-      return days === 1 ? '1 day ago' : `${days} days ago`;
-    }
-    const weeks = Math.floor(days / 7);
-    return weeks === 1 ? '1 week ago' : `${weeks} weeks ago`;
-  };
-
 
   const renderActivityIcon = (item: ActivityItem) => {
     switch (item.icon) {
@@ -1390,7 +1599,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
         <Box sx={{ textAlign: 'center', mt: 2 }}>
           <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
             <Chip 
-              label="MOBIQ v1.0"
+              label={`MOBIQ ${versionLabel}`}
               size="small"
               sx={{
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -1467,7 +1676,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box ref={searchContainerRef} sx={{ position: 'relative', width: 460 }}>
               <TextField
-                placeholder="Search devicesâ€¦"
+                placeholder="Search devices..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => searchQuery.trim() && setShowSearchResults(true)}
@@ -1509,7 +1718,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                   {searchLoading ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, padding: '12px 16px' }}>
                       <CircularProgress size={18} />
-                      <Typography sx={{ fontSize: '14px', color: '#475569' }}>Searchingâ€¦</Typography>
+                      <Typography sx={{ fontSize: '14px', color: '#475569' }}>Searching...</Typography>
                     </Box>
                   ) : searchResults.length === 0 ? (
                     <Box sx={{ padding: '12px 16px' }}>
@@ -1560,7 +1769,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                 }
               }}
             >
-              {refreshingDevices ? 'Refreshingâ€¦' : 'Refresh'}
+              {refreshingDevices ? 'Refreshing...' : 'Refresh'}
             </Button>
 
             <Button
@@ -1812,7 +2021,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                       }
                     }}
                   >
-                    {refreshingDevices ? 'Scanningâ€¦' : 'Scan Again'}
+                    {refreshingDevices ? 'Scanning...' : 'Scan Again'}
                   </Button>
                 </Box>
               ) : (
@@ -2031,7 +2240,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                                 </Typography>
                               )}
                               <Chip
-                                label={formatNetworkTechnology(device.network_technology)}
+                                label={resolveNetworkTechnologyLabel(device)}
                                 size="small"
                                 icon={<Signal size={12} />}
                                 sx={{
@@ -2178,17 +2387,22 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                mb: 3
+                mb: 2
               }}>
-                <Typography sx={{
-                  fontSize: '16px',
-                  lineHeight: '24px',
-                  fontWeight: 600,
-                  color: tokens.colors.text
-                }}>
-                  Recent Activity
-                </Typography>
-                <Stack direction="row" spacing={1}>
+                <Box>
+                  <Typography sx={{
+                    fontSize: '16px',
+                    lineHeight: '24px',
+                    fontWeight: 600,
+                    color: tokens.colors.text
+                  }}>
+                    Live Activity
+                  </Typography>
+                  <Typography sx={{ fontSize: '12px', color: tokens.colors.subtext }}>
+                    {activityLoading ? 'Refreshing activity...' : activityError || activityUpdatedLabel}
+                  </Typography>
+                </Box>
+                <Stack direction="row" spacing={1} alignItems="center">
                   <Button
                     variant="text"
                     onClick={handleViewAllActivity}
@@ -2233,7 +2447,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                     }}
                   >
                     <CircularProgress size={18} />
-                    <Typography sx={{ fontSize: '14px', color: tokens.colors.subtext }}>Loading activityâ€¦</Typography>
+                    <Typography sx={{ fontSize: '14px', color: tokens.colors.subtext }}>Loading activity...</Typography>
                   </ListItem>
                 ) : activityItems.length === 0 ? (
                   <ListItem
@@ -2251,7 +2465,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                     </Typography>
                   </ListItem>
                 ) : (
-                  displayedActivityItems.map((activity) => {
+                  displayedActivityItems.map((activity, index) => {
                     const iconColor =
                       activity.icon === 'check'
                         ? tokens.colors.success
@@ -2259,25 +2473,53 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                           ? tokens.colors.warning
                           : tokens.colors.primary;
                     const timestamp = activity.meta || (activity.ts ? new Date(activity.ts).toLocaleString() : 'Just now');
+                    const isLast = index === displayedActivityItems.length - 1;
                     return (
                       <ListItem
                         key={activity.id}
                         sx={{
-                          height: 56,
                           borderRadius: '10px',
                           border: `1px solid ${tokens.colors.border}`,
                           mb: 1,
-                          padding: '0 16px',
+                          padding: '12px 16px',
                           '&:last-child': { mb: 0 }
                         }}
                       >
-                        <ListItemIcon sx={{ minWidth: 40 }}>
-                          <Box sx={{ color: iconColor }}>
-                            {renderActivityIcon(activity)}
+                        <Box sx={{
+                          display: 'grid',
+                          gridTemplateColumns: '32px 1fr',
+                          gap: 2,
+                          alignItems: 'center',
+                          width: '100%'
+                        }}>
+                          <Box sx={{
+                            position: 'relative',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}>
+                            <Box sx={{
+                              width: 28,
+                              height: 28,
+                              borderRadius: '50%',
+                              display: 'grid',
+                              placeItems: 'center',
+                              backgroundColor: `${iconColor}1A`,
+                              color: iconColor
+                            }}>
+                              {renderActivityIcon(activity)}
+                            </Box>
+                            {!isLast && (
+                              <Box sx={{
+                                position: 'absolute',
+                                top: 28,
+                                bottom: -20,
+                                width: 2,
+                                backgroundColor: tokens.colors.border
+                              }} />
+                            )}
                           </Box>
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={
+                          <Box>
                             <Typography sx={{
                               fontSize: '14px',
                               fontWeight: 500,
@@ -2285,16 +2527,14 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                             }}>
                               {activity.title}
                             </Typography>
-                          }
-                          secondary={
                             <Typography sx={{
                               fontSize: '12px',
                               color: tokens.colors.subtext
                             }}>
                               {timestamp}
                             </Typography>
-                          }
-                        />
+                          </Box>
+                        </Box>
                       </ListItem>
                     );
                   })
@@ -2403,7 +2643,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                         '&:hover': { backgroundColor: '#1E40AF' }
                       }}
                     >
-                      {deviceSetupLoading === device.id ? 'Configuringâ€¦' : 'Configure automatically'}
+                      {deviceSetupLoading === device.id ? 'Configuring...' : 'Configure automatically'}
                     </Button>
                     <Button
                       variant="outlined"
@@ -2467,7 +2707,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
             variant="contained"
             sx={{ textTransform: 'none' }}
           >
-            {aliasSaving ? 'Savingâ€¦' : 'Save'}
+            {aliasSaving ? 'Saving...' : 'Save'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -2517,7 +2757,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
               <Box>
                 <Typography sx={{ fontSize: '14px', color: '#6B7280', mb: 1 }}>Network Technology</Typography>
                 <Typography sx={{ fontSize: '16px', fontWeight: 600, color: '#0F172A', mb: 2 }}>
-                  {formatNetworkTechnology(selectedDeviceDetails.network_technology)}
+                  {resolveNetworkTechnologyLabel(selectedDeviceDetails)}
                 </Typography>
               </Box>
               <Box>
@@ -2563,11 +2803,11 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
 
       {/* About Dialog */}
       <Dialog open={aboutDialogOpen} onClose={() => setAboutDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>About MOBIQ v1.0</DialogTitle>
+        <DialogTitle>{`About MOBIQ ${versionLabel}`}</DialogTitle>
         <DialogContent dividers>
           <Stack spacing={2}>
             <Typography variant="body1">
-              MOBIQ v1.0 centralizes the Android automation backend, React dashboard, and Electron shell into a single
+              {`MOBIQ ${versionLabel} centralizes the Android automation backend, React dashboard, and Electron shell into a single`}
               desktop experience tailored for field teams. It streams live device telemetry, runs scripted modules, and
               orchestrates repeatable workflows without juggling multiple CLI tools.
             </Typography>
@@ -2591,7 +2831,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
             <Box>
               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>Build information</Typography>
               <Typography variant="body2">
-                Version 1.0.0 â€¢ Electron 28 â€¢ React 18 â€¢ Python 3.12. Documentation and updates live in the project wiki and
+                {`Version ${appVersion ?? 'unknown'} - Electron 28 - React 18 - Python 3.x. Documentation and updates live in the project wiki and`}
                 release notes. For incidents or feature requests, open an issue in the repository or contact the support channel.
               </Typography>
             </Box>

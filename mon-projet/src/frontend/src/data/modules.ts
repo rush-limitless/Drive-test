@@ -10,6 +10,10 @@ export interface ModuleMetadata {
   waitDurationSeconds?: number;
   duration_estimate?: string;
   durationEstimate?: string;
+  avg_duration?: string;
+  avgDuration?: string;
+  impact?: 'low' | 'medium' | 'high';
+  prerequisites?: string[];
   hiddenInModulesPage?: boolean;
   callTestParams?: CallTestValues;
 }
@@ -22,6 +26,9 @@ export const MODULE_CATALOG: ModuleMetadata[] = [
     description: 'Runs a voice call scenario to validate audio quality and connectivity',
     category: 'Voice & Messaging',
     editable: true,
+    avg_duration: '2-4 min',
+    impact: 'high',
+    prerequisites: ['SIM ready', 'Microphone', 'Speaker'],
   },
   {
     id: 'enable_airplane_mode',
@@ -30,6 +37,9 @@ export const MODULE_CATALOG: ModuleMetadata[] = [
     description: 'Enables airplane mode to test network recovery scenarios.',
     category: 'Device Controls',
     editable: false,
+    avg_duration: '15-30 s',
+    impact: 'medium',
+    prerequisites: ['ADB connected'],
   },
   {
     id: 'disable_airplane_mode',
@@ -38,6 +48,9 @@ export const MODULE_CATALOG: ModuleMetadata[] = [
     description: 'Disables airplane mode to restore network connectivity.',
     category: 'Device Controls',
     editable: false,
+    avg_duration: '15-30 s',
+    impact: 'medium',
+    prerequisites: ['ADB connected'],
   },
   {
     id: 'ping',
@@ -46,6 +59,9 @@ export const MODULE_CATALOG: ModuleMetadata[] = [
     description: 'Ping an IP address or domain from the device for a configurable duration.',
     category: 'Connectivity',
     editable: true,
+    avg_duration: '30-60 s',
+    impact: 'low',
+    prerequisites: ['Network connectivity'],
   },
   {
     id: 'waiting_time',
@@ -55,6 +71,8 @@ export const MODULE_CATALOG: ModuleMetadata[] = [
     category: 'Utility',
     editable: true,
     waitDurationSeconds: 5,
+    avg_duration: 'Varies',
+    impact: 'low',
   },
   {
     id: 'activate_data',
@@ -63,6 +81,9 @@ export const MODULE_CATALOG: ModuleMetadata[] = [
     description: 'Ensures mobile data is enabled on the device before running connectivity tests.',
     category: 'Connectivity',
     editable: false,
+    avg_duration: '20-40 s',
+    impact: 'medium',
+    prerequisites: ['Mobile data'],
   },
   {
     id: 'launch_app',
@@ -71,6 +92,9 @@ export const MODULE_CATALOG: ModuleMetadata[] = [
     description: 'Launch Google or YouTube to generate realistic data traffic.',
     category: 'Automation',
     editable: true,
+    avg_duration: '30-90 s',
+    impact: 'medium',
+    prerequisites: ['Target app installed'],
   },
   {
     id: 'wrong_apn_configuration',
@@ -79,6 +103,9 @@ export const MODULE_CATALOG: ModuleMetadata[] = [
     description: 'Applies a deliberately wrong APN value to validate failure scenarios.',
     category: 'Network',
     editable: true,
+    avg_duration: '1-2 min',
+    impact: 'high',
+    prerequisites: ['APN access'],
   },
   {
     id: 'start_rf_logging',
@@ -87,6 +114,9 @@ export const MODULE_CATALOG: ModuleMetadata[] = [
     description: 'Starts RF logging via SysDump/secret code (best effort).',
     category: 'Diagnostics',
     editable: false,
+    avg_duration: '30-60 s',
+    impact: 'high',
+    prerequisites: ['SysDump available'],
   },
   {
     id: 'stop_rf_logging',
@@ -95,6 +125,9 @@ export const MODULE_CATALOG: ModuleMetadata[] = [
     description: 'Stops RF logging via SysDump (best effort).',
     category: 'Diagnostics',
     editable: false,
+    avg_duration: '15-30 s',
+    impact: 'medium',
+    prerequisites: ['RF logging active'],
   },
   {
     id: 'pull_rf_logs',
@@ -103,6 +136,9 @@ export const MODULE_CATALOG: ModuleMetadata[] = [
     description: 'Pulls RF log files from the device to the host for analysis.',
     category: 'Diagnostics',
     editable: true,
+    avg_duration: '1-3 min',
+    impact: 'high',
+    prerequisites: ['Storage available'],
   },
   {
     id: 'dial_secret_code',
@@ -111,5 +147,8 @@ export const MODULE_CATALOG: ModuleMetadata[] = [
     description: 'Dial a secret/USSD code such as *#9900# or *101#.',
     category: 'Automation',
     editable: true,
+    avg_duration: '15-30 s',
+    impact: 'medium',
+    prerequisites: ['Dialer access'],
   },
 ];

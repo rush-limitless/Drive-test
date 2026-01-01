@@ -133,7 +133,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
   const [activityVersion, setActivityVersion] = useState(0);
   const [activityDialog, setActivityDialog] = useState<{ deviceId: string; name: string } | null>(null);
   const [activityDialogEvents, setActivityDialogEvents] = useState<DeviceActivityEntry[]>([]);
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('table');
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<Set<string>>(new Set());
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterTag, setFilterTag] = useState<string>('all');
@@ -902,7 +902,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
                 <TableCell>{formatTimestamp(device.last_seen || registryMeta?.lastSeen)}</TableCell>
                 <TableCell>
                   {(deviceMeta.tags ?? []).length === 0
-                    ? 'â€”'
+                    ? '-'
                     : (deviceMeta.tags ?? []).map((tag) => `#${tag}`).join(', ')}
                 </TableCell>
                 <TableCell align="right">{workflowRuns}</TableCell>
@@ -1023,8 +1023,8 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
           onChange={handleViewModeChange}
           sx={{ ml: 'auto' }}
         >
-          <ToggleButton value="cards">Cards</ToggleButton>
           <ToggleButton value="table">Table</ToggleButton>
+          <ToggleButton value="cards">Cards</ToggleButton>
         </ToggleButtonGroup>
       </Box>
 
@@ -1116,7 +1116,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
 
       <Dialog open={Boolean(activityDialog)} onClose={closeActivityDialog} maxWidth="sm" fullWidth>
         <DialogTitle sx={{ fontWeight: 600, color: '#0F172A' }}>
-          Device History â€” {activityDialog?.name || ''}
+          Device History - {activityDialog?.name || ''}
         </DialogTitle>
         <DialogContent dividers>
           <Stack direction="row" spacing={2} mb={2} flexWrap="wrap" rowGap={2}>

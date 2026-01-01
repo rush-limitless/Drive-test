@@ -14,6 +14,7 @@ export interface StoredWorkflow {
   runCount: number;
   lastRunAt: string | null;
   tags: string[];
+  locked: boolean;
 }
 
 const STORAGE_KEY = 'customWorkflows';
@@ -289,6 +290,7 @@ const hydrateWorkflow = (record: any, index: number): StoredWorkflow => {
     record?.lastRun;
 
   const tags = normalizeTags(record?.tags ?? record?.tagList ?? []);
+  const locked = Boolean(record?.locked);
 
   const createdAt = sanitizeTimestamp(createdAtCandidate, now);
   const updatedAt = sanitizeTimestamp(updatedAtCandidate, createdAt);
@@ -307,6 +309,7 @@ const hydrateWorkflow = (record: any, index: number): StoredWorkflow => {
     runCount,
     lastRunAt,
     tags,
+    locked,
   };
 };
 
@@ -332,6 +335,7 @@ export const addStoredWorkflow = (
     runCount?: number;
     lastRunAt?: string | null;
     tags?: string[];
+    locked?: boolean;
   }
 ): StoredWorkflow => {
   const workflows = getStoredWorkflows();
@@ -351,6 +355,7 @@ export const addStoredWorkflow = (
     runCount: sanitizeRunCount(workflow.runCount, 0),
     lastRunAt,
     tags: normalizeTags(workflow.tags ?? []),
+    locked: Boolean(workflow.locked),
   };
 
   workflows.push(newWorkflow);
@@ -398,6 +403,10 @@ export const updateStoredWorkflow = (
 
   if (Object.prototype.hasOwnProperty.call(updates, 'tags')) {
     next.tags = normalizeTags((updates as any).tags ?? []);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(updates, 'locked')) {
+    next.locked = Boolean((updates as any).locked);
   }
 
   if (typeof updates.updatedAt === 'string') {

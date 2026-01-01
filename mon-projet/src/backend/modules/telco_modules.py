@@ -451,6 +451,14 @@ class TelcoModules(ADBExecutor):
             return False
         result = self.execute_command([ADB_EXECUTABLE, 'shell', 'pidof', package])
         return bool(result.success and result.output and result.output.strip())
+
+    def _is_app_installed(self, package: str) -> bool:
+        if not package:
+            return False
+        result = self.execute_command([ADB_EXECUTABLE, 'shell', 'pm', 'list', 'packages', package])
+        if not result.success or not result.output:
+            return False
+        return package in result.output
     
     # -----------------------------
     # Call Handling
@@ -1532,6 +1540,13 @@ class TelcoModules(ADBExecutor):
                 'success': False,
                 'error': f'Unsupported app "{normalized}"',
                 'package': normalized,
+                'duration': 0.0,
+            }
+        if normalized == 'chrome_news' and not self._is_app_installed(package):
+            return {
+                'success': False,
+                'error': 'Chrome package not installed on device',
+                'package': package,
                 'duration': 0.0,
             }
 

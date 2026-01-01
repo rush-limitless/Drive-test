@@ -197,6 +197,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }}>
       <Box sx={{
         width: 280,
+        minWidth: 280,
+        maxWidth: 280,
+        flexShrink: 0,
         background: 'linear-gradient(180deg, #0D1B2A 0%, #152238 100%)',
         padding: '16px 12px',
         display: 'flex',
@@ -239,7 +242,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <Box sx={{ flex: 1 }}>
           {[
             { label: 'Dashboard', icon: <Grid3X3 size={20} />, path: '/dashboard' },
-            { label: 'Test Modules', icon: <Puzzle size={20} />, path: '/modules' },
+            { label: 'Modules', icon: <Puzzle size={20} />, path: '/modules' },
             { label: 'Workflows', icon: <Zap size={20} />, path: '/workflows' },
             { label: 'Device Manager', icon: <Smartphone size={20} />, path: '/devices' }
           ].map((item, index) => {

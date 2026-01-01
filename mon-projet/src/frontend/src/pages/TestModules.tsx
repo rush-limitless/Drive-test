@@ -44,7 +44,6 @@ import {
   PhoneCall,
   Activity,
   SignalHigh,
-  FileText,
   ArrowLeft,
   ArrowRight,
 } from 'lucide-react';
@@ -81,6 +80,7 @@ const PING_CONFIG_STORAGE_KEY = 'pingModuleConfig';
 const WORKFLOW_BUILDER_STORAGE_KEY = 'workflowBuilderDraft';
 const FAVORITES_STORAGE_KEY = 'moduleFavorites';
 const RECENTS_STORAGE_KEY = 'moduleRecents';
+const DEFAULT_BATCH_SIZE = 1;
 const DEFAULT_DIAL_SECRET_CODE = '*#9900#';
 interface PingConfig {
   target: string;
@@ -130,6 +130,64 @@ const resolveModuleFailureReason = (payload: unknown): string | undefined => {
   return undefined;
 };
 
+const normalizeModuleError = (value?: string): string | undefined => {
+  if (!value || !value.trim()) {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  const lowered = trimmed.toLowerCase();
+  if (lowered.includes('chrome package not installed')) {
+    return 'Chrome is not installed on this device. Install Chrome or select another target.';
+  }
+  return trimmed;
+};
+
+
+const chunkDeviceIds = (deviceIds: string[], size: number) => {
+  const safeSize = Math.max(1, size);
+  const chunks: string[][] = [];
+  for (let index = 0; index < deviceIds.length; index += safeSize) {
+    chunks.push(deviceIds.slice(index, index + safeSize));
+  }
+  return chunks;
+};
+
+
+const formatExecutionError = (error: unknown): { message: string; action?: string } => {
+  if (error && typeof error === 'object') {
+    const status = (error as { status?: number }).status;
+    const rawText = (error as { text?: unknown }).text;
+    const text = typeof rawText === 'string' ? rawText.trim().slice(0, 200) : '';
+    if (typeof status === 'number') {
+      const message = text ? `Backend error (HTTP ${status}): ${text}` : `Backend error (HTTP ${status}).`;
+      const action =
+        status >= 500
+          ? 'Check backend logs and retry.'
+          : status === 401 || status === 403
+            ? 'Verify credentials and permissions.'
+            : 'Check request parameters and retry.';
+      return { message, action };
+    }
+  }
+  if (error instanceof Error) {
+    const lowered = error.message.toLowerCase();
+    if (lowered.includes('failed to fetch') || lowered.includes('network') || lowered.includes('load failed')) {
+      return {
+        message: 'Network error while contacting the backend.',
+        action: 'Check connectivity and backend status, then retry.',
+      };
+    }
+    return {
+      message: error.message || 'Backend error during module execution.',
+      action: 'Retry. If it persists, check backend logs.',
+    };
+  }
+  return {
+    message: 'Unexpected error while running the module.',
+    action: 'Retry. If it persists, check backend logs.',
+  };
+};
+
 type DeviceModuleResult = {
   deviceId: string;
   success: boolean;
@@ -150,6 +208,7 @@ type DeviceModuleRunSnapshot = {
   timestamp: string;
   results: DeviceModuleResult[];
 };
+
 
 const MODULE_ICON_MAP: Record<string, React.ComponentType<any>> = {
   enable_airplane_mode: Airplay,
@@ -198,7 +257,7 @@ const formatDeviceMessage = (result: DeviceModuleResult): string => {
   }
   if (payload && typeof payload === 'object') {
     const serialized = JSON.stringify(payload);
-    return serialized.length > 80 ? `${serialized.slice(0, 80)}â€¦` : serialized;
+    return serialized.length > 80 ? `${serialized.slice(0, 80)}...` : serialized;
   }
   return 'No details available';
 };
@@ -729,7 +788,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
   const [appLauncherSelection, setAppLauncherSelection] = useState<AppLauncherOption>(readAppLauncherSelection);
   const [appLauncherDuration, setAppLauncherDuration] = useState<number>(15);
   const [appLauncherDialogSelection, setAppLauncherDialogSelection] = useState<AppLauncherOption>(readAppLauncherSelection);
-  const [appLauncherDialogDuration, setAppLauncherDialogDuration] = useState<number>(15);
+  const [appLauncherDialogDuration, setAppLauncherDialogDuration] = useState<string>('15');
   const [appLauncherDialogOpen, setAppLauncherDialogOpen] = useState(false);
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
@@ -1553,11 +1612,13 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
           (typeof entry.device_id === 'string' && entry.device_id) ||
           (typeof entry.deviceId === 'string' && entry.deviceId) ||
           'unknown';
+        const normalizedEntryError =
+          typeof entry.error === 'string' ? normalizeModuleError(entry.error) : undefined;
         const failureReason =
           success
             ? undefined
-            : entry.error ??
-              resolveModuleFailureReason(entry.result ?? entry) ??
+            : normalizedEntryError ??
+              normalizeModuleError(resolveModuleFailureReason(entry.result ?? entry)) ??
               fallbackReason ??
               'Execution failed.';
         return {
@@ -1571,25 +1632,25 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
       setModuleRunStatuses((prev) => ({ ...prev, [module.id]: 'running' }));
       setModuleStatusEnabled((prev) => ({ ...prev, [module.id]: false }));
       startProgress(module.id);
+      const runStartedAt = Date.now();
       try {
         console.log(
           `[runDeviceModule] requesting ${module.id} on ${targets.length} device${targets.length === 1 ? '' : 's'} at ${new Date().toISOString()}`
         );
 
-        const parametersByDevice: Record<string, Record<string, any>> = {};
-        targets.forEach((deviceId) => {
-          parametersByDevice[deviceId] = { ...sharedParameters };
-        });
-
         const executeRequest = async (payload: Record<string, any>) => {
-          const response = await fetchWithRetry(`${normalizedBackendUrl}/api/modules/${module.id}/execute`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...authHeaders(),
+          const response = await fetchWithRetry(
+            `${normalizedBackendUrl}/api/modules/${module.id}/execute`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                ...authHeaders(),
+              },
+              body: JSON.stringify(payload),
             },
-            body: JSON.stringify(payload),
-          });
+            { retries: 3, backoffMs: 600, retryOn: [408, 429, 500, 502, 503, 504] }
+          );
           if (!response.ok) {
             const text = await response.text();
             throw { status: response.status, text };
@@ -1597,48 +1658,77 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
           return response.json();
         };
 
-        let data: any;
-        try {
-          data = await executeRequest({
-            device_ids: targets,
-            parameters_by_device: parametersByDevice,
+        const batches = chunkDeviceIds(targets, DEFAULT_BATCH_SIZE);
+        const aggregatedResults: DeviceModuleResult[] = [];
+        const statusIds: string[] = [];
+
+        for (const batch of batches) {
+          const parametersByDevice: Record<string, Record<string, any>> = {};
+          batch.forEach((deviceId) => {
+            parametersByDevice[deviceId] = { ...sharedParameters };
           });
-        } catch (error: any) {
-          const text = typeof error?.text === 'string' ? error.text : '';
-          if (error?.status === 422 || (error?.status === 400 && text.toLowerCase().includes('parameters_by_device'))) {
+
+          let data: any;
+          try {
             data = await executeRequest({
-              device_ids: targets,
-              parameters: sharedParameters,
+              device_ids: batch,
+              parameters_by_device: parametersByDevice,
             });
-          } else {
-            throw new Error(text || `Backend failure (HTTP ${error?.status ?? 'unknown'})`);
+          } catch (error: any) {
+            const text = typeof error?.text === 'string' ? error.text : '';
+            if (error?.status === 422 || (error?.status === 400 && text.toLowerCase().includes('parameters_by_device'))) {
+              data = await executeRequest({
+                device_ids: batch,
+                parameters: sharedParameters,
+              });
+            } else {
+              const formatted = formatExecutionError(error);
+              const message = formatted.action ? `${formatted.message} Action: ${formatted.action}` : formatted.message;
+              batch.forEach((deviceId) => {
+                aggregatedResults.push({
+                  deviceId,
+                  success: false,
+                  response: {},
+                  error: message,
+                });
+              });
+              continue;
+            }
           }
+
+          const statusIdFromServer =
+            typeof data.status_id === 'string' && data.status_id ? data.status_id : undefined;
+          if (statusIdFromServer) {
+            statusIds.push(statusIdFromServer);
+          }
+
+          const rawDeviceEntries: Record<string, any>[] = Array.isArray(data?.result?.device_results)
+            ? data.result.device_results
+            : Array.isArray(data?.device_results)
+              ? data.device_results
+              : [];
+
+          let batchResults: DeviceModuleResult[] = rawDeviceEntries.map((entry) =>
+            buildDeviceResult(entry, resolveModuleFailureReason(data))
+          );
+          if (batchResults.length === 0) {
+            const fallbackReason = resolveModuleFailureReason(data) ?? 'Execution result unavailable for devices.';
+            batchResults = batch.map((deviceId) => ({
+              deviceId,
+              success: false,
+              response: data,
+              error: fallbackReason,
+            }));
+          }
+
+          aggregatedResults.push(...batchResults);
         }
 
-        const statusIdFromServer =
-          typeof data.status_id === 'string' && data.status_id ? data.status_id : undefined;
-        const rawDeviceEntries: Record<string, any>[] = Array.isArray(data?.result?.device_results)
-          ? data.result.device_results
-          : Array.isArray(data?.device_results)
-            ? data.device_results
-            : [];
+        const deviceResults = aggregatedResults;
 
-        let deviceResults: DeviceModuleResult[] = rawDeviceEntries.map((entry) =>
-          buildDeviceResult(entry, resolveModuleFailureReason(data))
-        );
-        if (deviceResults.length === 0) {
-          const fallbackReason = resolveModuleFailureReason(data) ?? 'Execution result unavailable for devices.';
-          deviceResults = targets.map((deviceId) => ({
-            deviceId,
-            success: false,
-            response: data,
-            error: fallbackReason,
-          }));
-        }
-
-        if (statusIdFromServer) {
+        if (statusIds.length > 0) {
           setModuleStatusEnabled((prev) => ({ ...prev, [module.id]: true }));
-          const finalStatus = await fetchModuleStatus({ statusId: statusIdFromServer });
+          const finalStatus = await fetchModuleStatus({ statusId: statusIds[statusIds.length - 1] });
           if (finalStatus?.module_id) {
             setModuleStatusEntries((prev) => ({
               ...prev,
@@ -1653,21 +1743,21 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
           `[runDeviceModule] completed ${module.id} (${deviceResults.length} device results) at ${new Date().toISOString()}`
         );
 
-      const successes = deviceResults.filter((result) => result.success).map((result) => result.deviceId);
-      const failures = deviceResults
-        .filter((result) => !result.success)
-        .map((result) => ({
-          deviceId: result.deviceId,
-          reason: result.error ?? 'Execution failed.',
-        }));
-      const detailMessage = buildDeviceNotificationMessage(deviceResults);
-      const detailSuffix = detailMessage ? ` Details: ${detailMessage}` : '';
+        const successes = deviceResults.filter((result) => result.success).map((result) => result.deviceId);
+        const failures = deviceResults
+          .filter((result) => !result.success)
+          .map((result) => ({
+            deviceId: result.deviceId,
+            reason: result.error ?? 'Execution failed.',
+          }));
+        const detailMessage = buildDeviceNotificationMessage(deviceResults);
+        const detailSuffix = detailMessage ? ` Details: ${detailMessage}` : '';
 
-      setLastDeviceModuleRun({
-        moduleId: module.id,
-        timestamp: new Date().toISOString(),
-        results: deviceResults,
-      });
+        setLastDeviceModuleRun({
+          moduleId: module.id,
+          timestamp: new Date().toISOString(),
+          results: deviceResults,
+        });
 
         const activityTimestamp = new Date().toISOString();
         deviceResults.forEach((result) => {
@@ -1702,6 +1792,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
                 message: `${module.name} executed successfully on ${successes.length} device${successes.length === 1 ? '' : 's'}.${detailSuffix}`,
               });
             }
+          }
         } else if (successes.length > 0) {
           const alreadyOnStatuses = deviceResults.filter((result) => result.success).filter((result) => {
             const payload = (result.response as any)?.result ?? (result.response as any);
@@ -1720,26 +1811,39 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
             });
           }
         } else {
-            const reasons = failures.map((item) => `${item.deviceId}: ${item.reason}`).join(' | ');
-            setSnackbar({
-              severity: 'error',
-              message: `${module.name} failed on all selected devices. ${reasons}.${detailSuffix}`,
-            });
-          }
+          const reasons = failures.map((item) => `${item.deviceId}: ${item.reason}`).join(' | ');
+          setSnackbar({
+            severity: 'error',
+            message: `${module.name} failed on all selected devices. ${reasons}.${detailSuffix}`,
+          });
         }
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Unexpected error during module execution.';
-        setSnackbar({ severity: 'error', message: `${module.name} execution aborted: ${msg}` });
-    } finally {
-      stopProgress(module.id);
-      setModuleRunStatuses((prev) => {
-        const next = { ...prev };
-        delete next[module.id];
-        return next;
-      });
-    }
+        const detail = formatExecutionError(err);
+        const actionSuffix = detail.action ? ` Action: ${detail.action}` : '';
+        setSnackbar({
+          severity: 'error',
+          message: `${module.name} execution aborted. ${detail.message}${actionSuffix}`,
+        });
+      } finally {
+        stopProgress(module.id);
+        setModuleRunStatuses((prev) => {
+          const next = { ...prev };
+          delete next[module.id];
+          return next;
+        });
+      }
     },
-    [backendUrl, resolveRunTargets, pingConfig, wrongApnValue, logPullDestination, customCode, appLauncherSelection, fetchModuleStatus]
+    [
+      backendUrl,
+      resolveRunTargets,
+      pingConfig,
+      wrongApnValue,
+      logPullDestination,
+      customCode,
+      appLauncherSelection,
+      appLauncherDuration,
+      fetchModuleStatus,
+    ]
   );
 
   const handleRun = (module: ModuleMetadata) => {
@@ -1772,7 +1876,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
 
     if ((window as any).electronAPI?.runScript) {
       (window as any).electronAPI.runScript(scriptPath(module.script));
-      setSnackbar({ message: `Running ${module.name}â€¦`, severity: 'success' });
+      setSnackbar({ message: `Running ${module.name}...`, severity: 'success' });
       return;
     }
     console.info(`Run requested for ${module.script}`);
@@ -1781,17 +1885,26 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
 
   const closeAppLauncherDialog = () => {
     setAppLauncherDialogSelection(appLauncherSelection);
-    setAppLauncherDialogDuration(appLauncherDuration);
+    setAppLauncherDialogDuration(String(appLauncherDuration));
     setAppLauncherDialogOpen(false);
   };
 
   const handleAppLauncherDialogSave = () => {
+    const parsed = Number(appLauncherDialogDuration.trim());
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      setSnackbar({
+        severity: 'error',
+        message: 'Enter a duration greater than 0 seconds.',
+      });
+      return;
+    }
+    const normalized = Math.round(parsed);
     setAppLauncherSelection(appLauncherDialogSelection);
-    setAppLauncherDuration(appLauncherDialogDuration);
+    setAppLauncherDuration(normalized);
     setAppLauncherDialogOpen(false);
     setSnackbar({
       severity: 'success',
-      message: `Smart App Launcher will target ${APP_LAUNCHER_DISPLAY[appLauncherDialogSelection]} for ${appLauncherDialogDuration}s.`,
+      message: `Smart App Launcher will target ${APP_LAUNCHER_DISPLAY[appLauncherDialogSelection]} for ${normalized}s.`,
     });
   };
 
@@ -1819,6 +1932,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
     }
     if (module.id === 'launch_app') {
       setAppLauncherDialogSelection(appLauncherSelection);
+      setAppLauncherDialogDuration(String(appLauncherDuration));
       setAppLauncherDialogOpen(true);
       return;
     }
@@ -1861,7 +1975,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
 
     if ((window as any).electronAPI?.openFile) {
       (window as any).electronAPI.openFile(scriptPath(module.script));
-      setSnackbar({ message: `Opening ${module.name} in editorâ€¦`, severity: 'success' });
+      setSnackbar({ message: `Opening ${module.name} in editor...`, severity: 'success' });
       return;
     }
     setSnackbar({ message: `Script path: ${scriptPath(module.script)}`, severity: 'info' });
@@ -2001,7 +2115,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
     const rtt = response.rtt && typeof response.rtt === 'object' ? (response.rtt as Record<string, unknown>) : null;
     const rttSummary =
       rtt && typeof rtt.avg_ms === 'number'
-        ? `avg ${rtt.avg_ms.toFixed(2)} ms (min ${Number(rtt.min_ms ?? 0).toFixed(2)} â€¢ max ${Number(rtt.max_ms ?? 0).toFixed(2)})`
+        ? `avg ${rtt.avg_ms.toFixed(2)} ms (min ${Number(rtt.min_ms ?? 0).toFixed(2)} - max ${Number(rtt.max_ms ?? 0).toFixed(2)})`
         : null;
     return (
       <Stack spacing={0.5} sx={{ mt: 1 }}>
@@ -2012,7 +2126,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         )}
         {(packetsTx !== undefined || packetsRx !== undefined) && (
           <Typography variant="body2" sx={{ color: '#475569' }}>
-            Packets: {packetsTx ?? 'â€”'} sent / {packetsRx ?? 'â€”'} received
+            Packets: {packetsTx ?? '-'} sent / {packetsRx ?? '-'} received
           </Typography>
         )}
         {packetLoss && (
@@ -2211,7 +2325,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
               }
             >
               <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                {notification.moduleId} Â· {notification.deviceId}
+                {notification.moduleId} - {notification.deviceId}
               </Typography>
               <Typography variant="body2">{notification.message}</Typography>
             </Alert>
@@ -2518,6 +2632,9 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
             </Tooltip>
           ) : null;
           const moduleDurationLabel = module.duration_estimate ?? module.durationEstimate;
+          const avgDurationLabel = module.avg_duration ?? module.avgDuration;
+          const prerequisites = module.prerequisites ?? [];
+          const impactLabel = module.impact ? module.impact.toUpperCase() : null;
           return (
           <Grid item xs={12} sm={6} lg={4} key={module.id}>
             <Card
@@ -2655,7 +2772,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
                           }
                         }}
                       >
-                        {moduleRunning ? 'Runningâ€¦' : 'Run'}
+                        {moduleRunning ? 'Running...' : 'Run'}
                       </Button>
                     </span>
                   </Tooltip>
@@ -2713,7 +2830,8 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
           </Typography>
           <TextField
             label="Duration (seconds)"
-            type="number"
+            type="text"
+            inputMode="numeric"
             value={waitingTimeDraft}
             onChange={(event) => {
               setWaitingTimeDraft(event.target.value);
@@ -2874,19 +2992,13 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
           </FormControl>
           <TextField
             label="Duration (seconds)"
-            type="number"
+            type="text"
+            inputMode="numeric"
             fullWidth
             value={appLauncherDialogDuration}
             onChange={(event) => {
-              const parsed = Number(event.target.value);
-              if (!Number.isFinite(parsed)) {
-                setAppLauncherDialogDuration(1);
-                return;
-              }
-              const normalized = Math.max(1, Math.min(120, Math.round(parsed)));
-              setAppLauncherDialogDuration(normalized);
+              setAppLauncherDialogDuration(event.target.value);
             }}
-            inputProps={{ min: 1, max: 120 }}
             helperText="App stays open for the duration before being closed automatically."
             sx={{ mb: 1 }}
           />
