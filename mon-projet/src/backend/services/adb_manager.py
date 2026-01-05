@@ -446,8 +446,6 @@ class ADBConnection:
                         numeric_hint = await _getprop("gsm.operator.numeric")
                     if numeric_hint:
                         sim_present = True
-                    else:
-                        sim_present = False
 
                 if sim_present is not None:
                     info['sim_present'] = sim_present

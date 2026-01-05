@@ -913,6 +913,22 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
     }
     return 'Not detected';
   };
+  const stableOperatorCache = useRef<Record<string, string>>({});
+  const resolveStableOperatorLabel = useCallback(
+    (device: Device) => {
+      if (device.airplane_mode) {
+        return 'Unknown';
+      }
+      const current = resolveOperatorLabel(device);
+      if (current && current !== 'Unknown' && current !== 'Not detected') {
+        stableOperatorCache.current[device.id] = current;
+        return current;
+      }
+      const cached = stableOperatorCache.current[device.id];
+      return cached ?? current;
+    },
+    [resolveOperatorLabel]
+  );
 
   const resolveSimSlotLines = (device: Device): string[] | null => {
     if (!device.sim_slots || device.sim_slots.length === 0) {
@@ -2329,7 +2345,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                                     color: '#0F172A'
                                   }}
                                 >
-                                  {resolveOperatorLabel(device)}
+                                  {resolveStableOperatorLabel(device)}
                                 </Typography>
                               )}
                               <Chip
@@ -2844,7 +2860,7 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
               <Box>
                 <Typography sx={{ fontSize: '14px', color: '#6B7280', mb: 1 }}>Network Operator</Typography>
                 <Typography sx={{ fontSize: '16px', fontWeight: 600, color: '#0F172A', mb: 2 }}>
-                  {resolveOperatorLabel(selectedDeviceDetails)}
+                  {resolveStableOperatorLabel(selectedDeviceDetails)}
                 </Typography>
               </Box>
               <Box>
