@@ -76,7 +76,7 @@ class DeviceManager:
                 updated_devices = []
                 
                 for device_id in connected_device_ids:
-                    device_info = await adb_manager.get_device_info(device_id)
+                    device_info = await adb_manager.get_device_info(device_id, force_refresh=True)
                     
                     # Find existing device or create new one
                     device = db.query(Device).filter(Device.id == device_id).first()
@@ -87,6 +87,15 @@ class DeviceManager:
                         device.model = device_info.get('model', device.model)
                         device.os_version = device_info.get('os_version', device.os_version)
                         device.update_status(DeviceStatus.CONNECTED)
+                        sim_present = device_info.get('sim_present')
+                        if sim_present is False:
+                            device.sim_info = {}
+                        elif 'mcc' in device_info and 'mnc' in device_info:
+                            device.sim_info = {
+                                'mcc': device_info['mcc'],
+                                'mnc': device_info['mnc'],
+                                'carrier': device_info.get('carrier', 'Unknown')
+                            }
                         capabilities = device.capabilities or {}
                         capabilities.update({
                             "battery_level": device_info.get('battery_level'),
@@ -114,7 +123,10 @@ class DeviceManager:
                         )
                         
                         # Add SIM info if available
-                        if 'mcc' in device_info and 'mnc' in device_info:
+                        sim_present = device_info.get('sim_present')
+                        if sim_present is False:
+                            device.sim_info = {}
+                        elif 'mcc' in device_info and 'mnc' in device_info:
                             device.sim_info = {
                                 'mcc': device_info['mcc'],
                                 'mnc': device_info['mnc'],
@@ -189,7 +201,7 @@ class DeviceManager:
         """Get all devices from database."""
         db = next(get_db())
         try:
-            devices = db.query(Device).all()
+            devices = db.query(Device).order_by(Device.last_seen.desc(), Device.id.asc()).all()
             return [device.to_dict() for device in devices]
         finally:
             db.close()
@@ -207,7 +219,12 @@ class DeviceManager:
         """Get only connected devices."""
         db = next(get_db())
         try:
-            devices = db.query(Device).filter(Device.status == DeviceStatus.CONNECTED).all()
+            devices = (
+                db.query(Device)
+                .filter(Device.status == DeviceStatus.CONNECTED)
+                .order_by(Device.last_seen.desc(), Device.id.asc())
+                .all()
+            )
             return [device.to_dict() for device in devices]
         finally:
             db.close()

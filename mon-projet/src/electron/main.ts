@@ -33,6 +33,42 @@ let backendManagedExternally = false;
 
 const isDev = process.env.NODE_ENV === 'development';
 
+const safeLog = (level: 'log' | 'warn' | 'error', message: string, meta?: unknown): void => {
+  try {
+    if (meta !== undefined) {
+      console[level](message, meta);
+    } else {
+      console[level](message);
+    }
+  } catch (error) {
+    const err = error as NodeJS.ErrnoException;
+    const code = err?.code;
+    const messageText = err?.message || '';
+    if (code !== 'EPIPE' && !messageText.includes('EPIPE')) {
+      throw error;
+    }
+  }
+};
+
+const guardStdIo = (): void => {
+  const guard = (stream?: NodeJS.WriteStream) => {
+    if (!stream) {
+      return;
+    }
+    stream.on('error', (error: NodeJS.ErrnoException) => {
+      const messageText = error?.message || '';
+      if (error?.code === 'EPIPE' || messageText.includes('EPIPE')) {
+        return;
+      }
+      throw error;
+    });
+  };
+  guard(process.stdout);
+  guard(process.stderr);
+};
+
+guardStdIo();
+
 function createWindow(): void {
   const windowOptions: BrowserWindowConstructorOptions = {
     height: 900,
@@ -55,23 +91,23 @@ function createWindow(): void {
   mainWindow = new BrowserWindow(windowOptions);
 
   mainWindow.webContents.on('console-message', (_event, level, message, line, sourceId) => {
-    console.log(`[renderer][level=${level}] ${message} (${sourceId}:${line})`);
+    safeLog('log', `[renderer][level=${level}] ${message} (${sourceId}:${line})`);
   });
 
   mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL) => {
-    console.error(`[electron] Failed to load ${validatedURL}: ${errorDescription} (${errorCode})`);
+    safeLog('error', `[electron] Failed to load ${validatedURL}: ${errorDescription} (${errorCode})`);
   });
 
   mainWindow.webContents.on('did-finish-load', () => {
-    console.log('[electron] Renderer finished loading');
+    safeLog('log', '[electron] Renderer finished loading');
   });
 
   mainWindow.webContents.on('render-process-gone', (_event, details) => {
-    console.error('[electron] Renderer process gone:', details);
+    safeLog('error', '[electron] Renderer process gone:', details);
   });
 
   mainWindow.webContents.on('unresponsive', () => {
-    console.error('[electron] Renderer became unresponsive');
+    safeLog('error', '[electron] Renderer became unresponsive');
   });
 
   if (isDev) {
@@ -82,7 +118,7 @@ function createWindow(): void {
       ? path.join(process.resourcesPath, 'frontend', 'build', 'index.html')
       : path.resolve(__dirname, '..', '..', 'frontend', 'build', 'index.html');
     if (!fs.existsSync(rendererEntry)) {
-      console.error(`[electron] Renderer entry not found at ${rendererEntry}`);
+      safeLog('error', `[electron] Renderer entry not found at ${rendererEntry}`);
     }
     mainWindow.loadFile(rendererEntry);
   }
@@ -116,7 +152,7 @@ function startBackendServer(): Promise<void> {
 
     if (process.env.SKIP_BACKEND && process.env.SKIP_BACKEND !== '0' && process.env.SKIP_BACKEND.toLowerCase() !== 'false') {
       backendManagedExternally = true;
-      console.log(`[electron] SKIP_BACKEND set. Assuming backend already running at http://${RENDER_HOST}:${BACKEND_PORT}`);
+      safeLog('log', `[electron] SKIP_BACKEND set. Assuming backend already running at http://${RENDER_HOST}:${BACKEND_PORT}`);
       markReady();
       return;
     }
@@ -124,7 +160,7 @@ function startBackendServer(): Promise<void> {
     const alreadyRunning = await checkBackendAlreadyRunning(RENDER_HOST, BACKEND_PORT);
     if (alreadyRunning) {
       backendManagedExternally = true;
-      console.log(`[electron] Backend already running at http://${RENDER_HOST}:${BACKEND_PORT}, skipping spawn.`);
+      safeLog('log', `[electron] Backend already running at http://${RENDER_HOST}:${BACKEND_PORT}, skipping spawn.`);
       markReady();
       return;
     }
@@ -140,12 +176,12 @@ function startBackendServer(): Promise<void> {
     });
 
     if (!fs.existsSync(backend.cwd)) {
-      console.error('Backend path not found:', backend.cwd);
+      safeLog('error', 'Backend path not found:', backend.cwd);
       reject(new Error(`Backend path not found: ${backend.cwd}`));
       return;
     }
 
-    console.log('[electron] Starting backend:', backend.executable, backend.args.join(' '), 'cwd:', backend.cwd);
+    safeLog('log', `[electron] Starting backend: ${backend.executable} ${backend.args.join(' ')} cwd: ${backend.cwd}`);
 
     backendProcess = spawn(backend.executable, backend.args, {
       cwd: backend.cwd,
@@ -157,7 +193,7 @@ function startBackendServer(): Promise<void> {
 
     backendProcess.stdout?.on('data', (data) => {
       const text = data.toString();
-      console.log(`Backend: ${text}`);
+      safeLog('log', `Backend: ${text}`);
       if (readyPattern.test(text)) {
         markReady();
       }
@@ -165,19 +201,19 @@ function startBackendServer(): Promise<void> {
 
     backendProcess.stderr?.on('data', (data) => {
       const text = data.toString();
-      console.error(`Backend Error: ${text}`);
+      safeLog('error', `Backend Error: ${text}`);
       if (readyPattern.test(text)) {
         markReady();
       }
     });
 
     backendProcess.on('error', (error) => {
-      console.error('Failed to start backend:', error);
+      safeLog('error', 'Failed to start backend:', error);
       reject(error);
     });
 
     backendProcess.on('close', (code) => {
-      console.log(`Backend process exited with code ${code}`);
+      safeLog('log', `Backend process exited with code ${code}`);
       backendProcess = null;
     });
 
@@ -193,7 +229,7 @@ function startBackendServer(): Promise<void> {
     }, 1000);
 
     readyTimeout = setTimeout(() => {
-      console.warn('[electron] Backend readiness timeout reached; continuing startup.');
+      safeLog('warn', '[electron] Backend readiness timeout reached; continuing startup.');
       markReady();
     }, 15000);
   });
@@ -222,7 +258,7 @@ app.whenReady().then(async () => {
       }
     });
   } catch (error) {
-    console.error('Failed to start application:', error);
+    safeLog('error', 'Failed to start application:', error);
     app.quit();
   }
 });
@@ -252,5 +288,5 @@ ipcMain.handle('restart-backend', async () => {
 ipcMain.on('telemetry-event', (_event, data: { name?: string; payload?: Record<string, unknown> }) => {
   const name = data?.name ?? 'unknown';
   const payload = data?.payload ?? {};
-  console.log('[telemetry]', name, payload);
+  safeLog('log', `[telemetry] ${name}`, payload);
 });

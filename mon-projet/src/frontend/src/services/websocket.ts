@@ -55,6 +55,15 @@ class WebSocketService {
   private listeners: Map<string, Set<(data: any) => void>> = new Map();
   private connectionListeners: Set<(state: 'connected' | 'disconnected') => void> = new Set();
   private pendingDeviceSubscriptions: Set<string> = new Set();
+  private devicesReconnectTimer: number | null = null;
+  private executionReconnectTimer: number | null = null;
+  private devicesReconnectAttempts = 0;
+  private executionReconnectAttempts = 0;
+  private shouldReconnectDevices = true;
+  private shouldReconnectExecution = true;
+  private devicesConnectionRefs = 0;
+  private devicesHeartbeatTimer: number | null = null;
+  private readonly heartbeatIntervalMs = 15000;
 
   private toWs(baseHttpUrl: string): string {
     return baseHttpUrl.replace(/^http/, 'ws');
@@ -66,12 +75,21 @@ class WebSocketService {
       return;
     }
     this.backendUrl = backendUrl;
+    this.shouldReconnectExecution = true;
     const wsUrl = `${this.toWs(backendUrl)}/api/v1/ws/executions/${executionId}`;
     if (this.executionSocket && this.executionSocket.readyState <= 1) return;
 
     this.executionSocket = new WebSocket(wsUrl);
-    this.executionSocket.onopen = () => { console.log('WS (execution) connected'); this.notifyConnection(); };
-    this.executionSocket.onclose = () => { console.log('WS (execution) disconnected'); this.notifyConnection(); };
+    this.executionSocket.onopen = () => {
+      console.log('WS (execution) connected');
+      this.executionReconnectAttempts = 0;
+      this.notifyConnection();
+    };
+    this.executionSocket.onclose = () => {
+      console.log('WS (execution) disconnected');
+      this.notifyConnection();
+      this.scheduleExecutionReconnect(executionId);
+    };
     this.executionSocket.onerror = (e) => console.error('WS (execution) error:', e);
     this.executionSocket.onmessage = (ev: MessageEvent) => {
       try {
@@ -84,6 +102,11 @@ class WebSocketService {
   }
 
   disconnectExecution(): void {
+    this.shouldReconnectExecution = false;
+    if (this.executionReconnectTimer !== null) {
+      window.clearTimeout(this.executionReconnectTimer);
+      this.executionReconnectTimer = null;
+    }
     if (this.executionSocket) {
       this.executionSocket.close();
       this.executionSocket = null;
@@ -97,19 +120,27 @@ class WebSocketService {
       return;
     }
     this.backendUrl = backendUrl;
+    this.shouldReconnectDevices = true;
     const wsUrl = `${this.toWs(backendUrl)}/api/v1/ws/devices`;
     if (this.devicesSocket && this.devicesSocket.readyState <= 1) return;
 
     this.devicesSocket = new WebSocket(wsUrl);
     this.devicesSocket.onopen = () => {
       console.log('WS (devices) connected');
+      this.devicesReconnectAttempts = 0;
       this.notifyConnection();
+      this.startDevicesHeartbeat();
       // Flush pending subscriptions when the socket becomes available
       this.pendingDeviceSubscriptions.forEach((deviceId) => {
         this.sendDeviceSubscription('subscribe_device', deviceId);
       });
     };
-    this.devicesSocket.onclose = () => { console.log('WS (devices) disconnected'); this.notifyConnection(); };
+    this.devicesSocket.onclose = () => {
+      console.log('WS (devices) disconnected');
+      this.notifyConnection();
+      this.stopDevicesHeartbeat();
+      this.scheduleDevicesReconnect();
+    };
     this.devicesSocket.onerror = (e) => console.error('WS (devices) error:', e);
     this.devicesSocket.onmessage = (ev: MessageEvent) => {
       try {
@@ -128,7 +159,25 @@ class WebSocketService {
     };
   }
 
+  acquireDevicesConnection(backendUrl: string): void {
+    this.devicesConnectionRefs += 1;
+    this.connectDevices(backendUrl);
+  }
+
+  releaseDevicesConnection(): void {
+    this.devicesConnectionRefs = Math.max(0, this.devicesConnectionRefs - 1);
+    if (this.devicesConnectionRefs === 0) {
+      this.disconnectDevices();
+    }
+  }
+
   disconnectDevices(): void {
+    this.shouldReconnectDevices = false;
+    if (this.devicesReconnectTimer !== null) {
+      window.clearTimeout(this.devicesReconnectTimer);
+      this.devicesReconnectTimer = null;
+    }
+    this.stopDevicesHeartbeat();
     if (this.devicesSocket) {
       this.devicesSocket.close();
       this.devicesSocket = null;
@@ -218,6 +267,22 @@ class WebSocketService {
     }
   }
 
+  private startDevicesHeartbeat(): void {
+    this.stopDevicesHeartbeat();
+    this.devicesHeartbeatTimer = window.setInterval(() => {
+      if (this.devicesSocket && this.devicesSocket.readyState === this.devicesSocket.OPEN) {
+        this.devicesSocket.send(JSON.stringify({ type: 'ping' }));
+      }
+    }, this.heartbeatIntervalMs);
+  }
+
+  private stopDevicesHeartbeat(): void {
+    if (this.devicesHeartbeatTimer !== null) {
+      window.clearInterval(this.devicesHeartbeatTimer);
+      this.devicesHeartbeatTimer = null;
+    }
+  }
+
   startLivePreview(deviceId: string, quality: 'low' | 'medium' | 'high' = 'medium'): void {
     if (this.devicesSocket && this.devicesSocket.readyState === this.devicesSocket.OPEN) {
       this.devicesSocket.send(JSON.stringify({ type: 'start_preview', device_id: deviceId, quality }));
@@ -254,6 +319,36 @@ class WebSocketService {
   private notifyConnection(): void {
     const state = (this.getConnectionState() as 'connected' | 'disconnected');
     this.connectionListeners.forEach(cb => cb(state));
+  }
+
+  private scheduleDevicesReconnect(): void {
+    if (!this.shouldReconnectDevices || !this.backendUrl) {
+      return;
+    }
+    if (this.devicesReconnectTimer !== null) {
+      return;
+    }
+    const delay = Math.min(10000, 500 * Math.pow(2, this.devicesReconnectAttempts));
+    this.devicesReconnectAttempts += 1;
+    this.devicesReconnectTimer = window.setTimeout(() => {
+      this.devicesReconnectTimer = null;
+      this.connectDevices(this.backendUrl);
+    }, delay);
+  }
+
+  private scheduleExecutionReconnect(executionId: string): void {
+    if (!this.shouldReconnectExecution || !this.backendUrl) {
+      return;
+    }
+    if (this.executionReconnectTimer !== null) {
+      return;
+    }
+    const delay = Math.min(10000, 500 * Math.pow(2, this.executionReconnectAttempts));
+    this.executionReconnectAttempts += 1;
+    this.executionReconnectTimer = window.setTimeout(() => {
+      this.executionReconnectTimer = null;
+      this.connectExecution(this.backendUrl, executionId);
+    }, delay);
   }
 }
 

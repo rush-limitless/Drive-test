@@ -71,14 +71,6 @@ type WorkflowEditorData = {
   tags: string[];
 };
 
-type WorkflowTemplate = {
-  id: string;
-  name: string;
-  description: string;
-  moduleIds: string[];
-  tags: string[];
-};
-
 type WorkflowExecutionDeviceResult = {
   deviceId: string;
   success: boolean;
@@ -154,37 +146,6 @@ const convertDurationToSeconds = (value: number, unit: DurationUnit): number => 
   const normalizedValue = Number.isFinite(value) ? Math.max(0, Math.trunc(value)) : 0;
   return normalizedValue * REPEAT_UNIT_TO_SECONDS[unit];
 };
-
-const WORKFLOW_TEMPLATES: WorkflowTemplate[] = [
-  {
-    id: 'smoke_test',
-    name: 'Smoke Test',
-    description: 'Quick validation of data connectivity and app launch.',
-    moduleIds: ['ping', 'activate_data', 'launch_app'],
-    tags: ['smoke', 'baseline'],
-  },
-  {
-    id: 'network_recovery',
-    name: 'Network Recovery',
-    description: 'Toggle airplane mode and verify connectivity recovery.',
-    moduleIds: ['enable_airplane_mode', 'disable_airplane_mode', 'ping'],
-    tags: ['network', 'recovery'],
-  },
-  {
-    id: 'log_collection',
-    name: 'Log Collection',
-    description: 'Collect device and RF logs for triage.',
-    moduleIds: ['pull_device_logs', 'pull_rf_logs'],
-    tags: ['logs'],
-  },
-  {
-    id: 'rf_logging',
-    name: 'RF Logging Session',
-    description: 'Start RF logging, run a check, then pull logs.',
-    moduleIds: ['start_rf_logging', 'ping', 'stop_rf_logging', 'pull_rf_logs'],
-    tags: ['rf', 'logs'],
-  },
-];
 
 
 type StoredCallTestValues = CallTestValues;
@@ -470,6 +431,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
   const [workflowRepeatSettings, setWorkflowRepeatSettings] = useState<Record<string, RepeatDurationSettings>>({});
   const [workflowCancelRequests, setWorkflowCancelRequests] = useState<Record<string, boolean>>({});
   const workflowCancelControllers = useRef<Record<string, AbortController>>({});
+  const workflowActiveModuleStatusIds = useRef<Record<string, string[]>>({});
   const [serverSchedules, setServerSchedules] = useState<BackendWorkflowSchedule[]>([]);
   const [scheduleFetchError, setScheduleFetchError] = useState<string | null>(null);
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
@@ -484,7 +446,6 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
   const [workflowTagFilter, setWorkflowTagFilter] = useState<string>('all');
   const [exportMenuAnchor, setExportMenuAnchor] = useState<HTMLElement | null>(null);
   const [exportMenuWorkflow, setExportMenuWorkflow] = useState<StoredWorkflow | null>(null);
-  const [templateMenuAnchor, setTemplateMenuAnchor] = useState<HTMLElement | null>(null);
   const moduleCatalogMap = useMemo(() => new Map(MODULE_CATALOG.map((m) => [m.id, m])), []);
   const normalizedBackendUrl = useMemo(() => (backendUrl ? backendUrl.replace(/\/$/, '') : ''), [backendUrl]);
   const userTimeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone || 'local', []);
@@ -516,39 +477,6 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
     return ['all', ...Array.from(tagSet).sort((a, b) => a.localeCompare(b))];
   }, [workflows]);
 
-  const openTemplateMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setTemplateMenuAnchor(event.currentTarget);
-  };
-
-  const closeTemplateMenu = () => {
-    setTemplateMenuAnchor(null);
-  };
-
-  const handleCreateFromTemplate = useCallback(
-    (template: WorkflowTemplate) => {
-      const modules = template.moduleIds
-        .map((moduleId) => moduleCatalogMap.get(moduleId))
-        .filter((module): module is ModuleMetadata => Boolean(module))
-        .map((module) => cloneModuleForWorkflow(module));
-      if (modules.length === 0) {
-        setSnackbar({ severity: 'error', message: 'Template modules not available in this build.' });
-        closeTemplateMenu();
-        return;
-      }
-      addStoredWorkflow({
-        name: template.name,
-        description: template.description,
-        modules,
-        runCount: 0,
-        lastRunAt: null,
-        tags: template.tags,
-      });
-      setWorkflows(getStoredWorkflows());
-      setSnackbar({ severity: 'success', message: `Workflow "${template.name}" created.` });
-      closeTemplateMenu();
-    },
-    [moduleCatalogMap]
-  );
 
   const handleCloneWorkflow = useCallback(
     (workflow: StoredWorkflow) => {
@@ -680,6 +608,64 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
     [workflowCancelRequests]
   );
 
+  const cancelActiveModuleRuns = useCallback(
+    async (workflowId: string) => {
+      if (!normalizedBackendUrl) {
+        return;
+      }
+      const workflow = workflows.find((item) => item.id === workflowId);
+      const activeIndex = workflowActiveModuleIndex[workflowId];
+      if (!workflow || activeIndex === null || activeIndex === undefined) {
+        return;
+      }
+      const activeModule = workflow.modules[activeIndex];
+      if (!activeModule) {
+        return;
+      }
+      const apiModuleId = resolveModuleExecutionId(activeModule.id);
+      if (!apiModuleId) {
+        return;
+      }
+
+      let statusIds = workflowActiveModuleStatusIds.current[workflowId] || [];
+      if (statusIds.length === 0) {
+        try {
+          const response = await fetchWithRetry(
+            `${normalizedBackendUrl}/api/modules/status?module_id=${encodeURIComponent(apiModuleId)}`
+          );
+          if (response.ok) {
+            const payload = await response.json();
+            if (payload?.status_id && payload?.state === 'running') {
+              statusIds = [payload.status_id];
+              workflowActiveModuleStatusIds.current[workflowId] = statusIds;
+            }
+          }
+        } catch {
+          return;
+        }
+      }
+
+      await Promise.all(
+        statusIds.map(async (statusId) => {
+          try {
+            await fetchWithRetry(
+              `${normalizedBackendUrl}/api/modules/${apiModuleId}/cancel`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status_id: statusId }),
+              },
+              { retries: 1, backoffMs: 400, retryOn: [408, 429, 500, 502, 503, 504] }
+            );
+          } catch {
+            // ignore best-effort cancellation failures
+          }
+        })
+      );
+    },
+    [normalizedBackendUrl, workflowActiveModuleIndex, workflows]
+  );
+
   const handleStopWorkflow = useCallback((workflowId: string) => {
     markWorkflowCancelled(workflowId);
     setWorkflowPaused(workflowId, false);
@@ -687,7 +673,8 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
     if (controller) {
       controller.abort();
     }
-  }, [markWorkflowCancelled, setWorkflowPaused]);
+    void cancelActiveModuleRuns(workflowId);
+  }, [cancelActiveModuleRuns, markWorkflowCancelled, setWorkflowPaused]);
 
   const sortedModuleCatalog = useMemo(
     () => [...MODULE_CATALOG].sort((a, b) => a.name.localeCompare(b.name)),
@@ -1231,6 +1218,16 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
       runIteration: number,
       abortSignal?: AbortSignal
     ) => {
+      const recordStatusId = (statusId?: string) => {
+        if (!statusId) {
+          return;
+        }
+        const existing = workflowActiveModuleStatusIds.current[workflow.id] || [];
+        if (!existing.includes(statusId)) {
+          workflowActiveModuleStatusIds.current[workflow.id] = [...existing, statusId];
+        }
+      };
+
       if (isWaitingModule(module)) {
         const waitSeconds = sanitizeWaitDurationSeconds(module.waitDurationSeconds);
         if (waitSeconds > 0) {
@@ -1299,6 +1296,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
               }
 
               const data = await response.json();
+              recordStatusId(data?.status_id);
               const deviceResults = data?.result?.device_results;
               if (Array.isArray(deviceResults)) {
                 return deviceResults.map((entry: any) => ({
@@ -1369,6 +1367,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
           }
         } else {
           const data = await response.json();
+          recordStatusId(data?.status_id);
           const deviceResults = data?.result?.device_results;
           if (Array.isArray(deviceResults)) {
             results = [
@@ -1671,6 +1670,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
             break;
           }
           setWorkflowActiveModuleIndex((prev) => ({ ...prev, [workflow.id]: index }));
+          workflowActiveModuleStatusIds.current[workflow.id] = [];
           setWorkflowRunStatus((prev) => ({
             ...prev,
             [workflow.id]: `${runLabel}: running "${module.name}" on ${deviceIds.length} device${deviceIds.length === 1 ? '' : 's'}...`,
@@ -1837,6 +1837,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
       await sleep(1200);
     } finally {
       clearWorkflowCancellation(workflow.id);
+      delete workflowActiveModuleStatusIds.current[workflow.id];
       setWorkflowPauseRequests((prev) => {
         const next = { ...prev };
         delete next[workflow.id];
@@ -1994,37 +1995,8 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
           >
             New Workflow
           </Button>
-          <Button
-            variant="outlined"
-            startIcon={<ChevronDown size={18} />}
-            onClick={openTemplateMenu}
-            sx={{
-              height: 40,
-              borderRadius: '10px',
-              textTransform: 'none',
-              fontWeight: 600,
-            }}
-          >
-            Templates
-          </Button>
         </Box>
       </Box>
-      <Menu
-        anchorEl={templateMenuAnchor}
-        open={Boolean(templateMenuAnchor)}
-        onClose={closeTemplateMenu}
-      >
-        {WORKFLOW_TEMPLATES.map((template) => (
-          <MenuItem key={template.id} onClick={() => handleCreateFromTemplate(template)}>
-            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography sx={{ fontWeight: 600 }}>{template.name}</Typography>
-              <Typography variant="caption" sx={{ color: '#64748B' }}>
-                {template.description}
-              </Typography>
-            </Box>
-          </MenuItem>
-        ))}
-      </Menu>
 
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>

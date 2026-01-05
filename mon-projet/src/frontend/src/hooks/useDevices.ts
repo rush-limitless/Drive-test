@@ -25,8 +25,6 @@ export interface UseDevicesResult {
   applyDevicePatch: (deviceId: string, patch: Partial<Device>) => void;
 }
 
-let deviceSocketRefs = 0;
-
 export const useDevices = (options: UseDevicesOptions = {}): UseDevicesResult => {
   const { backendUrl, scopeId, pollMs = 15000, autoRefresh = true } = options;
 
@@ -121,8 +119,7 @@ export const useDevices = (options: UseDevicesOptions = {}): UseDevicesResult =>
 
     const resolved = resolveBaseUrl(backendUrl);
     backendRef.current = resolved;
-    webSocketService.connectDevices(resolved);
-    deviceSocketRefs += 1;
+    webSocketService.acquireDevicesConnection(resolved);
 
     const unsubscribe = webSocketService.subscribeToDeviceUpdates((update: DeviceStatusUpdate) => {
       applyDevicePatch(update.device_id, {
@@ -133,10 +130,7 @@ export const useDevices = (options: UseDevicesOptions = {}): UseDevicesResult =>
 
     return () => {
       unsubscribe();
-      deviceSocketRefs = Math.max(0, deviceSocketRefs - 1);
-      if (deviceSocketRefs === 0) {
-        webSocketService.disconnectDevices();
-      }
+      webSocketService.releaseDevicesConnection();
     };
   }, [backendUrl, applyDevicePatch]);
 

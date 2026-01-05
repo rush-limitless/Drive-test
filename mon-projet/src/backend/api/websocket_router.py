@@ -81,6 +81,8 @@ async def handle_client_message(websocket: WebSocket, message: dict):
         if device_id:
             # TODO: Stop live preview
             logger.info(f"Stop preview requested for device {device_id}")
+    elif message_type == "ping":
+        return
             
     else:
         logger.warning(f"Unknown message type: {message_type}")

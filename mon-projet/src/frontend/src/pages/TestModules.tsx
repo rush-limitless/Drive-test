@@ -29,6 +29,7 @@ import {
 } from '@mui/material';
 import {
   Play,
+  StopCircle,
   Pencil,
   Timer,
   Search,
@@ -80,7 +81,7 @@ const PING_CONFIG_STORAGE_KEY = 'pingModuleConfig';
 const WORKFLOW_BUILDER_STORAGE_KEY = 'workflowBuilderDraft';
 const FAVORITES_STORAGE_KEY = 'moduleFavorites';
 const RECENTS_STORAGE_KEY = 'moduleRecents';
-const DEFAULT_BATCH_SIZE = 1;
+const DEFAULT_BATCH_SIZE = 50;
 const DEFAULT_DIAL_SECRET_CODE = '*#9900#';
 interface PingConfig {
   target: string;
@@ -284,6 +285,44 @@ const resolveApiKey = (): string | null => {
 const authHeaders = () => {
   const key = resolveApiKey();
   return key ? { 'X-API-Key': key } : {};
+};
+
+const parseDurationEstimateMs = (value?: string): number | null => {
+  if (!value) {
+    return null;
+  }
+  const trimmed = value.trim().toLowerCase();
+  if (!trimmed || trimmed.includes('varies')) {
+    return null;
+  }
+  const rangeMatch = trimmed.match(/(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)/);
+  const singleMatch = trimmed.match(/(\d+(?:\.\d+)?)/);
+  const toNumber = (match?: RegExpMatchArray | null, index = 1) =>
+    match ? Number.parseFloat(match[index]) : Number.NaN;
+  const unit = trimmed.includes('hour') || trimmed.includes('hr') ? 'h' : trimmed.includes('min') ? 'm' : 's';
+  let valueSeconds: number | null = null;
+  if (rangeMatch) {
+    const low = toNumber(rangeMatch, 1);
+    const high = toNumber(rangeMatch, 2);
+    if (Number.isFinite(low) && Number.isFinite(high)) {
+      valueSeconds = (low + high) / 2;
+    }
+  } else if (singleMatch) {
+    const single = toNumber(singleMatch, 1);
+    if (Number.isFinite(single)) {
+      valueSeconds = single;
+    }
+  }
+  if (!valueSeconds) {
+    return null;
+  }
+  if (unit === 'h') {
+    return valueSeconds * 60 * 60 * 1000;
+  }
+  if (unit === 'm') {
+    return valueSeconds * 60 * 1000;
+  }
+  return valueSeconds * 1000;
 };
 
 const createWorkflowInstance = (module: ModuleMetadata): WorkflowModuleInstance => ({
@@ -843,9 +882,11 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
   const [moduleRunStatuses, setModuleRunStatuses] = useState<Record<string, 'idle' | 'running'>>({});
   const [moduleStatusEnabled, setModuleStatusEnabled] = useState<Record<string, boolean>>({});
   const [moduleRunProgress, setModuleRunProgress] = useState<Record<string, number>>({});
+  const [moduleStatusIds, setModuleStatusIds] = useState<Record<string, string>>({});
   const [moduleStatusEntries, setModuleStatusEntries] = useState<
     Record<string, ModuleStatusEntry>
   >({});
+  const moduleProgressMeta = useRef<Record<string, { startedAt: number; expectedMs: number | null }>>({});
   const [deviceNotifications, setDeviceNotifications] = useState<DeviceNotification[]>([]);
   const executionSockets = useRef<Record<string, WebSocket | null>>({});
   const { devices: discoveredDevices, status: devicesStatus } = useDevices({ backendUrl });
@@ -1409,25 +1450,59 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
   );
   const runningModulesKey = runningModuleIds.join(',');
 
-  const startProgress = useCallback((moduleId: string) => {
-    setModuleRunProgress((prev) => ({ ...prev, [moduleId]: 0 }));
-    if (progressIntervals.current[moduleId]) {
-      window.clearInterval(progressIntervals.current[moduleId]);
-    }
-    progressIntervals.current[moduleId] = window.setInterval(() => {
-      setModuleRunProgress((prev) => {
-        const current = prev[moduleId] ?? 0;
-        const nextValue = Math.min(95, current + 5);
-        return { ...prev, [moduleId]: nextValue };
-      });
-    }, 500);
-  }, []);
+  const estimateModuleDurationMs = useCallback(
+    (module: ModuleMetadata): number | null => {
+      if (module.id === 'ping') {
+        return Math.max(1, Math.round(pingConfig.duration)) * 1000;
+      }
+      if (module.id === 'waiting_time') {
+        const waitSeconds = module.waitDurationSeconds ?? WAITING_TIME_DEFAULT_DURATION;
+        return Math.max(1, Math.round(waitSeconds)) * 1000;
+      }
+      return parseDurationEstimateMs(
+        module.avg_duration ||
+          module.duration_estimate ||
+          module.durationEstimate ||
+          module.avgDuration
+      );
+    },
+    [pingConfig.duration]
+  );
+
+  const startProgress = useCallback(
+    (module: ModuleMetadata) => {
+      const moduleId = module.id;
+      const expectedMs = estimateModuleDurationMs(module);
+      moduleProgressMeta.current[moduleId] = { startedAt: Date.now(), expectedMs };
+      setModuleRunProgress((prev) => ({ ...prev, [moduleId]: 0 }));
+      if (progressIntervals.current[moduleId]) {
+        window.clearInterval(progressIntervals.current[moduleId]);
+      }
+      progressIntervals.current[moduleId] = window.setInterval(() => {
+        setModuleRunProgress((prev) => {
+          const current = prev[moduleId] ?? 0;
+          const meta = moduleProgressMeta.current[moduleId];
+          let nextValue = current;
+          if (meta?.expectedMs) {
+            const elapsed = Date.now() - meta.startedAt;
+            const estimated = Math.min(99, Math.round((elapsed / meta.expectedMs) * 100));
+            nextValue = Math.max(current, estimated);
+          } else {
+            nextValue = Math.min(95, current + 5);
+          }
+          return { ...prev, [moduleId]: nextValue };
+        });
+      }, 500);
+    },
+    [estimateModuleDurationMs]
+  );
 
   const stopProgress = useCallback((moduleId: string) => {
     if (progressIntervals.current[moduleId]) {
       window.clearInterval(progressIntervals.current[moduleId]);
       delete progressIntervals.current[moduleId];
     }
+    delete moduleProgressMeta.current[moduleId];
     setModuleRunProgress((prev) => ({ ...prev, [moduleId]: 100 }));
     window.setTimeout(() => {
       setModuleRunProgress((prev) => {
@@ -1631,7 +1706,17 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
 
       setModuleRunStatuses((prev) => ({ ...prev, [module.id]: 'running' }));
       setModuleStatusEnabled((prev) => ({ ...prev, [module.id]: false }));
-      startProgress(module.id);
+      setModuleStatusIds((prev) => {
+        const next = { ...prev };
+        delete next[module.id];
+        return next;
+      });
+      setModuleStatusEntries((prev) => {
+        const next = { ...prev };
+        delete next[module.id];
+        return next;
+      });
+      startProgress(module);
       const runStartedAt = Date.now();
       try {
         console.log(
@@ -1700,6 +1785,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
             typeof data.status_id === 'string' && data.status_id ? data.status_id : undefined;
           if (statusIdFromServer) {
             statusIds.push(statusIdFromServer);
+            setModuleStatusIds((prev) => ({ ...prev, [module.id]: statusIdFromServer }));
           }
 
           const rawDeviceEntries: Record<string, any>[] = Array.isArray(data?.result?.device_results)
@@ -1734,6 +1820,9 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
               ...prev,
               [finalStatus.module_id]: finalStatus,
             }));
+            if (finalStatus.status_id) {
+              setModuleStatusIds((prev) => ({ ...prev, [finalStatus.module_id]: finalStatus.status_id }));
+            }
           }
         } else {
           setModuleStatusEnabled((prev) => ({ ...prev, [module.id]: false }));
@@ -1844,6 +1933,58 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
       appLauncherDuration,
       fetchModuleStatus,
     ]
+  );
+
+  const cancelModuleRun = useCallback(
+    async (module: ModuleMetadata) => {
+      if (!backendUrl) {
+        setSnackbar({ severity: 'error', message: 'Backend unavailable: no URL configured.' });
+        return;
+      }
+      let statusId = moduleStatusEntries[module.id]?.status_id || moduleStatusIds[module.id];
+      if (!statusId) {
+        const latestStatus = await fetchModuleStatus({ moduleId: module.id });
+        if (latestStatus?.status_id) {
+          statusId = latestStatus.status_id;
+          setModuleStatusEntries((prev) => ({ ...prev, [module.id]: latestStatus }));
+          setModuleStatusIds((prev) => ({ ...prev, [module.id]: latestStatus.status_id }));
+        }
+      }
+      if (!statusId) {
+        setSnackbar({
+          severity: 'error',
+          message: 'Unable to cancel yet: status not available. Please retry in a few seconds.',
+        });
+        return;
+      }
+      const normalizedBackendUrl = resolveBaseUrl(backendUrl);
+      try {
+        const response = await fetchWithRetry(
+          `${normalizedBackendUrl}/api/modules/${module.id}/cancel`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...authHeaders(),
+            },
+            body: JSON.stringify({ status_id: statusId }),
+          },
+          { retries: 1, backoffMs: 400, retryOn: [408, 429, 500, 502, 503, 504] }
+        );
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || `HTTP ${response.status}`);
+        }
+        setSnackbar({ severity: 'info', message: `${module.name} cancellation requested.` });
+      } catch (error) {
+        const detail = formatExecutionError(error);
+        setSnackbar({
+          severity: 'error',
+          message: `${module.name} cancellation failed. ${detail.message}`,
+        });
+      }
+    },
+    [backendUrl, fetchModuleStatus, moduleStatusEntries, moduleStatusIds]
   );
 
   const handleRun = (module: ModuleMetadata) => {
@@ -2608,29 +2749,6 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
             totalDevices > 0 && pendingDevices > 0
               ? `Running (${totalDevices - pendingDevices}/${totalDevices})`
               : 'Running';
-          const statusLabel =
-            moduleStatusEntry?.state === 'running'
-              ? runningLabel
-              : moduleStatusEntry?.success
-                ? 'Last run OK'
-                : 'Last run failed';
-          const statusColor =
-            moduleStatusEntry?.state === 'running'
-              ? 'info'
-              : moduleStatusEntry?.success
-                ? 'success'
-                : 'error';
-          const statusDescription = moduleStatusEntry?.summary ?? moduleStatusEntry?.stage_message;
-          const statusChip = moduleStatusEntry ? (
-            <Tooltip title={statusDescription ?? ''} disableHoverListener={!statusDescription}>
-              <Chip
-                label={statusLabel}
-                size="small"
-                color={statusColor as 'success' | 'error' | 'info'}
-                sx={{ fontWeight: 600 }}
-              />
-            </Tooltip>
-          ) : null;
           const moduleDurationLabel = module.duration_estimate ?? module.durationEstimate;
           const avgDurationLabel = module.avg_duration ?? module.avgDuration;
           const prerequisites = module.prerequisites ?? [];
@@ -2680,7 +2798,6 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
                         fontSize: '10px'
                       }}
                     />
-                    {statusChip && <Box mt={0.5}>{statusChip}</Box>}
                   </Box>
                   <Stack direction="row" spacing={1}>
                     <IconButton
@@ -2740,40 +2857,73 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
                     </Box>
                   )}
                   {(typeof moduleRunProgress[module.id] === 'number') && (
-                    <LinearProgress
-                      variant="determinate"
-                      value={moduleRunProgress[module.id]}
-                      sx={{ width: '100%', height: 6, borderRadius: 3, mt: 1 }}
-                    />
+                    <Box display="flex" alignItems="center" gap={1} sx={{ mt: 1 }}>
+                      <LinearProgress
+                        variant="determinate"
+                        value={moduleRunProgress[module.id]}
+                        sx={{ flex: 1, height: 6, borderRadius: 3 }}
+                      />
+                      <Typography
+                        variant="caption"
+                        sx={{ color: '#64748B', fontSize: '11px', minWidth: 32, textAlign: 'right' }}
+                      >
+                        {Math.min(100, Math.round(moduleRunProgress[module.id]))}%
+                      </Typography>
+                    </Box>
                   )}
                 </Box>
 
                 <Box display="flex" gap={2}>
-                  <Tooltip title={hasSelectedDevices ? 'Run module' : 'Select at least one device'}>
+                  <Tooltip title={hasSelectedDevices ? (moduleRunning ? 'Stop module' : 'Run module') : 'Select at least one device'}>
                     <span style={{ flex: 1 }}>
-                      <Button
-                        variant="contained"
-                        startIcon={<Play size={16} />}
-                        onClick={() => handleRun(module)}
-                        disabled={!hasSelectedDevices || moduleRunning}
-                        sx={{
-                          width: '100%',
-                          backgroundColor: runButtonBackground,
-                          borderRadius: '8px',
-                          height: 40,
-                          fontWeight: 600,
-                          textTransform: 'none',
-                          fontSize: '14px',
-                          '&:hover': {
-                            backgroundColor: runButtonHover
-                          },
-                          '&.Mui-disabled': {
-                            backgroundColor: '#94A3B8'
-                          }
-                        }}
-                      >
-                        {moduleRunning ? 'Running...' : 'Run'}
-                      </Button>
+                      {moduleRunning ? (
+                        <Button
+                          variant="outlined"
+                          startIcon={<StopCircle size={16} />}
+                          onClick={() => cancelModuleRun(module)}
+                          disabled={!hasSelectedDevices}
+                          sx={{
+                            width: '100%',
+                            borderRadius: '8px',
+                            height: 40,
+                            fontWeight: 600,
+                            textTransform: 'none',
+                            fontSize: '14px',
+                            borderColor: '#DC2626',
+                            color: '#DC2626',
+                            '&:hover': {
+                              borderColor: '#B91C1C',
+                              backgroundColor: 'rgba(220, 38, 38, 0.08)'
+                            }
+                          }}
+                        >
+                          Stop
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="contained"
+                          startIcon={<Play size={16} />}
+                          onClick={() => handleRun(module)}
+                          disabled={!hasSelectedDevices || moduleRunning}
+                          sx={{
+                            width: '100%',
+                            backgroundColor: runButtonBackground,
+                            borderRadius: '8px',
+                            height: 40,
+                            fontWeight: 600,
+                            textTransform: 'none',
+                            fontSize: '14px',
+                            '&:hover': {
+                              backgroundColor: runButtonHover
+                            },
+                            '&.Mui-disabled': {
+                              backgroundColor: '#94A3B8'
+                            }
+                          }}
+                        >
+                          Run
+                        </Button>
+                      )}
                     </span>
                   </Tooltip>
                   <Tooltip

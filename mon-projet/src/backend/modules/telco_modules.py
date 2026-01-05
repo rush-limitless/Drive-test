@@ -7,6 +7,7 @@ import subprocess
 import time
 import math
 import random
+import threading
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -1439,10 +1440,96 @@ class TelcoModules(ADBExecutor):
         }
 
     def pull_rf_logs(self, destination: str) -> Dict[str, Any]:
-        """Convenience wrapper for RF logs location (/sdcard/log)."""
-        result = self.pull_device_logs(destination)
-        result['module'] = 'pull_rf_logs'
-        return result
+        """Best-effort pull of RF/modem logs from device storage."""
+        normalized_destination = (destination or '').strip()
+        if not normalized_destination:
+            normalized_destination = './device_logs'
+        if os.name != 'nt' and re.match(r'^[A-Za-z]:', normalized_destination):
+            drive = normalized_destination[0].lower()
+            remainder = normalized_destination[2:].replace('\\', '/')
+            normalized_destination = f"/mnt/{drive}/{remainder.lstrip('/')}"
+        target_base = Path(normalized_destination).expanduser()
+        device_suffix = self.device_id or 'device'
+        target_dir = target_base / device_suffix
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        candidate_roots = [
+            "/sdcard/log",
+            "/sdcard/Log",
+            "/sdcard/LOG",
+            "/sdcard/CP_LOG",
+            "/sdcard/cp_log",
+            "/sdcard/diag_logs",
+            "/sdcard/diag_log",
+            "/sdcard/diag",
+            "/sdcard/diaglog",
+        ]
+        keyword_hints = ("cp", "modem", "rf", "radio", "diag")
+
+        sources: List[str] = []
+        fallback_root = None
+        for root in candidate_roots:
+            listing = self.execute_command([ADB_EXECUTABLE, 'shell', 'ls', '-1', root])
+            if not listing.success:
+                continue
+            entries = [line.strip() for line in listing.output.splitlines() if line.strip()]
+            if root.endswith(("_LOG", "_log")) or "diag" in root.lower():
+                sources.append(root)
+                continue
+            if entries:
+                lower_entries = {entry.lower(): entry for entry in entries}
+                cp_candidates = [
+                    lower_entries.get("cp"),
+                    lower_entries.get("cp_log"),
+                    lower_entries.get("cp-log"),
+                ]
+                cp_matches = [entry for entry in cp_candidates if entry]
+                if cp_matches:
+                    sources.extend(f"{root}/{entry}" for entry in cp_matches)
+                    continue
+                matched = [entry for entry in entries if any(key in entry.lower() for key in keyword_hints)]
+                if matched:
+                    sources.extend(f"{root}/{entry}" for entry in matched)
+                else:
+                    fallback_root = root
+            elif not fallback_root:
+                fallback_root = root
+
+        unique_sources = []
+        seen = set()
+        for source in sources:
+            if source not in seen:
+                seen.add(source)
+                unique_sources.append(source)
+
+        pulled: List[str] = []
+        errors: List[Dict[str, str]] = []
+        if unique_sources:
+            for source in unique_sources:
+                dest_path = target_dir / Path(source).name
+                res = self.execute_command([ADB_EXECUTABLE, 'pull', source, str(dest_path)], timeout=300)
+                if res.success:
+                    pulled.append(source)
+                else:
+                    errors.append({"source": source, "error": res.error or res.output})
+        elif fallback_root:
+            res = self.execute_command([ADB_EXECUTABLE, 'pull', fallback_root, str(target_dir)], timeout=300)
+            if res.success:
+                pulled.append(fallback_root)
+            else:
+                errors.append({"source": fallback_root, "error": res.error or res.output})
+        else:
+            errors.append({"source": "unknown", "error": "No RF log directories found on device."})
+
+        success = len(pulled) > 0
+        return {
+            'module': 'pull_rf_logs',
+            'destination': str(target_dir),
+            'success': success,
+            'pulled_paths': pulled,
+            'errors': errors,
+            'note': "Pulled RF/modem log folders when found; fallback may include general logs.",
+        }
 
     def run_custom_script(self, script: Optional[str]) -> Dict[str, Any]:
         """Execute custom ADB shell commands provided by the user (one per line)."""
@@ -2139,6 +2226,7 @@ class TelcoModules(ADBExecutor):
         *,
         module_name: Optional[str] = None,
         max_workers: Optional[int] = None,
+        cancel_event: Optional[threading.Event] = None,
     ) -> Dict[str, Any]:
         """Run the same worker callable concurrently on multiple devices."""
         targets = [device_id for device_id in device_ids if device_id]
@@ -2155,7 +2243,7 @@ class TelcoModules(ADBExecutor):
         pool_size = max_workers or len(targets)
         with ThreadPoolExecutor(max_workers=pool_size) as executor:
             future_to_device = {
-                executor.submit(cls._run_worker_for_device, worker, device_id): device_id
+                executor.submit(cls._run_worker_for_device, worker, device_id, cancel_event): device_id
                 for device_id in targets
             }
             for future in as_completed(future_to_device):
@@ -2189,8 +2277,11 @@ class TelcoModules(ADBExecutor):
     def _run_worker_for_device(
         worker: Callable[['TelcoModules'], Dict[str, Any]],
         device_id: str,
+        cancel_event: Optional[threading.Event] = None,
     ) -> Dict[str, Any]:
         """Invoke the worker with a dedicated TelcoModules instance for a device."""
+        if cancel_event and cancel_event.is_set():
+            return {'success': False, 'cancelled': True, 'error': 'Execution cancelled'}
         executor = TelcoModules(device_id)
         result = worker(executor)
         if not isinstance(result, dict):

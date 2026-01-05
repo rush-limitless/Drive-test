@@ -83,7 +83,6 @@ function DeviceManager({ backendUrl }: DeviceManagerProps) {
       setDevices(deviceList);
       refreshWorkflowCounts();
       // Subscribe to device updates for each device
-      webSocketService.connectDevices(backendUrl);
       deviceList.forEach(d => webSocketService.subscribeToDevice(d.id));
     } catch (err) {
       setError('Failed to load devices. Make sure ADB is running and devices are connected.');
@@ -208,9 +207,9 @@ function DeviceManager({ backendUrl }: DeviceManagerProps) {
     }
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) {
-      return value;
+      return `${value} UTC`;
     }
-    return parsed.toLocaleString();
+    return parsed.toLocaleString(undefined, { timeZoneName: 'short' });
   };
 
   const formatNetworkTechnology = (technology?: string | null) => {
@@ -262,6 +261,7 @@ function DeviceManager({ backendUrl }: DeviceManagerProps) {
       return;
     }
 
+    webSocketService.acquireDevicesConnection(backendUrl);
     void loadDevices();
     // Real-time device status updates
     const unsub = webSocketService.subscribeToDeviceUpdates((update) => {
@@ -284,7 +284,7 @@ function DeviceManager({ backendUrl }: DeviceManagerProps) {
 
     return () => {
       unsub();
-      webSocketService.disconnectDevices();
+      webSocketService.releaseDevicesConnection();
     };
   }, [backendUrl, loadDevices]);
 

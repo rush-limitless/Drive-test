@@ -295,6 +295,11 @@ const parseDisconnectedDevicesValue = (value: string | null): Set<string> => {
 };
 
 type AppMenuAction = 'about' | 'faq' | 'updates' | 'manual';
+const DEFAULT_VERSION_LABEL =
+  (import.meta as any).env?.VITE_APP_VERSION ||
+  (import.meta as any).env?.VITE_REACT_APP_APP_VERSION ||
+  (typeof process !== 'undefined' ? process.env.REACT_APP_APP_VERSION : undefined) ||
+  '';
 
 const buildLocalSearchResults = (
   query: string,
@@ -1010,13 +1015,34 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
   const activityPageEnd = Math.min(activityItems.length, activityPageStart + ACTIVITY_PAGE_SIZE);
   const activityPageCount = Math.max(0, activityPageEnd - activityPageStart);
 
+  const orderedDevices = useMemo(() => {
+    const statusRank = (status?: string) => {
+      const normalized = normalizeStatus(status);
+      if (connectedStatuses.includes(normalized)) return 0;
+      if (idleStatuses.includes(normalized)) return 1;
+      return 2;
+    };
+    return [...devices].sort((a, b) => {
+      const diff = statusRank(a.status) - statusRank(b.status);
+      if (diff !== 0) {
+        return diff;
+      }
+      const aTime = a.last_seen ? new Date(a.last_seen).getTime() : 0;
+      const bTime = b.last_seen ? new Date(b.last_seen).getTime() : 0;
+      if (aTime !== bTime) {
+        return bTime - aTime;
+      }
+      return a.id.localeCompare(b.id);
+    });
+  }, [devices]);
+
   const visibleDevices = useMemo(
     () =>
-      devices.filter((device) => {
+      orderedDevices.filter((device) => {
         const normalizedStatusValue = normalizeStatus(device.status);
         return connectedStatuses.includes(normalizedStatusValue) || idleStatuses.includes(normalizedStatusValue);
       }),
-    [devices]
+    [orderedDevices]
   );
 
   const setupCandidates = useMemo<Device[]>(() => [], []);
@@ -1074,6 +1100,11 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
       return nextIds;
     });
   };
+  const handleClearSelection = () => {
+    autoSelectDisabledRef.current = true;
+    writeAutoSelectDisabled(true);
+    updateSelectedDeviceIds(() => []);
+  };
 
   const formatRelativeTime = (value?: string | number | Date | null): string => {
     if (!value) {
@@ -1115,13 +1146,9 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
     if (fromHealth) {
       return fromHealth;
     }
-    const envVersion =
-      (import.meta as any).env?.VITE_APP_VERSION ||
-      (import.meta as any).env?.VITE_REACT_APP_APP_VERSION ||
-      (typeof process !== 'undefined' ? process.env.REACT_APP_APP_VERSION : undefined);
-    return typeof envVersion === 'string' && envVersion.trim() ? envVersion.trim() : null;
+    return DEFAULT_VERSION_LABEL || null;
   }, [healthSnapshot?.version]);
-  const versionLabel = appVersion ? `v${appVersion}` : 'v1.0';
+  const versionLabel = appVersion ? `v${appVersion}` : 'development build';
   const activityUpdatedLabel = activityLastUpdated
     ? `Updated ${formatRelativeTime(activityLastUpdated)}`
     : 'Not updated yet';
@@ -1360,20 +1387,20 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
       return 'Unknown';
     }
     if (normalized.toLowerCase() === 'now') {
-      return new Date().toLocaleString();
+      return new Date().toLocaleString(undefined, { timeZoneName: 'short' });
     }
     const parsed = new Date(normalized);
     if (!Number.isNaN(parsed.getTime())) {
-      return parsed.toLocaleString();
+      return parsed.toLocaleString(undefined, { timeZoneName: 'short' });
     }
     const numeric = Number(normalized);
     if (Number.isFinite(numeric)) {
       const numericDate = new Date(numeric);
       if (!Number.isNaN(numericDate.getTime())) {
-        return numericDate.toLocaleString();
+        return numericDate.toLocaleString(undefined, { timeZoneName: 'short' });
       }
     }
-    return 'Unknown';
+    return `${normalized} UTC`;
   };
 
   const parseBatteryLevel = (value: Device['battery_level']): number | null => {
@@ -1533,20 +1560,70 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
         height: '100vh'
       }}>
         {/* Brand */}
-        <Box sx={{ mb: 4, pb: 2, borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
-          <Typography variant="h6" sx={{ 
-            color: 'rgba(255, 255, 255, 0.9)', 
-            fontWeight: 700,
-            fontSize: '18px',
-            lineHeight: '26px'
-          }}>
-            MOBIQ
-          </Typography>
-          <Typography variant="body2" sx={{ 
-            color: 'rgba(255, 255, 255, 0.7)',
-            fontSize: '12px',
-            lineHeight: '18px'
-          }}>
+        <Box
+          sx={{
+            mb: 4,
+            pb: 2.5,
+            borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #0EA5E9 0%, #22D3EE 100%)',
+                boxShadow: '0 10px 18px rgba(14, 165, 233, 0.3)',
+                display: 'grid',
+                placeItems: 'center',
+              }}
+            >
+              <Box
+                sx={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: '6px',
+                  border: '2px solid rgba(255, 255, 255, 0.85)',
+                  boxShadow: '0 0 10px rgba(255, 255, 255, 0.35)',
+                }}
+              />
+            </Box>
+            <Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 800,
+                  fontSize: '18px',
+                  lineHeight: '22px',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: '#F8FAFC',
+                }}
+              >
+                MOBIQ
+              </Typography>
+              <Box
+                sx={{
+                  width: 36,
+                  height: 3,
+                  borderRadius: 999,
+                  background: 'linear-gradient(90deg, #38BDF8 0%, #0EA5E9 100%)',
+                  opacity: 0.9,
+                  mt: 0.4,
+                }}
+              />
+            </Box>
+          </Box>
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'rgba(255, 255, 255, 0.7)',
+              fontSize: '11px',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+            }}
+          >
             The Future of Telecom Automation
           </Typography>
         </Box>
@@ -1975,6 +2052,22 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
                     <Typography sx={{ fontSize: '12px', color: tokens.colors.primary, fontWeight: 600 }}>
                       Select all
                     </Typography>
+                    <Button
+                      variant="text"
+                      size="small"
+                      onClick={handleClearSelection}
+                      disabled={selectedDeviceIds.length === 0}
+                      sx={{
+                        minWidth: 'auto',
+                        padding: '2px 6px',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        color: tokens.colors.subtext,
+                      }}
+                    >
+                      Clear
+                    </Button>
                   </Box>
                 )}
               </Box>

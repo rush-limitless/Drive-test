@@ -208,20 +208,64 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         top: 0,
         height: '100vh'
       }}>
-        <Box sx={{ mb: 4, pb: 2, borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
-          <Typography variant="h6" sx={{ 
-            color: 'rgba(255, 255, 255, 0.9)', 
-            fontWeight: 700,
-            fontSize: '18px',
-            lineHeight: '26px'
-          }}>
-            MOBIQ
-          </Typography>
-          <Typography variant="body2" sx={{ 
-            color: 'rgba(255, 255, 255, 0.7)',
-            fontSize: '12px',
-            lineHeight: '18px'
-          }}>
+        <Box sx={{ mb: 4, pb: 2.5, borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, #0EA5E9 0%, #22D3EE 100%)',
+                boxShadow: '0 10px 18px rgba(14, 165, 233, 0.3)',
+                display: 'grid',
+                placeItems: 'center',
+              }}
+            >
+              <Box
+                sx={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: '6px',
+                  border: '2px solid rgba(255, 255, 255, 0.85)',
+                  boxShadow: '0 0 10px rgba(255, 255, 255, 0.35)',
+                }}
+              />
+            </Box>
+            <Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 800,
+                  fontSize: '18px',
+                  lineHeight: '22px',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  color: '#F8FAFC',
+                }}
+              >
+                MOBIQ
+              </Typography>
+              <Box
+                sx={{
+                  width: 36,
+                  height: 3,
+                  borderRadius: 999,
+                  background: 'linear-gradient(90deg, #38BDF8 0%, #0EA5E9 100%)',
+                  opacity: 0.9,
+                  mt: 0.4,
+                }}
+              />
+            </Box>
+          </Box>
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'rgba(255, 255, 255, 0.7)',
+              fontSize: '11px',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+            }}
+          >
             The Future of Telecom Automation
           </Typography>
           {appVersion && (
@@ -232,6 +276,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 fontSize: '11px',
                 lineHeight: '16px',
                 mt: 0.5,
+                display: 'none',
               }}
             >
               Version {appVersion}
@@ -281,15 +326,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         <Box sx={{ textAlign: 'center', mt: 2 }}>
           <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1 }}>
-            <Chip 
-              label="Version 2.3.0"
-              size="small"
-              sx={{
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                color: 'rgba(255, 255, 255, 0.7)',
-                fontSize: '11px'
-              }}
-            />
+            {appVersion ? (
+              <Chip
+                label={`Version ${appVersion}`}
+                size="small"
+                sx={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontSize: '11px'
+                }}
+              />
+            ) : null}
             <IconButton size="small" onClick={handleOpenMenu} sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
               <Info size={16} />
             </IconButton>

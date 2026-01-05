@@ -50,6 +50,7 @@ def _now_iso() -> str:
 
 module_status_entries: Dict[str, Dict[str, Any]] = {}
 module_latest_status: Dict[str, str] = {}
+module_cancel_events: Dict[str, threading.Event] = {}
 
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
@@ -81,6 +82,10 @@ class ModuleExecute(BaseModel):
     device_ids: List[str] = Field(default_factory=list)
     parameters: Dict[str, Any] = Field(default_factory=dict)
     parameters_by_device: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
+
+
+class ModuleCancelRequest(BaseModel):
+    status_id: str
 
 
 class ModuleRetryQueue:
@@ -391,6 +396,7 @@ legacy_modules_db: List[Dict[str, Any]] = [
     },
 ]
 legacy_modules_db = [_base_module_fields(entry) for entry in legacy_modules_db]
+LEGACY_MODULE_IDS = {entry["id"] for entry in legacy_modules_db}
 
 
 def _serialize_catalog_definition(definition: ModuleDefinition) -> Dict[str, Any]:
@@ -493,38 +499,6 @@ async def list_categories():
     """Return distinct module categories."""
     return sorted({m.get("category", "uncategorized") for m in _merged_modules().values()})
 
-
-@router.get("/modules/{module_id}")
-async def get_module(module_id: str):
-    module = _merged_modules().get(module_id)
-    if module:
-        return module
-    raise HTTPException(status_code=404, detail="Module not found")
-
-
-@router.post("/modules/{module_id}/validate")
-async def validate_module_input(module_id: str, params: Dict[str, Any]):
-    """Basic passthrough validation placeholder for frontend compatibility."""
-    definition = _get_catalog_definition(module_id)
-    if definition:
-        _validate_catalog_parameters(definition, params or {})
-        return {"module_id": module_id, "valid": True, "input_params": params or {}}
-
-    module = _merged_modules().get(module_id)
-    if not module:
-        raise HTTPException(status_code=404, detail="Module not found")
-    return {"module_id": module_id, "valid": True, "input_params": params or {}}
-
-
-
-@router.post("/modules/{module_id}/execute")
-async def execute_module(module_id: str, execution: ModuleExecute, db: Session = Depends(get_db)):
-    definition = _get_catalog_definition(module_id)
-    if definition:
-        return _execute_catalog_module(definition, execution, db)
-    return _execute_legacy_module(module_id, execution)
-
-
 @router.get("/modules/status")
 async def get_module_status(
     module_id: Optional[str] = None,
@@ -590,6 +564,65 @@ async def get_module_run(run_id: str, db: Session = Depends(get_db)):
     if not run:
         raise HTTPException(status_code=404, detail="Run not found")
     return _serialize_run(run)
+
+
+@router.get("/modules/{module_id}")
+async def get_module(module_id: str):
+    module = _merged_modules().get(module_id)
+    if module:
+        return module
+    raise HTTPException(status_code=404, detail="Module not found")
+
+
+@router.post("/modules/{module_id}/validate")
+async def validate_module_input(module_id: str, params: Dict[str, Any]):
+    """Basic passthrough validation placeholder for frontend compatibility."""
+    definition = _get_catalog_definition(module_id)
+    if definition:
+        _validate_catalog_parameters(definition, params or {})
+        return {"module_id": module_id, "valid": True, "input_params": params or {}}
+
+    module = _merged_modules().get(module_id)
+    if not module:
+        raise HTTPException(status_code=404, detail="Module not found")
+    return {"module_id": module_id, "valid": True, "input_params": params or {}}
+
+
+@router.post("/modules/{module_id}/execute")
+async def execute_module(module_id: str, execution: ModuleExecute, db: Session = Depends(get_db)):
+    if module_id in LEGACY_MODULE_IDS:
+        return await asyncio.to_thread(_execute_legacy_module, module_id, execution)
+    definition = _get_catalog_definition(module_id)
+    if definition:
+        return _execute_catalog_module(definition, execution, db)
+    return await asyncio.to_thread(_execute_legacy_module, module_id, execution)
+
+
+@router.post("/modules/{module_id}/cancel")
+async def cancel_module_execution(module_id: str, payload: ModuleCancelRequest):
+    """Cancel a running legacy module execution (best effort)."""
+    status_id = payload.status_id
+    entry = module_status_entries.get(status_id)
+    if not entry or entry.get("module_id") != module_id:
+        raise HTTPException(status_code=404, detail="Module status not found")
+    if entry.get("state") != "running":
+        return {"status_id": status_id, "cancelled": False, "message": "Execution is not running"}
+    cancel_event = module_cancel_events.get(status_id)
+    if cancel_event:
+        cancel_event.set()
+    entry.update(
+        {
+            "state": "cancelled",
+            "completed_at": _now_iso(),
+            "pending_device_ids": [],
+            "success": False,
+            "stage_message": "Execution cancelled by user",
+            "summary": "Execution cancelled by user",
+            "last_update": _now_iso(),
+        }
+    )
+    _emit_module_status(entry)
+    return {"status_id": status_id, "cancelled": True}
 
 
 def _execute_catalog_module(definition: ModuleDefinition, execution: ModuleExecute, db: Session) -> Dict[str, Any]:
@@ -794,6 +827,8 @@ def _run_legacy_module_on_devices_with_params(
 ) -> Dict[str, Any]:
     status_id = f"{module_id}_{int(time.time() * 1000)}"
     execution_id = f"exec_{module_id}"
+    cancel_event = threading.Event()
+    module_cancel_events[status_id] = cancel_event
     module_status_entries[status_id] = {
         "status_id": status_id,
         "execution_id": execution_id,
@@ -819,41 +854,53 @@ def _run_legacy_module_on_devices_with_params(
 
     results: List[Dict[str, Any]] = []
     pool_size = max(1, len(device_ids))
-    with ThreadPoolExecutor(max_workers=pool_size) as executor:
-        future_to_device = {
-            executor.submit(_run_worker_for_device_with_params, worker, device_id, resolve_params(device_id)): device_id
-            for device_id in device_ids
-        }
-        for future in as_completed(future_to_device):
-            device_id = future_to_device[future]
-            try:
-                value = future.result()
-                results.append(
-                    {
-                        "device_id": device_id,
-                        "success": bool(value.get("success", True)),
-                        "result": value,
-                    }
-                )
-            except Exception as exc:
-                results.append(
-                    {
-                        "device_id": device_id,
-                        "success": False,
-                        "error": str(exc),
-                    }
-                )
+    try:
+        with ThreadPoolExecutor(max_workers=pool_size) as executor:
+            future_to_device = {
+                executor.submit(
+                    _run_worker_for_device_with_params,
+                    worker,
+                    device_id,
+                    resolve_params(device_id),
+                    cancel_event,
+                ): device_id
+                for device_id in device_ids
+            }
+            for future in as_completed(future_to_device):
+                device_id = future_to_device[future]
+                try:
+                    value = future.result()
+                    results.append(
+                        {
+                            "device_id": device_id,
+                            "success": bool(value.get("success", True)),
+                            "result": value,
+                        }
+                    )
+                except Exception as exc:
+                    results.append(
+                        {
+                            "device_id": device_id,
+                            "success": False,
+                            "error": str(exc),
+                        }
+                    )
+    finally:
+        module_cancel_events.pop(status_id, None)
 
-    overall_success = all(entry.get("success", False) for entry in results)
+    cancelled = cancel_event.is_set()
+    overall_success = False if cancelled else all(entry.get("success", False) for entry in results)
     success_count = sum(1 for entry in results if entry.get("success"))
     failure_count = len(results) - success_count
-    summary = stage_message or _default_stage_message(module.get("name") or module_id, success_count, failure_count)
+    summary = "Execution cancelled by user" if cancelled else (
+        stage_message or _default_stage_message(module.get("name") or module_id, success_count, failure_count)
+    )
 
     entry = module_status_entries.get(status_id)
     if entry:
         entry.update(
             {
-                "state": "completed",
+                "state": "cancelled" if cancelled else "completed",
                 "completed_at": _now_iso(),
                 "device_results": results,
                 "pending_device_ids": [],
@@ -902,7 +949,10 @@ def _run_worker_for_device_with_params(
     worker: Callable[[TelcoModules, Dict[str, Any]], Dict[str, Any]],
     device_id: str,
     params: Dict[str, Any],
+    cancel_event: Optional[threading.Event] = None,
 ) -> Dict[str, Any]:
+    if cancel_event and cancel_event.is_set():
+        return {"success": False, "cancelled": True, "error": "Execution cancelled"}
     executor = TelcoModules(device_id)
     result = worker(executor, params)
     if not isinstance(result, dict):
@@ -923,6 +973,8 @@ def _run_legacy_module_on_devices(
 ) -> Dict[str, Any]:
     status_id = f"{module_id}_{int(time.time() * 1000)}"
     execution_id = f"exec_{module_id}"
+    cancel_event = threading.Event()
+    module_cancel_events[status_id] = cancel_event
     module_status_entries[status_id] = {
         "status_id": status_id,
         "execution_id": execution_id,
@@ -940,22 +992,31 @@ def _run_legacy_module_on_devices(
     _emit_module_status(module_status_entries[status_id])
     module_latest_status[module_id] = status_id
 
-    aggregation = TelcoModules.execute_on_multiple_devices(
-        device_ids, worker, module_name=module.get("name") or module_id
-    )
+    try:
+        aggregation = TelcoModules.execute_on_multiple_devices(
+            device_ids,
+            worker,
+            module_name=module.get("name") or module_id,
+            cancel_event=cancel_event,
+        )
+    finally:
+        module_cancel_events.pop(status_id, None)
     device_results = aggregation.get("device_results") or []
+    cancelled = cancel_event.is_set()
     success_count = sum(1 for entry in device_results if entry.get("success"))
     failure_count = len(device_results) - success_count
-    summary = stage_message or _default_stage_message(module.get("name") or module_id, success_count, failure_count)
+    summary = "Execution cancelled by user" if cancelled else (
+        stage_message or _default_stage_message(module.get("name") or module_id, success_count, failure_count)
+    )
     entry = module_status_entries.get(status_id)
     if entry:
         entry.update(
             {
-                "state": "completed",
+                "state": "cancelled" if cancelled else "completed",
                 "completed_at": _now_iso(),
                 "device_results": device_results,
                 "pending_device_ids": [],
-                "success": aggregation.get("success", False),
+                "success": False if cancelled else aggregation.get("success", False),
                 "stage_message": summary,
                 "summary": summary,
                 "success_count": success_count,
@@ -1022,13 +1083,29 @@ def _execute_legacy_module(module_id: str, execution: ModuleExecute, schedule_re
         schedule_retry_override: Optional[bool] = None,
         worker_with_params: Optional[Callable[[TelcoModules, Dict[str, Any]], Dict[str, Any]]] = None,
     ) -> Dict[str, Any]:
+        start_at = time.time() + 1.0
+        if params is not None:
+            params = dict(params)
+            params["start_at"] = start_at
         schedule_flag = schedule_retry if schedule_retry_override is None else schedule_retry_override
+        def wrap_worker(executor: TelcoModules) -> Dict[str, Any]:
+            wait_seconds = max(0.0, start_at - time.time())
+            if wait_seconds:
+                time.sleep(wait_seconds)
+            return worker(executor)
+        def wrap_worker_with_params(executor: TelcoModules, worker_params: Dict[str, Any]) -> Dict[str, Any]:
+            start_target = worker_params.get("start_at")
+            if isinstance(start_target, (int, float)):
+                wait_seconds = max(0.0, start_target - time.time())
+                if wait_seconds:
+                    time.sleep(wait_seconds)
+            return worker_with_params(executor, worker_params)
         if parameters_by_device and worker_with_params:
             return _run_legacy_module_on_devices_with_params(
                 module,
                 module_id,
                 targets,
-                worker_with_params,
+                wrap_worker_with_params,
                 parameters=params if params is not None else parameters,
                 parameters_by_device=parameters_by_device,
                 stage_message=stage_message,
@@ -1038,7 +1115,7 @@ def _execute_legacy_module(module_id: str, execution: ModuleExecute, schedule_re
             module,
             module_id,
             targets,
-            worker,
+            wrap_worker,
             parameters=params if params is not None else parameters,
             stage_message=stage_message,
             schedule_retry=schedule_flag,
