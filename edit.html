@@ -609,7 +609,7 @@
             populateInputs(data);
         }
 
-        const apiUrl = new URLSearchParams(window.location.search).get('api') || 'data/dashboard.json';
+        const apiUrl = new URLSearchParams(window.location.search).get('api') || `data/dashboard.json?v=${Date.now()}`;
 
         fetch(apiUrl, { cache: 'no-store' })
             .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
