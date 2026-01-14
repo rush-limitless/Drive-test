@@ -26,3 +26,7 @@ Notes
 - API override: add `?api=https://example.com/data.json` to the URL to load remote data.
 - Editor workflow: open `edit.html`, click APPLY to preview, then DOWNLOAD JSON and replace `data/dashboard.json` before sharing `view.html` or `index.html`.
 - One-click publish (optional): set Netlify env vars `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID`, then use the PUBLISH button in `edit.html`. Optional env var `PUBLISH_KEY` protects the endpoint.
+
+GitHub Actions (auto deploy)
+- Add repo secrets `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID`.
+- On push to `main`, the workflow builds and deploys `dist/` to Netlify.
