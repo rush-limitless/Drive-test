@@ -1,5 +1,7 @@
 # Dashboard Project
 
+[![Deploy to Netlify](https://github.com/rush-limitless/Drive-test/actions/workflows/deploy-netlify.yml/badge.svg)](https://github.com/rush-limitless/Drive-test/actions/workflows/deploy-netlify.yml)
+
 Static HTML dashboard ready for static hosting.
 
 Files
