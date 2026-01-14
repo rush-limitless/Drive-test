@@ -110,10 +110,25 @@ exports.handler = async (event) => {
             }
         }
 
+        const publishRes = await fetch(
+            `https://api.netlify.com/api/v1/sites/${siteId}/deploys/${newDeploy.id}/restore`,
+            {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        if (!publishRes.ok) {
+            const text = await publishRes.text();
+            throw new Error(`Publish failed ${publishRes.status}: ${text}`);
+        }
+
         return {
             statusCode: 200,
             headers: { 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({ ok: true, deployId: newDeploy.id })
+            body: JSON.stringify({ ok: true, deployId: newDeploy.id, published: true })
         };
     } catch (err) {
         return {
