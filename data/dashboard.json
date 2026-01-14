@@ -1,0 +1,36 @@
+{
+  "project": "CLUSTER_NORD",
+  "ref": "DT-2026-X1",
+  "uptime": "14H 22M",
+  "kpi": {
+    "hoSuccess": "82.4%",
+    "dropRate": "1.8%",
+    "sinrWorst": "-2.0 dB",
+    "cqiAverage": "6.5 (Fair)"
+  },
+  "diagnostics": {
+    "error": "HANDOVER_TOO_LATE",
+    "summary": "UE detects Target Cell (4502-B) but fails to report Event A3 in time due to rapid SINR degradation.",
+    "note": "Source Cell (4501-A) signal remains dominant (Overshooting) beyond planned boundary.",
+    "rootCause": "PILOT_POLLUTION",
+    "interferers": [
+      "Serving Cell: -88 dBm",
+      "Interferer 1: -91 dBm (Strong)",
+      "Interferer 2: -93 dBm (Strong)"
+    ]
+  },
+  "actions": [
+    {
+      "id": "PHY",
+      "label": "Downtilt 4501-A",
+      "current": "4 deg",
+      "next": "6 deg"
+    },
+    {
+      "id": "LOG",
+      "label": "Modify A3 Offset",
+      "current": "3 dB",
+      "next": "2 dB"
+    }
+  ]
+}

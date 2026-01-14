@@ -1,0 +1,13 @@
+{
+  "name": "dashboard-project",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i src/tailwind.css -o assets/tailwind.min.css --minify",
+    "watch:css": "tailwindcss -i src/tailwind.css -o assets/tailwind.min.css --watch",
+    "build": "npm run build:css && node scripts/build.js"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.13"
+  }
+}

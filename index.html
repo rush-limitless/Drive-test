@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard de monitoring live des echec de handover et diagnostics radio.">
+    <meta name="theme-color" content="#FFD600">
+    <title>Dashboard Live - Rapport d'optimisation radio (HO Failure)</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23FFD600'/%3E%3Cpath d='M10 48h44v6H10zM10 10h6v30h-6zM48 10h6v30h-6zM22 26h20v6H22z' fill='%231a1a1a'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="assets/tailwind.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cyber-yellow: #FFD600;
+            --cyber-black: #1a1a1a;
+        }
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--cyber-black);
+            color: black;
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            overflow: hidden; /* Empeche le scroll pour un effet dashboard fixe */
+        }
+        
+        .dashboard-container {
+            width: 100%;
+            height: 100%;
+            background-color: var(--cyber-yellow);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        /* Grille de fond technique */
+        .grid-bg {
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .border-thick { border: 3px solid black; }
+        .border-thin { border: 1px solid black; }
+
+        .section-title {
+            background: black;
+            color: var(--cyber-yellow);
+            padding: 4px 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .kpi-card {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid black;
+            transition: all 0.2s;
+        }
+        .kpi-card:hover {
+            background: rgba(255,255,255,0.4);
+            transform: translateY(-2px);
+            box-shadow: 4px 4px 0px black;
+        }
+
+        /* Scanline effect pour le cote ecran */
+        .scanline {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .main-grid {
+            overflow: hidden;
+        }
+
+        .map-panel {
+            height: 500px;
+        }
+
+        .side-panel {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .action-row {
+            background: transparent;
+            border: none;
+            padding: 0;
+            width: 100%;
+            text-align: left;
+        }
+
+        :focus-visible {
+            outline: 3px solid #000;
+            outline-offset: 3px;
+        }
+
+        @media (max-width: 1024px) {
+            body { overflow: auto; height: auto; }
+            .dashboard-container { height: auto; min-height: 100vh; }
+            .main-grid { overflow: visible; }
+            .map-panel { height: 500px; }
+        }
+
+        @media (max-width: 640px) {
+            .section-title { font-size: 0.75rem; }
+            .map-panel { height: 500px; }
+        }
+
+        @media (min-width: 1024px) {
+            .map-panel {
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container p-4 md:p-6">
+        <div class="grid-bg"></div>
+        <div class="scanline"></div>
+        
+        <!-- HEADER DASHBOARD -->
+        <header class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end border-b-4 border-black pb-4 mb-4 shrink-0">
+            <div>
+                <div class="flex items-center gap-3">
+                    <div class="w-4 h-4 bg-red-600 animate-pulse border border-black"></div>
+                    <h1 class="text-3xl md:text-5xl font-extrabold tracking-tighter leading-none">TITLE</h1>
+                </div>
+                <div class="flex flex-wrap gap-2 mt-3 text-xs md:text-sm font-bold font-mono">
+                    <span class="bg-black text-[#FFD600] px-3 py-1">PROJECT: <span id="project-id">CLUSTER_NORD</span></span>
+                    <span class="border-2 border-black px-3 py-1 bg-white/50">REF: <span id="project-ref">DT-2026-X1</span></span>
+                    <span class="border-2 border-black px-3 py-1 bg-white/50">UPTIME: <span id="project-uptime">14H 22M</span></span>
+                </div>
+            </div>
+            
+            <div class="text-left md:text-right font-bold text-xs md:text-sm mt-4 md:mt-0 space-y-1">
+                <p>SYSTEM DATE: <span id="clock" aria-live="polite" aria-atomic="true">2026-01-13 14:45:00</span></p>
+                <p>TECH: 4G LTE (L1800/L2100) / 5G NSA</p>
+                <p>GPS: 3.8480 deg N, 11.5021 deg E</p>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT (Fluid Grid) -->
+        <div class="main-grid relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow">
+            
+            <!-- GAUCHE : CARTE INTERACTIVE (2/3 largeur) -->
+            <div class="map-panel lg:col-span-2 flex flex-col border-thick bg-gray-900 relative group overflow-hidden">
+                <!-- Image Map -->
+                <img id="map-image" src="/api/placeholder/1200/800" alt="Carte du cluster (vue simulation)" loading="lazy" decoding="async" class="w-full h-full object-cover opacity-60 mix-blend-luminosity hover:opacity-80 transition-opacity duration-500" onerror="this.src='https://placehold.co/1200x800/2a2a2a/FFFFFF?text=MAP+VIEW+LOADING...'">
+                
+                <!-- UI Overlay sur la carte -->
+                <div class="absolute inset-0 pointer-events-none p-4 flex flex-col justify-between">
+                    <div class="flex justify-between">
+                        <span class="bg-black text-[#FFD600] px-2 py-1 text-xs font-bold border border-[#FFD600]">LIVE FEED</span>
+                        <span class="bg-black text-white px-2 py-1 text-xs font-bold">CAM_01</span>
+                    </div>
+                    
+                    <!-- Viseur central -->
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="w-32 h-32 md:w-64 md:h-64 border border-[#FFD600] rounded-full opacity-30 flex items-center justify-center relative">
+                            <div class="absolute top-1/2 left-0 w-full h-[1px] bg-[#FFD600]"></div>
+                            <div class="absolute left-1/2 top-0 h-full w-[1px] bg-[#FFD600]"></div>
+                            <!-- Point d'echec clignotant -->
+                            <div class="w-3 h-3 bg-red-500 rounded-full animate-ping absolute"></div>
+                            <div class="absolute -top-6 text-[#FFD600] text-xs bg-black px-1">TARGET LOCK</div>
+                        </div>
+                    </div>
+
+                    <!-- Legende Map -->
+                    <div class="bg-black/80 border border-white/20 p-3 text-xs text-white max-w-xs backdrop-blur-sm">
+                        <div class="font-bold text-[#FFD600] mb-2 border-b border-gray-600 pb-1">LAYER CONTROL</div>
+                        <div class="flex items-center gap-2 mb-1"><div class="w-2 h-2 bg-green-500 rounded-full"></div> RSRP > -90dBm</div>
+                        <div class="flex items-center gap-2 mb-1"><div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div> HO Failure Event</div>
+                        <div class="flex items-center gap-2"><div class="w-2 h-2 bg-yellow-500 rounded-full"></div> Interference</div>
+                    </div>
+                </div>
+                <div class="absolute top-4 right-4 pointer-events-auto z-20">
+                    <label class="bg-black text-[#FFD600] px-2 py-1 text-xs font-bold border border-[#FFD600] cursor-pointer" for="map-upload">UPLOAD MAP/IMAGE</label>
+                    <input id="map-upload" type="file" accept="image/*" class="hidden">
+                </div>
+            </div>
+
+            <!-- DROITE : PANNEAU DE CONTROLE (1/3 largeur) -->
+            <div class="side-panel flex flex-col gap-4 h-full overflow-y-auto pr-1">
+                
+                <!-- 01. IMPACT / KPI -->
+                <div class="border-thick bg-white/50 p-4 relative shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="section-title m-0">01 // TELEMETRY</div>
+                        <div class="w-3 h-3 bg-green-500 border border-black rounded-full" title="Data Stream Active"></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="kpi-card p-3 flex flex-col justify-between h-24">
+                            <span class="text-xs font-bold text-gray-800 uppercase">HO Success</span>
+                            <span id="kpi-ho-success" class="text-3xl font-black text-red-600">82.4%</span>
+                            <div class="w-full bg-gray-300 h-1 mt-1"><div class="bg-red-600 h-1 w-[82%]"></div></div>
+                        </div>
+                        <div class="kpi-card p-3 flex flex-col justify-between h-24">
+                            <span class="text-xs font-bold text-gray-800 uppercase">Drop Rate</span>
+                            <span id="kpi-drop-rate" class="text-3xl font-black">1.8%</span>
+                            <div class="w-full bg-gray-300 h-1 mt-1"><div class="bg-black h-1 w-[30%]"></div></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 space-y-2 text-xs font-bold border-t-2 border-black border-dashed pt-3">
+                        <div class="flex justify-between">
+                            <span>SINR (Worst):</span>
+                            <span id="kpi-sinr-worst" class="bg-black text-white px-1">-2.0 dB</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>CQI Average:</span>
+                            <span id="kpi-cqi-average">6.5 (Fair)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 02. ANALYSE -->
+                <div class="border-thick bg-white/50 p-4 flex-grow shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col">
+                    <div class="section-title m-0 mb-3">02 // DIAGNOSTICS</div>
+                    
+                    <div class="bg-black/5 p-3 border border-black/10 flex-grow font-mono text-xs leading-relaxed overflow-y-auto">
+                        <p class="mb-2"><span class="bg-red-600 text-white px-1">CRITICAL ERROR</span> <span id="diag-error">HANDOVER_TOO_LATE</span></p>
+                        <p class="mb-3">
+                            > <span id="diag-summary">UE detects Target Cell (4502-B) but fails to report Event A3 in time due to rapid SINR degradation.</span><br>
+                            > <span id="diag-note">Source Cell (4501-A) signal remains dominant (Overshooting) beyond planned boundary.</span>
+                        </p>
+                        <div class="font-bold border-l-4 border-black pl-2 my-2">
+                            ROOT CAUSE: <span id="diag-root-cause">PILOT POLLUTION</span>
+                        </div>
+                        <ul id="diag-interferers" class="list-none space-y-1 mt-2 text-[10px] uppercase text-gray-700">
+                            <li>[x] Serving Cell: -88 dBm</li>
+                            <li>[x] Interferer 1: -91 dBm (Strong)</li>
+                            <li>[x] Interferer 2: -93 dBm (Strong)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 03. RECOMMANDATIONS -->
+                <div class="border-thick bg-black text-[#FFD600] p-4 shadow-[8px_8px_0px_0px_rgba(255,255,255,0.2)]">
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="section-title bg-[#FFD600] text-black m-0">03 // COMMANDS</div>
+                        <button id="export-xml" class="bg-[#FFD600] text-black text-xs px-2 py-1 font-bold hover:bg-white hover:text-black transition cursor-pointer" aria-label="Exporter le rapport XML">EXPORT XML</button>
+                    </div>
+
+                    <div class="space-y-3">
+                        <!-- Action 1 -->
+                        <button id="action-btn-1" type="button" class="action-row flex items-center gap-3 group cursor-pointer" data-action="PHY" data-target="Downtilt 4501-A" data-current="4 deg" data-next="6 deg" aria-label="Action physique: Downtilt 4501-A">
+                            <div class="h-8 w-8 bg-[#FFD600] text-black flex items-center justify-center font-bold text-xs group-hover:bg-white transition">PHY</div>
+                            <div class="flex-grow border-b border-[#FFD600]/30 pb-1">
+                                <div id="action1-label" class="text-xs font-bold text-white">DOWNTILT 4501-A</div>
+                                <div class="flex justify-between text-[#FFD600] text-xs font-mono">
+                                    <span id="action1-current">CURRENT: 4 deg</span>
+                                    <span id="action1-next">TARGET: 6 deg</span>
+                                </div>
+                            </div>
+                        </button>
+
+                        <!-- Action 2 -->
+                        <button id="action-btn-2" type="button" class="action-row flex items-center gap-3 group cursor-pointer" data-action="LOG" data-target="Modify A3 Offset" data-current="3 dB" data-next="2 dB" aria-label="Action logique: modifier A3 offset">
+                            <div class="h-8 w-8 bg-transparent border border-[#FFD600] text-[#FFD600] flex items-center justify-center font-bold text-xs group-hover:bg-[#FFD600] group-hover:text-black transition">LOG</div>
+                            <div class="flex-grow border-b border-[#FFD600]/30 pb-1">
+                                <div id="action2-label" class="text-xs font-bold text-white">MODIFY A3_OFFSET</div>
+                                <div class="flex justify-between text-[#FFD600] text-xs font-mono">
+                                    <span id="action2-current">VAL: 3 dB</span>
+                                    <span id="action2-next">NEW: 2 dB</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div id="action-status" class="mt-3 text-xs text-[#FFD600] bg-black/40 border border-[#FFD600]/40 px-2 py-1" aria-live="polite" aria-atomic="true">
+                        Ready.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple horloge pour l'effet "Live"
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toISOString().replace('T', ' ').substring(0, 19);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        const statusEl = document.getElementById('action-status');
+        const exportBtn = document.getElementById('export-xml');
+        const actionButtons = document.querySelectorAll('[data-action]');
+        const actionLog = [];
+        const mapUpload = document.getElementById('map-upload');
+        const mapImage = document.getElementById('map-image');
+        const actionBtn1 = document.getElementById('action-btn-1');
+        const actionBtn2 = document.getElementById('action-btn-2');
+
+        const dataFallback = {
+            project: 'CLUSTER_NORD',
+            ref: 'DT-2026-X1',
+            uptime: '14H 22M',
+            kpi: {
+                hoSuccess: '82.4%',
+                dropRate: '1.8%',
+                sinrWorst: '-2.0 dB',
+                cqiAverage: '6.5 (Fair)'
+            },
+            diagnostics: {
+                error: 'HANDOVER_TOO_LATE',
+                summary: 'UE detects Target Cell (4502-B) but fails to report Event A3 in time due to rapid SINR degradation.',
+                note: 'Source Cell (4501-A) signal remains dominant (Overshooting) beyond planned boundary.',
+                rootCause: 'PILOT_POLLUTION',
+                interferers: [
+                    'Serving Cell: -88 dBm',
+                    'Interferer 1: -91 dBm (Strong)',
+                    'Interferer 2: -93 dBm (Strong)'
+                ]
+            },
+            actions: [
+                { id: 'PHY', label: 'Downtilt 4501-A', current: '4 deg', next: '6 deg' },
+                { id: 'LOG', label: 'Modify A3 Offset', current: '3 dB', next: '2 dB' }
+            ]
+        };
+
+        function setText(id, value) {
+            const el = document.getElementById(id);
+            if (el && value) el.textContent = value;
+        }
+
+        function renderDiagnostics(list) {
+            const el = document.getElementById('diag-interferers');
+            if (!el || !Array.isArray(list)) return;
+            el.innerHTML = '';
+            list.forEach((item) => {
+                const li = document.createElement('li');
+                li.textContent = `[x] ${item}`;
+                el.appendChild(li);
+            });
+        }
+
+        function applyData(data) {
+            setText('project-id', data.project);
+            setText('project-ref', data.ref);
+            setText('project-uptime', data.uptime);
+            setText('kpi-ho-success', data.kpi?.hoSuccess);
+            setText('kpi-drop-rate', data.kpi?.dropRate);
+            setText('kpi-sinr-worst', data.kpi?.sinrWorst);
+            setText('kpi-cqi-average', data.kpi?.cqiAverage);
+            setText('diag-error', data.diagnostics?.error);
+            setText('diag-summary', data.diagnostics?.summary);
+            setText('diag-note', data.diagnostics?.note);
+            setText('diag-root-cause', data.diagnostics?.rootCause);
+            renderDiagnostics(data.diagnostics?.interferers);
+            applyActions(data.actions || []);
+        }
+
+        function applyActions(actions) {
+            if (!Array.isArray(actions) || actions.length < 2) return;
+            const a1 = actions[0];
+            const a2 = actions[1];
+
+            setText('action1-label', a1.label?.toUpperCase() || '');
+            setText('action1-current', `CURRENT: ${a1.current || ''}`);
+            setText('action1-next', `TARGET: ${a1.next || ''}`);
+            setText('action2-label', a2.label?.toUpperCase() || '');
+            setText('action2-current', `VAL: ${a2.current || ''}`);
+            setText('action2-next', `NEW: ${a2.next || ''}`);
+
+            if (actionBtn1) {
+                actionBtn1.dataset.target = a1.label || '';
+                actionBtn1.dataset.current = a1.current || '';
+                actionBtn1.dataset.next = a1.next || '';
+            }
+            if (actionBtn2) {
+                actionBtn2.dataset.target = a2.label || '';
+                actionBtn2.dataset.current = a2.current || '';
+                actionBtn2.dataset.next = a2.next || '';
+            }
+        }
+
+        const apiUrl = new URLSearchParams(window.location.search).get('api') || 'data/dashboard.json';
+
+        fetch(apiUrl, { cache: 'no-store' })
+            .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
+            .then((data) => applyData(data))
+            .catch(() => applyData(dataFallback));
+
+        function setStatus(message) {
+            if (!statusEl) return;
+            statusEl.textContent = message;
+        }
+
+        exportBtn?.addEventListener('click', () => {
+            const timestamp = new Date().toISOString();
+            const actionXml = actionLog
+                .map((a) => `  <action id="${a.id}">\n    <label>${a.label}</label>\n    <current>${a.current}</current>\n    <next>${a.next}</next>\n    <time>${a.time}</time>\n  </action>`)
+                .join('\n');
+            const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<report>\n  <title>HO Failure Dashboard</title>\n  <timestamp>${timestamp}</timestamp>\n  <project>${document.getElementById('project-id')?.textContent || 'CLUSTER_NORD'}</project>\n  <kpi>\n    <hoSuccess>${document.getElementById('kpi-ho-success')?.textContent || '82.4%'}</hoSuccess>\n    <dropRate>${document.getElementById('kpi-drop-rate')?.textContent || '1.8%'}</dropRate>\n  </kpi>\n  <diagnostics>\n    <error>${document.getElementById('diag-error')?.textContent || 'HANDOVER_TOO_LATE'}</error>\n    <rootCause>${document.getElementById('diag-root-cause')?.textContent || 'PILOT_POLLUTION'}</rootCause>\n  </diagnostics>\n  <actions>\n${actionXml || '  <!-- none -->'}\n  </actions>\n</report>\n`;
+            const blob = new Blob([xml], { type: 'application/xml' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ho-report-${timestamp.replace(/[:.]/g, '-')}.xml`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+            setStatus('Export XML termine.');
+        });
+
+        actionButtons.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const action = btn.getAttribute('data-action') || 'ACTION';
+                const target = btn.getAttribute('data-target') || 'UNKNOWN';
+                const current = btn.getAttribute('data-current') || '';
+                const next = btn.getAttribute('data-next') || '';
+                const detail = [current, next].filter(Boolean).join(' -> ');
+                actionLog.push({
+                    id: action,
+                    label: target,
+                    current,
+                    next,
+                    time: new Date().toISOString()
+                });
+                setStatus(`${action}: ${target}${detail ? ' (' + detail + ')' : ''}`);
+            });
+        });
+
+        mapUpload?.addEventListener('change', (event) => {
+            const file = event.target.files?.[0];
+            if (!file || !mapImage) return;
+            const url = URL.createObjectURL(file);
+            mapImage.src = url;
+            mapImage.onload = () => URL.revokeObjectURL(url);
+            setStatus(`Image chargee: ${file.name}`);
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
