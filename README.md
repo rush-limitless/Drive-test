@@ -33,3 +33,7 @@ Notes
 GitHub Actions (auto deploy)
 - Add repo secrets `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID`.
 - On push to `main`, the workflow builds and deploys `dist/` to Netlify.
+
+GitHub Pages (alternative hosting)
+- In GitHub repo: Settings -> Pages -> Source: GitHub Actions.
+- Push to `main` triggers deployment to Pages.
