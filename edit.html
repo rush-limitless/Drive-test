@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --cyber-yellow: #FFD600;
+            --cyber-yellow: #FFFFFF;
             --cyber-black: #1a1a1a;
         }
         body {
@@ -405,6 +405,15 @@
 
             </div>
         </div>
+
+        <div class="relative z-10 mt-4">
+            <div class="border-t-4 border-black"></div>
+            <div class="border-t-2 border-black mt-2"></div>
+            <div class="mt-2 flex items-center justify-between text-xs font-bold uppercase">
+                <span>F2G</span>
+                <span>PKF Institute of Excellence</span>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -718,7 +727,7 @@
             const data = buildDataFromInputs();
             setStatus('Publication en cours...');
             try {
-                const res = await fetch('/.netlify/functions/publish', {
+                const res = await fetch('/.netlify/functions/publish-github', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -734,7 +743,7 @@
                 if (!result.ok) {
                     throw new Error(result.error || 'Publish failed');
                 }
-                setStatus(`Publie. Deploy: ${result.deployId}`);
+                setStatus(`Publie sur GitHub. Commit: ${result.commit || 'OK'}`);
             } catch (err) {
                 setStatus(`Erreur publish: ${err.message}`);
             }
