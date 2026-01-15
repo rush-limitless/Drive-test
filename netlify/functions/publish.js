@@ -110,19 +110,30 @@ exports.handler = async (event) => {
             }
         }
 
-        const publishRes = await fetch(
-            `https://api.netlify.com/api/v1/sites/${siteId}/deploys/${newDeploy.id}/restore`,
-            {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+        let published = false;
+        for (let attempt = 0; attempt < 10; attempt += 1) {
+            const publishRes = await fetch(
+                `https://api.netlify.com/api/v1/sites/${siteId}/deploys/${newDeploy.id}/restore`,
+                {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
                 }
+            );
+            if (publishRes.ok) {
+                published = true;
+                break;
             }
-        );
-        if (!publishRes.ok) {
             const text = await publishRes.text();
-            throw new Error(`Publish failed ${publishRes.status}: ${text}`);
+            if (!/not ready/i.test(text)) {
+                throw new Error(`Publish failed ${publishRes.status}: ${text}`);
+            }
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+        }
+        if (!published) {
+            throw new Error('Publish failed: deploy still not ready');
         }
 
         return {
