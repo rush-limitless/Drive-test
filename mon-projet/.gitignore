@@ -11,6 +11,9 @@ build/*
 !build/simple-server.spec
 !build/build-exe.ps1
 src/frontend/build/
+_tmp_rf_logs/
+_tmp_rf_logs_wf/
+.version-bump.json
 *.egg-info/
 target/
 

@@ -1,6 +1,6 @@
 {
   "name": "telco-adb-automation",
-  "version": "2.3.7",
+  "version": "2.3.9",
   "description": "ADB Framework Telco Automation Desktop Application",
   "author": "F2G Telco",
   "main": "main.js",

@@ -161,4 +161,4 @@ if (Test-Path $InstallerPath) {
     exit 1
 }
 
-Write-Host "=== TERMINÉ - MOBIQ v2.2.0 AVEC ADB FORCÉ ===" -ForegroundColor Green
+Write-Host "=== TERMINÉ - MOBIQ v$Version AVEC ADB FORCÉ ===" -ForegroundColor Green

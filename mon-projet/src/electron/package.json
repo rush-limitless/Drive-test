@@ -1,7 +1,7 @@
 {
   "name": "mobiq",
-  "version": "2.3.7",
-  "description": "Mobile Test Automation Tool v2.3.7",
+  "version": "2.3.9",
+  "description": "Mobile Test Automation Tool v2.3.9",
   "author": "F2G Telco",
   "main": "dist/main.js",
   "scripts": {
