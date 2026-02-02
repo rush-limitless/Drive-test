@@ -162,6 +162,17 @@ class FlowExecutor:
             return executor.pull_rf_logs(destination)
         elif module_name == 'dial_secret_code':
             return executor.dial_secret_code(params.get('code'))
+        elif module_name == 'launch_app':
+            app = params.get('app') or params.get('target') or params.get('app_target')
+            duration_raw = params.get('duration_seconds', params.get('duration'))
+            duration_seconds = None
+            if duration_raw is not None:
+                try:
+                    duration_seconds = int(duration_raw)
+                except (TypeError, ValueError):
+                    duration_seconds = None
+            targets = params.get('targets') or params.get('target_sequence')
+            return executor.launch_app(app=app, duration_seconds=duration_seconds, targets=targets)
         elif module_name == 'check_signal_strength':
             return executor.check_signal_strength()
         elif module_name == 'ping':

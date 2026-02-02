@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Box, Typography, Chip, IconButton, Menu, MenuItem } from '@mui/material';
 import { Grid3X3, Smartphone, Zap, Puzzle, Info, ChevronLeft, ChevronRight } from 'lucide-react';
 import { resolveBaseUrl, fetchWithRetry } from '../services/utils';
+import { APP_VERSION } from '../version';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -14,7 +15,7 @@ const DEFAULT_VERSION_LABEL =
   (import.meta as any).env?.VITE_APP_VERSION ??
   (import.meta as any).env?.VITE_REACT_APP_APP_VERSION ??
   (typeof process !== 'undefined' ? process.env.REACT_APP_APP_VERSION : undefined) ??
-  '';
+  APP_VERSION;
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();

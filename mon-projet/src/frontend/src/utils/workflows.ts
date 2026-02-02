@@ -57,6 +57,15 @@ const sanitizeCallTestParams = (value: unknown): CallTestValues | undefined => {
 const cloneModule = (module: ModuleMetadata): ModuleMetadata => ({
   ...module,
   callTestParams: cloneCallTestParams(module.callTestParams),
+  secretCode: typeof module.secretCode === 'string' ? module.secretCode : undefined,
+  appLaunchTarget: typeof module.appLaunchTarget === 'string' ? module.appLaunchTarget : undefined,
+  appLaunchDurationSeconds:
+    typeof module.appLaunchDurationSeconds === 'number' ? module.appLaunchDurationSeconds : undefined,
+  pingTarget: typeof module.pingTarget === 'string' ? module.pingTarget : undefined,
+  pingDurationSeconds: typeof module.pingDurationSeconds === 'number' ? module.pingDurationSeconds : undefined,
+  pingIntervalSeconds: typeof module.pingIntervalSeconds === 'number' ? module.pingIntervalSeconds : undefined,
+  wrongApnValue: typeof module.wrongApnValue === 'string' ? module.wrongApnValue : undefined,
+  logPullDestination: typeof module.logPullDestination === 'string' ? module.logPullDestination : undefined,
 });
 
 const safeParse = (value: string | null): unknown[] => {
@@ -135,9 +144,74 @@ const normalizeModuleEntry = (entry: unknown): ModuleMetadata | null => {
     const editable =
       typeof record.editable === 'boolean' ? record.editable : base?.editable ?? true;
 
+    const parameters = record && typeof (record as any).parameters === 'object'
+      ? (record as any).parameters as Record<string, unknown>
+      : {};
     const callTestParams =
       sanitizeCallTestParams((record as any).callTestParams) ??
       cloneCallTestParams(base?.callTestParams);
+    const secretCode =
+      typeof (record as any).secretCode === 'string'
+        ? (record as any).secretCode
+        : typeof (record as any).code === 'string'
+          ? (record as any).code
+          : base?.secretCode;
+    const appLaunchTarget =
+      typeof (record as any).appLaunchTarget === 'string'
+        ? (record as any).appLaunchTarget
+        : typeof (record as any).app === 'string'
+          ? (record as any).app
+          : typeof (parameters.app) === 'string'
+            ? parameters.app as string
+            : base?.appLaunchTarget;
+    const appLaunchDurationSeconds =
+      typeof (record as any).appLaunchDurationSeconds === 'number'
+        ? (record as any).appLaunchDurationSeconds
+        : typeof (record as any).duration_seconds === 'number'
+          ? (record as any).duration_seconds
+          : typeof (parameters.duration_seconds) === 'number'
+            ? parameters.duration_seconds as number
+            : base?.appLaunchDurationSeconds;
+    const pingTarget =
+      typeof (record as any).pingTarget === 'string'
+        ? (record as any).pingTarget
+        : typeof (record as any).target === 'string'
+          ? (record as any).target
+          : typeof (parameters.target) === 'string'
+            ? parameters.target as string
+            : base?.pingTarget;
+    const pingDurationSeconds =
+      typeof (record as any).pingDurationSeconds === 'number'
+        ? (record as any).pingDurationSeconds
+        : typeof (record as any).duration_seconds === 'number'
+          ? (record as any).duration_seconds
+          : typeof (parameters.duration_seconds) === 'number'
+            ? parameters.duration_seconds as number
+            : base?.pingDurationSeconds;
+    const pingIntervalSeconds =
+      typeof (record as any).pingIntervalSeconds === 'number'
+        ? (record as any).pingIntervalSeconds
+        : typeof (record as any).interval_seconds === 'number'
+          ? (record as any).interval_seconds
+          : typeof (parameters.interval_seconds) === 'number'
+            ? parameters.interval_seconds as number
+            : base?.pingIntervalSeconds;
+    const wrongApnValue =
+      typeof (record as any).wrongApnValue === 'string'
+        ? (record as any).wrongApnValue
+        : typeof (record as any).apn_value === 'string'
+          ? (record as any).apn_value
+          : typeof (parameters.apn_value) === 'string'
+            ? parameters.apn_value as string
+            : base?.wrongApnValue;
+    const logPullDestination =
+      typeof (record as any).logPullDestination === 'string'
+        ? (record as any).logPullDestination
+        : typeof (record as any).destination === 'string'
+          ? (record as any).destination
+          : typeof (parameters.destination) === 'string'
+            ? parameters.destination as string
+            : base?.logPullDestination;
 
     return {
       id: rawId,
@@ -155,6 +229,14 @@ const normalizeModuleEntry = (entry: unknown): ModuleMetadata | null => {
           ? (record as any).hiddenInModulesPage as boolean
           : base?.hiddenInModulesPage ?? false,
       callTestParams,
+      secretCode,
+      appLaunchTarget,
+      appLaunchDurationSeconds,
+      pingTarget,
+      pingDurationSeconds,
+      pingIntervalSeconds,
+      wrongApnValue,
+      logPullDestination,
     };
   }
 
@@ -177,6 +259,21 @@ const normalizeModuleEntry = (entry: unknown): ModuleMetadata | null => {
           ? module.hiddenInModulesPage
           : base?.hiddenInModulesPage ?? false,
       callTestParams: cloneCallTestParams(module.callTestParams ?? base?.callTestParams),
+      secretCode: typeof module.secretCode === 'string' ? module.secretCode : base?.secretCode,
+      appLaunchTarget:
+        typeof module.appLaunchTarget === 'string' ? module.appLaunchTarget : base?.appLaunchTarget,
+      appLaunchDurationSeconds:
+        typeof module.appLaunchDurationSeconds === 'number'
+          ? module.appLaunchDurationSeconds
+          : base?.appLaunchDurationSeconds,
+      pingTarget: typeof module.pingTarget === 'string' ? module.pingTarget : base?.pingTarget,
+      pingDurationSeconds:
+        typeof module.pingDurationSeconds === 'number' ? module.pingDurationSeconds : base?.pingDurationSeconds,
+      pingIntervalSeconds:
+        typeof module.pingIntervalSeconds === 'number' ? module.pingIntervalSeconds : base?.pingIntervalSeconds,
+      wrongApnValue: typeof module.wrongApnValue === 'string' ? module.wrongApnValue : base?.wrongApnValue,
+      logPullDestination:
+        typeof module.logPullDestination === 'string' ? module.logPullDestination : base?.logPullDestination,
     };
   }
 

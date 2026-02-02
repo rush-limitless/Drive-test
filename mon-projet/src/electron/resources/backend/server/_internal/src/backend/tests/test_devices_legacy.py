@@ -13,7 +13,7 @@ if str(BACKEND_ROOT) not in sys.path:
     sys.path.append(str(BACKEND_ROOT))
 
 os.environ.setdefault("SPECIFY_ADB_EXECUTABLE", "adb")
-from api.devices_legacy import DeviceManager  # noqa: E402
+from api.devices_legacy import DeviceManager, ADB_EXECUTABLE  # noqa: E402
 
 
 def _make_result(stdout: str = "", returncode: int = 0, stderr: str = ""):
@@ -28,47 +28,47 @@ async def test_get_devices_returns_enriched_device(monkeypatch):
     device_id = "ABC123"
 
     responses = {
-        ("adb", "devices"): _make_result(
+        (ADB_EXECUTABLE, "devices"): _make_result(
             "List of devices attached\nABC123\tdevice\n"
         ),
-        ("adb", "-s", device_id, "shell", "getprop", "ro.product.model"): _make_result(
+        (ADB_EXECUTABLE, "-s", device_id, "shell", "getprop", "ro.product.model"): _make_result(
             "Pixel 7\n"
         ),
         (
-            "adb",
+            ADB_EXECUTABLE,
             "-s",
             device_id,
             "shell",
             "getprop",
             "ro.build.version.release",
         ): _make_result("14\n"),
-        ("adb", "-s", device_id, "shell", "getprop", "ro.product.brand"): _make_result(
+        (ADB_EXECUTABLE, "-s", device_id, "shell", "getprop", "ro.product.brand"): _make_result(
             "google\n"
         ),
-        ("adb", "-s", device_id, "shell", "getprop", "ro.product.marketname"): _make_result(
+        (ADB_EXECUTABLE, "-s", device_id, "shell", "getprop", "ro.product.marketname"): _make_result(
             "Pixel 7\n"
         ),
-        ("adb", "-s", device_id, "shell", "getprop", "ro.product.model.display"): _make_result(
+        (ADB_EXECUTABLE, "-s", device_id, "shell", "getprop", "ro.product.model.display"): _make_result(
             ""
         ),
-        ("adb", "-s", device_id, "shell", "getprop", "ro.product.name"): _make_result(
+        (ADB_EXECUTABLE, "-s", device_id, "shell", "getprop", "ro.product.name"): _make_result(
             ""
         ),
         (
-            "adb",
+            ADB_EXECUTABLE,
             "-s",
             device_id,
             "shell",
             "getprop",
             "ro.config.marketing_name",
         ): _make_result(""),
-        ("adb", "-s", device_id, "shell", "getprop", "ro.product.device"): _make_result(
+        (ADB_EXECUTABLE, "-s", device_id, "shell", "getprop", "ro.product.device"): _make_result(
             ""
         ),
-        ("adb", "-s", device_id, "shell", "dumpsys", "battery"): _make_result(
+        (ADB_EXECUTABLE, "-s", device_id, "shell", "dumpsys", "battery"): _make_result(
             "level: 79\nstatus: 2\n"
         ),
-        ("adb", "-s", device_id, "shell", "getprop", "gsm.operator.alpha"): _make_result(
+        (ADB_EXECUTABLE, "-s", device_id, "shell", "getprop", "gsm.operator.alpha"): _make_result(
             "Test Operator\n"
         ),
     }

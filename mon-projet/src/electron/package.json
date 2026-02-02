@@ -1,88 +1,89 @@
 {
-    "name": "mobiq",
-    "version": "2.3.0",
-    "description": "Mobile Test Automation Tool v2.2.0",
-    "author": "F2G Telco",
-    "main": "dist/main.js",
-    "scripts": {
-        "electron": "electron .",
-        "electron:dev": "electron . --dev",
-        "build": "tsc",
-        "build:watch": "tsc --watch",
-        "dist": "electron-builder",
-        "dist:linux": "electron-builder --linux",
-        "test": "vitest run"
+  "name": "mobiq",
+  "version": "2.3.7",
+  "description": "Mobile Test Automation Tool v2.3.7",
+  "author": "F2G Telco",
+  "main": "dist/main.js",
+  "scripts": {
+    "electron": "electron .",
+    "electron:dev": "electron . --dev",
+    "prebuild": "node ../../scripts/sync-version.js",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "dist": "electron-builder",
+    "dist:linux": "electron-builder --linux",
+    "test": "vitest run"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "typescript": "^4.9.5",
+    "electron": "^28.1.0",
+    "electron-builder": "^24.8.1",
+    "vitest": "^2.1.9"
+  },
+  "build": {
+    "appId": "com.mobiq.automation",
+    "productName": "MOBIQ",
+    "copyright": "Copyright © 2025 F2G Telco",
+    "directories": {
+      "output": "../../build/electron",
+      "buildResources": "build-resources"
     },
-    "dependencies": {},
-    "devDependencies": {
-        "@types/node": "^20.11.30",
-        "typescript": "^4.9.5",
-        "electron": "^28.1.0",
-        "electron-builder": "^24.8.1",
-        "vitest": "^2.1.9"
+    "compression": "store",
+    "removePackageScripts": true,
+    "buildDependenciesFromSource": false,
+    "nodeGypRebuild": false,
+    "files": [
+      "dist/**/*",
+      "resources/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "to": "backend",
+        "from": "resources/backend"
+      },
+      {
+        "to": "frontend",
+        "from": "resources/frontend"
+      },
+      {
+        "to": "adb",
+        "from": "resources/adb"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico",
+      "verifyUpdateCodeSignature": false,
+      "requestedExecutionLevel": "asInvoker"
     },
-    "build": {
-        "appId": "com.mobiq.automation",
-        "productName": "MOBIQ",
-        "copyright": "Copyright \u00a9 2025 F2G Telco",
-        "directories": {
-            "output": "../../build/electron",
-            "buildResources": "build-resources"
-        },
-        "compression": "store",
-        "removePackageScripts": true,
-        "buildDependenciesFromSource": false,
-        "nodeGypRebuild": false,
-        "files": [
-            "dist/**/*",
-            "resources/**/*",
-            "package.json"
-        ],
-        "extraResources": [
-            {
-                "to": "backend",
-                "from": "resources/backend"
-            },
-            {
-                "to": "frontend",
-                "from": "resources/frontend"
-            },
-            {
-                "to": "adb",
-                "from": "resources/adb"
-            }
-        ],
-        "win": {
-            "target": "nsis",
-            "icon": "icon.ico",
-            "verifyUpdateCodeSignature": false,
-            "requestedExecutionLevel": "asInvoker"
-        },
-        "nsis": {
-            "oneClick": false,
-            "allowToChangeInstallationDirectory": true,
-            "createDesktopShortcut": true,
-            "createStartMenuShortcut": true,
-            "shortcutName": "MOBIQ",
-            "deleteAppDataOnUninstall": false,
-            "runAfterFinish": true,
-            "menuCategory": "F2G Telco\\MOBIQ",
-            "artifactName": "MOBIQ-Setup-${version}.exe",
-            "guid": "F2G-TELCO-ADB-2025",
-            "warningsAsErrors": false,
-            "removeDefaultUninstallWelcomePage": false,
-            "installerIcon": "icon.ico",
-            "uninstallerIcon": "icon.ico",
-            "installerHeaderIcon": "icon.ico",
-            "license": "../../LICENSE.txt",
-            "include": "build-resources/installer.nsh"
-        },
-        "publish": {
-            "provider": "github",
-            "owner": "F2G-Telco-Academy",
-            "repo": "ADB-automation-tool",
-            "private": false
-        }
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "MOBIQ",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true,
+      "menuCategory": "F2G Telco\\MOBIQ",
+      "artifactName": "MOBIQ-Setup-${version}.exe",
+      "guid": "F2G-TELCO-ADB-2025",
+      "warningsAsErrors": false,
+      "removeDefaultUninstallWelcomePage": false,
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico",
+      "installerHeaderIcon": "icon.ico",
+      "license": "../../LICENSE.txt",
+      "include": "build-resources/installer.nsh"
     },
-    "productName": "MOBIQ"
+    "publish": {
+      "provider": "github",
+      "owner": "F2G-Telco-Academy",
+      "repo": "ADB-automation-tool",
+      "private": false
+    }
+  },
+  "productName": "MOBIQ"
 }

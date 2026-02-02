@@ -41,6 +41,7 @@ import {
   StopCircle,
   Copy,
   Download,
+  Upload,
   Tag,
   Lock,
   Unlock,
@@ -105,14 +106,52 @@ interface FlowComposerProps {
   backendUrl: string;
 }
 
+type PingConfig = {
+  target: string;
+  duration: number;
+  interval: number;
+};
+
+type WorkflowExportEntry = {
+  name: string;
+  description?: string;
+  modules: ModuleMetadata[];
+  tags?: string[];
+  locked?: boolean;
+  repeatSettings?: RepeatDurationSettings;
+};
+
+type WorkflowExportPayload = {
+  version: 1;
+  exportedAt: string;
+  source: 'MOBIQ';
+  workflows: WorkflowExportEntry[];
+};
+
 const CALL_TEST_STORAGE_KEY = 'callTestParams';
 const GLOBAL_CALL_TEST_KEY = '__global__';
 const WORKFLOW_BACKEND_MAP_KEY = 'workflowBackendMap';
+const DIAL_SECRET_CODE_STORAGE_KEY = 'dialSecretCode';
+const PING_CONFIG_STORAGE_KEY = 'pingModuleConfig';
+const APP_LAUNCHER_STORAGE_KEY = 'appLauncherSelection';
+const WRONG_APN_STORAGE_KEY = 'module.wrongApnValue';
+const LOG_PULL_STORAGE_KEY = 'module.logPullDestination';
 const CALL_TEST_DEFAULTS: CallTestValues = {
   countryCode: '+237',
   phoneNumber: '691234567',
   duration: 30,
   callCount: 1,
+};
+const DEFAULT_DIAL_SECRET_CODE = '*#9900#';
+const DEFAULT_PING_CONFIG: PingConfig = { target: '8.8.8.8', duration: 10, interval: 1.0 };
+const DEFAULT_APP_LAUNCH_DURATION_SECONDS = 15;
+const DEFAULT_WRONG_APN = 'arnaud';
+type AppLauncherOption = 'youtube' | 'maps' | 'chrome_news';
+const APP_LAUNCHER_OPTIONS: AppLauncherOption[] = ['youtube', 'maps', 'chrome_news'];
+const APP_LAUNCHER_DISPLAY: Record<AppLauncherOption, string> = {
+  youtube: 'YouTube',
+  maps: 'Maps navigation',
+  chrome_news: 'Chrome news site',
 };
 const WAITING_TIME_MODULE_ID = 'waiting_time';
 const DEFAULT_WAIT_DURATION_SECONDS = 5;
@@ -147,6 +186,15 @@ const convertDurationToSeconds = (value: number, unit: DurationUnit): number => 
   return normalizedValue * REPEAT_UNIT_TO_SECONDS[unit];
 };
 
+const downloadJson = (payload: WorkflowExportPayload, filename: string) => {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 5000);
+};
 
 type StoredCallTestValues = CallTestValues;
 
@@ -206,6 +254,65 @@ const readCallTestStorageMap = (): Record<string, StoredCallTestValues> => {
   return {};
 };
 
+const readStoredDialSecretCode = (): string => {
+  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+    return DEFAULT_DIAL_SECRET_CODE;
+  }
+  const stored = window.localStorage.getItem(DIAL_SECRET_CODE_STORAGE_KEY);
+  const trimmed = stored ? stored.trim() : '';
+  return trimmed || DEFAULT_DIAL_SECRET_CODE;
+};
+
+const readStoredPingConfig = (): PingConfig => {
+  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+    return { ...DEFAULT_PING_CONFIG };
+  }
+  try {
+    const raw = window.localStorage.getItem(PING_CONFIG_STORAGE_KEY);
+    if (!raw) {
+      return { ...DEFAULT_PING_CONFIG };
+    }
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object') {
+      const target = typeof parsed.target === 'string' ? parsed.target.trim() : DEFAULT_PING_CONFIG.target;
+      const duration = Number.isFinite(parsed.duration) ? Math.max(1, Math.round(parsed.duration)) : DEFAULT_PING_CONFIG.duration;
+      const interval = Number.isFinite(parsed.interval) ? Math.max(0.1, Number(parsed.interval)) : DEFAULT_PING_CONFIG.interval;
+      return { target: target || DEFAULT_PING_CONFIG.target, duration, interval };
+    }
+  } catch {
+    // ignore
+  }
+  return { ...DEFAULT_PING_CONFIG };
+};
+
+const readStoredAppLauncherSelection = (): AppLauncherOption => {
+  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+    return 'youtube';
+  }
+  const stored = window.localStorage.getItem(APP_LAUNCHER_STORAGE_KEY) as AppLauncherOption | null;
+  if (stored && APP_LAUNCHER_DISPLAY[stored]) {
+    return stored;
+  }
+  return 'youtube';
+};
+
+const readStoredWrongApnValue = (): string => {
+  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+    return DEFAULT_WRONG_APN;
+  }
+  const raw = window.localStorage.getItem(WRONG_APN_STORAGE_KEY);
+  const value = raw ? raw.trim() : '';
+  return value.length > 0 ? value : DEFAULT_WRONG_APN;
+};
+
+const readStoredLogPullDestination = (): string => {
+  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
+    return '';
+  }
+  const raw = window.localStorage.getItem(LOG_PULL_STORAGE_KEY);
+  return raw ? raw.trim() : '';
+};
+
 const resolveCallTestValuesForDevice = (deviceId?: string | null): StoredCallTestValues => {
   const map = readCallTestStorageMap();
   if (deviceId && map[deviceId]) {
@@ -227,6 +334,38 @@ const buildModuleParametersForDevice = (module: ModuleMetadata, deviceId?: strin
       call_count: values.callCount,
       calls: values.callCount,
     };
+  }
+  if (module.id === 'dial_secret_code') {
+    const code = (module.secretCode ?? readStoredDialSecretCode()).trim();
+    return { code };
+  }
+  if (module.id === 'launch_app') {
+    return {
+      app: module.appLaunchTarget ?? readStoredAppLauncherSelection(),
+      duration_seconds:
+        typeof module.appLaunchDurationSeconds === 'number'
+          ? Math.max(1, Math.round(module.appLaunchDurationSeconds))
+          : DEFAULT_APP_LAUNCH_DURATION_SECONDS,
+    };
+  }
+  if (module.id === 'ping') {
+    const fallback = readStoredPingConfig();
+    const target = module.pingTarget ?? fallback.target;
+    const duration = typeof module.pingDurationSeconds === 'number'
+      ? Math.max(1, Math.round(module.pingDurationSeconds))
+      : fallback.duration;
+    const interval = typeof module.pingIntervalSeconds === 'number'
+      ? Math.max(0.1, Number(module.pingIntervalSeconds))
+      : fallback.interval;
+    return { target, duration, interval };
+  }
+  if (module.id === 'wrong_apn_configuration') {
+    const apn_value = module.wrongApnValue ?? readStoredWrongApnValue();
+    return { apn_value, use_ui_flow: true };
+  }
+  if (module.id === 'pull_device_logs' || module.id === 'pull_rf_logs') {
+    const destination = module.logPullDestination ?? readStoredLogPullDestination();
+    return { destination };
   }
   return undefined;
 };
@@ -309,12 +448,20 @@ const describeCallTestModule = (module: ModuleMetadata): string => {
   return `Call to ${numberLabel} - ${attemptLabel}`;
 };
 
+const describeDialSecretCode = (module: ModuleMetadata): string => {
+  const code = (module.secretCode ?? readStoredDialSecretCode()).trim();
+  return code ? `Dial ${code}` : 'Dial USSD code';
+};
+
 const describeWaitingModule = (module: ModuleMetadata): string =>
-  `Wait ${module.waitDurationSeconds - DEFAULT_WAIT_DURATION_SECONDS} second(s)`;
+  `Wait ${module.waitDurationSeconds} second(s)`;
 
 const getModuleTooltipLabel = (module: ModuleMetadata): string | undefined => {
   if (module.id === 'call_test') {
     return describeCallTestModule(module);
+  }
+  if (module.id === 'dial_secret_code') {
+    return describeDialSecretCode(module);
   }
   if (isWaitingModule(module)) {
     return describeWaitingModule(module);
@@ -386,6 +533,47 @@ const cloneModuleForWorkflow = (module: ModuleMetadata): ModuleMetadata => {
       callTestParams: { ...values },
     };
   }
+  if (module.id === 'dial_secret_code') {
+    cloned = {
+      ...cloned,
+      secretCode: typeof module.secretCode === 'string' ? module.secretCode : readStoredDialSecretCode(),
+    };
+  }
+  if (module.id === 'launch_app') {
+    cloned = {
+      ...cloned,
+      appLaunchTarget:
+        typeof module.appLaunchTarget === 'string' ? module.appLaunchTarget : readStoredAppLauncherSelection(),
+      appLaunchDurationSeconds:
+        typeof module.appLaunchDurationSeconds === 'number'
+          ? module.appLaunchDurationSeconds
+          : DEFAULT_APP_LAUNCH_DURATION_SECONDS,
+    };
+  }
+  if (module.id === 'ping') {
+    const config = readStoredPingConfig();
+    cloned = {
+      ...cloned,
+      pingTarget: typeof module.pingTarget === 'string' ? module.pingTarget : config.target,
+      pingDurationSeconds:
+        typeof module.pingDurationSeconds === 'number' ? module.pingDurationSeconds : config.duration,
+      pingIntervalSeconds:
+        typeof module.pingIntervalSeconds === 'number' ? module.pingIntervalSeconds : config.interval,
+    };
+  }
+  if (module.id === 'wrong_apn_configuration') {
+    cloned = {
+      ...cloned,
+      wrongApnValue: typeof module.wrongApnValue === 'string' ? module.wrongApnValue : readStoredWrongApnValue(),
+    };
+  }
+  if (module.id === 'pull_device_logs' || module.id === 'pull_rf_logs') {
+    cloned = {
+      ...cloned,
+      logPullDestination:
+        typeof module.logPullDestination === 'string' ? module.logPullDestination : readStoredLogPullDestination(),
+    };
+  }
   return cloned;
 };
 
@@ -412,6 +600,47 @@ const readWorkflowBackendMap = (): Record<string, string> => {
     console.warn('[FlowComposer] Failed to read backend workflow map', error);
   }
   return {};
+};
+
+const normalizeRepeatSettings = (value: unknown): RepeatDurationSettings => {
+  const record = value && typeof value === 'object' ? (value as Partial<RepeatDurationSettings>) : {};
+  const repeatCountCandidate = typeof record.repeatCount === 'number' ? record.repeatCount : DEFAULT_REPEAT_SETTINGS.repeatCount;
+  const durationValueCandidate = typeof record.durationValue === 'number' ? record.durationValue : DEFAULT_REPEAT_SETTINGS.durationValue;
+  const durationUnitCandidate =
+    typeof record.durationUnit === 'string' && record.durationUnit in REPEAT_UNIT_TO_SECONDS
+      ? (record.durationUnit as DurationUnit)
+      : DEFAULT_REPEAT_SETTINGS.durationUnit;
+
+  return {
+    repeatCount: Math.max(1, Math.trunc(repeatCountCandidate)),
+    durationValue: Math.max(0, Math.trunc(durationValueCandidate)),
+    durationUnit: durationUnitCandidate,
+  };
+};
+
+const sanitizeSecretCode = (value: string): string =>
+  value.replace(/[^0-9*#]/g, '').trim();
+
+const sanitizeWrongApn = (value: string): string =>
+  value.replace(/[^A-Za-z0-9._-]/g, '').trim();
+
+const parseWorkflowImportPayload = (data: unknown): WorkflowExportEntry[] => {
+  if (!data) {
+    return [];
+  }
+  if (Array.isArray(data)) {
+    return data as WorkflowExportEntry[];
+  }
+  if (typeof data === 'object') {
+    const record = data as Partial<WorkflowExportPayload> & Record<string, unknown>;
+    if (Array.isArray(record.workflows)) {
+      return record.workflows as WorkflowExportEntry[];
+    }
+    if (Array.isArray((record as any).modules)) {
+      return [record as WorkflowExportEntry];
+    }
+  }
+  return [];
 };
 
 const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
@@ -443,9 +672,9 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
   const [backendWorkflowIds, setBackendWorkflowIds] = useState<string[]>([]);
   const [workflowExecutionReports, setWorkflowExecutionReports] = useState<Record<string, WorkflowExecutionReport>>({});
   const [preflightReports, setPreflightReports] = useState<Record<string, WorkflowPreflightReport | null>>({});
-  const [workflowTagFilter, setWorkflowTagFilter] = useState<string>('all');
   const [exportMenuAnchor, setExportMenuAnchor] = useState<HTMLElement | null>(null);
   const [exportMenuWorkflow, setExportMenuWorkflow] = useState<StoredWorkflow | null>(null);
+  const importInputRef = useRef<HTMLInputElement | null>(null);
   const moduleCatalogMap = useMemo(() => new Map(MODULE_CATALOG.map((m) => [m.id, m])), []);
   const normalizedBackendUrl = useMemo(() => (backendUrl ? backendUrl.replace(/\/$/, '') : ''), [backendUrl]);
   const userTimeZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone || 'local', []);
@@ -464,19 +693,6 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
       timeZone: userTimeZone,
     });
   }, [scheduleDelayMinutes, userTimeZone]);
-
-  const availableWorkflowTags = useMemo(() => {
-    const tagSet = new Set<string>();
-    workflows.forEach((workflow) => {
-      (workflow.tags ?? []).forEach((tag) => {
-        if (tag && tag.trim().length > 0) {
-          tagSet.add(tag.trim());
-        }
-      });
-    });
-    return ['all', ...Array.from(tagSet).sort((a, b) => a.localeCompare(b))];
-  }, [workflows]);
-
 
   const handleCloneWorkflow = useCallback(
     (workflow: StoredWorkflow) => {
@@ -569,6 +785,64 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
       }));
     },
     []
+  );
+
+  const handleImportClick = () => {
+    importInputRef.current?.click();
+  };
+
+  const handleImportFileChange = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) {
+        return;
+      }
+
+      try {
+        const contents = await file.text();
+        const parsed = JSON.parse(contents);
+        const entries = parseWorkflowImportPayload(parsed);
+
+        if (entries.length === 0) {
+          throw new Error('No workflows found in the import file.');
+        }
+
+        const importedNames: string[] = [];
+        entries.forEach((entry, index) => {
+          if (!entry || typeof entry !== 'object') {
+            return;
+          }
+          const name = typeof entry.name === 'string' ? entry.name.trim() : '';
+          const description = typeof entry.description === 'string' ? entry.description : '';
+          const tags = Array.isArray(entry.tags) ? entry.tags : [];
+          const locked = Boolean(entry.locked);
+          const modules = Array.isArray(entry.modules) ? entry.modules : [];
+          const repeatSettings = normalizeRepeatSettings(entry.repeatSettings);
+
+          const newWorkflow = addStoredWorkflow({
+            name: name || `Imported Workflow ${index + 1}`,
+            description,
+            modules,
+            tags,
+            locked,
+          });
+          updateRepeatSettingsForWorkflow(newWorkflow.id, repeatSettings);
+          importedNames.push(newWorkflow.name);
+        });
+
+        setWorkflows(getStoredWorkflows());
+        setSnackbar({
+          severity: 'success',
+          message: `Imported ${importedNames.length} workflow${importedNames.length === 1 ? '' : 's'}.`,
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unable to import workflow.';
+        setSnackbar({ severity: 'error', message });
+      } finally {
+        event.target.value = '';
+      }
+    },
+    [updateRepeatSettingsForWorkflow]
   );
 
   const setWorkflowPaused = useCallback((workflowId: string, paused: boolean) => {
@@ -677,7 +951,10 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
   }, [cancelActiveModuleRuns, markWorkflowCancelled, setWorkflowPaused]);
 
   const sortedModuleCatalog = useMemo(
-    () => [...MODULE_CATALOG].sort((a, b) => a.name.localeCompare(b.name)),
+    () =>
+      MODULE_CATALOG
+        .filter((module) => module.hiddenInModulesPage !== true)
+        .sort((a, b) => a.name.localeCompare(b.name)),
     []
   );
 
@@ -709,8 +986,6 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
   const filteredWorkflows = sortedWorkflows.filter((workflow) => {
     const matchesStatus = filterStatus === 'all' ? true : workflow.status === filterStatus;
     const query = searchQuery.trim().toLowerCase();
-    const tagMatches =
-      workflowTagFilter === 'all' || (workflow.tags ?? []).some((tag) => tag.toLowerCase() === workflowTagFilter.toLowerCase());
     const moduleLabels = workflow.modules
       .map((module) => (module.name || module.id || '').toLowerCase())
       .join(' ');
@@ -721,7 +996,7 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
       (workflow.description || '').toLowerCase().includes(query) ||
       moduleLabels.includes(query) ||
       tagLabels.includes(query);
-    return matchesStatus && matchesSearch && tagMatches;
+    return matchesStatus && matchesSearch;
   });
 
   const getStatusColor = (status: string) => {
@@ -1558,8 +1833,34 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
         closeExportMenu();
       }
     },
-    [exportMenuWorkflow, ensureBackendWorkflow, normalizedBackendUrl, workflowBackendMap]
+    [closeExportMenu, exportMenuWorkflow, ensureBackendWorkflow, normalizedBackendUrl, workflowBackendMap]
   );
+
+  const handleExportWorkflowDefinition = useCallback(() => {
+    if (!exportMenuWorkflow) {
+      closeExportMenu();
+      return;
+    }
+    const payload: WorkflowExportPayload = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      source: 'MOBIQ',
+      workflows: [
+        {
+          name: exportMenuWorkflow.name,
+          description: exportMenuWorkflow.description,
+          modules: exportMenuWorkflow.modules,
+          tags: exportMenuWorkflow.tags ?? [],
+          locked: exportMenuWorkflow.locked,
+          repeatSettings: getRepeatSettingsForWorkflow(exportMenuWorkflow.id),
+        },
+      ],
+    };
+    const filename = `${exportMenuWorkflow.name.replace(/\s+/g, '_').toLowerCase()}_workflow.json`;
+    downloadJson(payload, filename);
+    setSnackbar({ severity: 'success', message: 'Workflow exported.' });
+    closeExportMenu();
+  }, [closeExportMenu, exportMenuWorkflow, getRepeatSettingsForWorkflow]);
 
   const handleRunWorkflow = async (workflow: StoredWorkflow) => {
     if (workflow.locked) {
@@ -1922,27 +2223,6 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
               <MenuItem value="draft">Draft ({draftWorkflows.length})</MenuItem>
             </Select>
           </FormControl>
-          <FormControl size="small">
-            <Select
-              value={workflowTagFilter}
-              onChange={(e) => setWorkflowTagFilter(String(e.target.value))}
-              sx={{
-                height: 36,
-                borderRadius: '10px',
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: '#E5E7EB'
-                }
-              }}
-              IconComponent={ChevronDown}
-            >
-              {availableWorkflowTags.map((tag) => (
-                <MenuItem key={tag} value={tag}>
-                  {tag === 'all' ? 'All tags' : tag}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
           <Chip
             label={`${selectedDeviceIds.length} device${selectedDeviceIds.length === 1 ? '' : 's'} selected`}
             size="small"
@@ -1977,6 +2257,34 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
               )
             }}
           />
+
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="application/json"
+            onChange={handleImportFileChange}
+            style={{ display: 'none' }}
+          />
+
+          <Button
+            variant="outlined"
+            startIcon={<Upload size={18} />}
+            onClick={handleImportClick}
+            sx={{
+              height: 40,
+              borderRadius: '10px',
+              textTransform: 'none',
+              fontWeight: 600,
+              borderColor: '#CBD5E1',
+              color: '#1E293B',
+              '&:hover': {
+                borderColor: '#94A3B8',
+                backgroundColor: '#F8FAFC'
+              }
+            }}
+          >
+            Import
+          </Button>
           
           <Button
             variant="contained"
@@ -2308,6 +2616,22 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
                                 <Copy size={16} />
                               </IconButton>
                             </Tooltip>
+                            <Tooltip title="Export Workflow">
+                              <IconButton
+                                onClick={(event) => openExportMenu(event, workflow)}
+                                sx={{
+                                  backgroundColor: '#EEF2FF',
+                                  color: '#1D4ED8',
+                                  width: 36,
+                                  height: 36,
+                                  '&:hover': {
+                                    backgroundColor: '#E0E7FF'
+                                  }
+                                }}
+                              >
+                                <Download size={16} />
+                              </IconButton>
+                            </Tooltip>
                             <Tooltip title="Schedule Workflow">
                               <IconButton
                                 onClick={() => handleOpenScheduleDialog(workflow)}
@@ -2443,6 +2767,24 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
       </CardContent>
     </Card>
 
+      <Menu
+        anchorEl={exportMenuAnchor}
+        open={Boolean(exportMenuAnchor)}
+        onClose={closeExportMenu}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <MenuItem onClick={handleExportWorkflowDefinition}>
+          Export workflow (JSON)
+        </MenuItem>
+        <MenuItem onClick={() => handleExportWorkflowReport('csv')}>
+          Export last run (CSV)
+        </MenuItem>
+        <MenuItem onClick={() => handleExportWorkflowReport('pdf')}>
+          Export last run (PDF)
+        </MenuItem>
+      </Menu>
+
       <Dialog open={scheduleDialogOpen} onClose={handleScheduleDialogClose} fullWidth maxWidth="xs">
         <DialogTitle>Schedule Workflow</DialogTitle>
         <DialogContent dividers>
@@ -2496,12 +2838,17 @@ const FlowComposer: React.FC<FlowComposerProps> = ({ backendUrl }) => {
 
       <Snackbar
         open={Boolean(snackbar)}
-        autoHideDuration={4000}
+        autoHideDuration={8000}
         onClose={() => setSnackbar(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         {snackbar ? (
-          <Alert severity={snackbar.severity} onClose={() => setSnackbar(null)} sx={{ borderRadius: '8px' }}>
+          <Alert
+            severity={snackbar.severity}
+            variant="filled"
+            onClose={() => setSnackbar(null)}
+            sx={{ borderRadius: '10px', fontWeight: 600, boxShadow: '0 10px 24px rgba(0, 0, 0, 0.25)' }}
+          >
             {snackbar.message}
           </Alert>
         ) : null}
@@ -2561,11 +2908,7 @@ const WorkflowEditorDialog: React.FC<WorkflowEditorDialogProps> = ({
     if (!module) {
       return;
     }
-    const hydratedModule =
-      module.id === WAITING_TIME_MODULE_ID
-        ? { ...module, waitDurationSeconds: getStoredWaitingTimeDuration() }
-        : module;
-    setSelectedModules((prev) => [...prev, cloneModuleForWorkflow(hydratedModule)]);
+    setSelectedModules((prev) => [...prev, cloneModuleForWorkflow(module)]);
     setModuleToAdd('');
   };
 
@@ -2646,6 +2989,100 @@ const WorkflowEditorDialog: React.FC<WorkflowEditorDialogProps> = ({
       next[index] = {
         ...next[index],
         waitDurationSeconds: sanitizeWaitDurationSeconds(value),
+      };
+      return next;
+    });
+  };
+
+  const handleSecretCodeChange = (index: number, value: string) => {
+    const trimmed = sanitizeSecretCode(value);
+    setSelectedModules((prev) => {
+      const next = [...prev];
+      if (!next[index]) {
+        return prev;
+      }
+      next[index] = {
+        ...next[index],
+        secretCode: trimmed,
+      };
+      return next;
+    });
+  };
+
+  const handleAppLaunchTargetChange = (index: number, value: string) => {
+    setSelectedModules((prev) => {
+      const next = [...prev];
+      if (!next[index]) {
+        return prev;
+      }
+      next[index] = {
+        ...next[index],
+        appLaunchTarget: value,
+      };
+      return next;
+    });
+  };
+
+  const handleAppLaunchDurationChange = (index: number, value: number) => {
+    setSelectedModules((prev) => {
+      const next = [...prev];
+      if (!next[index]) {
+        return prev;
+      }
+      next[index] = {
+        ...next[index],
+        appLaunchDurationSeconds: Math.max(1, Math.round(value)),
+      };
+      return next;
+    });
+  };
+
+  const handlePingChange = (index: number, patch: Partial<PingConfig>) => {
+    setSelectedModules((prev) => {
+      const next = [...prev];
+      if (!next[index]) {
+        return prev;
+      }
+      next[index] = {
+        ...next[index],
+        pingTarget: typeof patch.target === 'string' ? patch.target : next[index].pingTarget,
+        pingDurationSeconds:
+          typeof patch.duration === 'number'
+            ? Math.max(1, Math.round(patch.duration))
+            : next[index].pingDurationSeconds,
+        pingIntervalSeconds:
+          typeof patch.interval === 'number'
+            ? Math.max(0.1, Number(patch.interval))
+            : next[index].pingIntervalSeconds,
+      };
+      return next;
+    });
+  };
+
+  const handleWrongApnChange = (index: number, value: string) => {
+    const trimmed = sanitizeWrongApn(value);
+    setSelectedModules((prev) => {
+      const next = [...prev];
+      if (!next[index]) {
+        return prev;
+      }
+      next[index] = {
+        ...next[index],
+        wrongApnValue: trimmed,
+      };
+      return next;
+    });
+  };
+
+  const handleLogPullDestinationChange = (index: number, value: string) => {
+    setSelectedModules((prev) => {
+      const next = [...prev];
+      if (!next[index]) {
+        return prev;
+      }
+      next[index] = {
+        ...next[index],
+        logPullDestination: value.trim(),
       };
       return next;
     });
@@ -2808,19 +3245,44 @@ const WorkflowEditorDialog: React.FC<WorkflowEditorDialogProps> = ({
                       <Typography sx={{ fontWeight: 500, color: '#0F172A' }}>
                         {index + 1}. {module.name}
                       </Typography>
-                      {isWaitingModule(module) ? (
+                      {isWaitingModule(module) && (
                         <Typography variant="caption" sx={{ color: '#475569' }}>
-                          Wait {module.waitDurationSeconds - DEFAULT_WAIT_DURATION_SECONDS} second(s)
+                          Wait {module.waitDurationSeconds} second(s)
                         </Typography>
-                      ) : null}
+                      )}
+                      {module.id === 'dial_secret_code' && (
+                        <Typography variant="caption" sx={{ color: '#475569' }}>
+                          {describeDialSecretCode(module)}
+                        </Typography>
+                      )}
+                      {module.id === 'launch_app' && (
+                        <Typography variant="caption" sx={{ color: '#475569' }}>
+                          Target {APP_LAUNCHER_DISPLAY[(module.appLaunchTarget ?? readStoredAppLauncherSelection()) as AppLauncherOption] ?? 'App'}
+                        </Typography>
+                      )}
+                      {module.id === 'ping' && (
+                        <Typography variant="caption" sx={{ color: '#475569' }}>
+                          Ping {(module.pingTarget ?? readStoredPingConfig().target) || 'target'}
+                        </Typography>
+                      )}
+                      {module.id === 'wrong_apn_configuration' && (
+                        <Typography variant="caption" sx={{ color: '#475569' }}>
+                          APN {(module.wrongApnValue ?? readStoredWrongApnValue()) || DEFAULT_WRONG_APN}
+                        </Typography>
+                      )}
+                      {(module.id === 'pull_device_logs' || module.id === 'pull_rf_logs') && (
+                        <Typography variant="caption" sx={{ color: '#475569' }}>
+                          Destination {(module.logPullDestination ?? readStoredLogPullDestination()) || 'not set'}
+                        </Typography>
+                      )}
                     </Box>
                     <Stack direction="row" spacing={1} alignItems="center">
-                      {isWaitingModule(module) ? (
+                      {isWaitingModule(module) && (
                         <TextField
                           size="small"
                           type="number"
                           label="Seconds"
-                          value={module.waitDurationSeconds - DEFAULT_WAIT_DURATION_SECONDS}
+                          value={module.waitDurationSeconds}
                           onChange={(event) => {
                             const parsed = Number(event.target.value);
                             if (Number.isFinite(parsed)) {
@@ -2830,7 +3292,104 @@ const WorkflowEditorDialog: React.FC<WorkflowEditorDialogProps> = ({
                           inputProps={{ min: MIN_WAIT_DURATION_SECONDS, max: MAX_WAIT_DURATION_SECONDS }}
                           sx={{ width: 120 }}
                         />
-                      ) : null}
+                      )}
+                      {module.id === 'dial_secret_code' && (
+                        <TextField
+                          size="small"
+                          label="USSD"
+                          value={module.secretCode ?? ''}
+                          onChange={(event) => handleSecretCodeChange(index, event.target.value)}
+                          helperText="Digits, * and # only"
+                          sx={{ width: 160 }}
+                        />
+                      )}
+                      {module.id === 'launch_app' && (
+                        <>
+                          <FormControl size="small" sx={{ minWidth: 140 }}>
+                            <Select
+                              value={module.appLaunchTarget ?? readStoredAppLauncherSelection()}
+                              onChange={(event) => handleAppLaunchTargetChange(index, String(event.target.value))}
+                            >
+                              {APP_LAUNCHER_OPTIONS.map((option) => (
+                                <MenuItem key={option} value={option}>
+                                  {APP_LAUNCHER_DISPLAY[option]}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                          <TextField
+                            size="small"
+                            type="number"
+                            label="Seconds"
+                            value={module.appLaunchDurationSeconds ?? DEFAULT_APP_LAUNCH_DURATION_SECONDS}
+                            onChange={(event) => {
+                              const parsed = Number(event.target.value);
+                              if (Number.isFinite(parsed)) {
+                                handleAppLaunchDurationChange(index, parsed);
+                              }
+                            }}
+                            inputProps={{ min: 1, max: 600 }}
+                            sx={{ width: 110 }}
+                          />
+                        </>
+                      )}
+                      {module.id === 'ping' && (
+                        <>
+                          <TextField
+                            size="small"
+                            label="Target"
+                            value={module.pingTarget ?? readStoredPingConfig().target}
+                            onChange={(event) => handlePingChange(index, { target: event.target.value.trim() })}
+                            sx={{ width: 160 }}
+                          />
+                          <TextField
+                            size="small"
+                            type="number"
+                            label="Duration"
+                            value={module.pingDurationSeconds ?? readStoredPingConfig().duration}
+                            onChange={(event) => {
+                              const parsed = Number(event.target.value);
+                              if (Number.isFinite(parsed)) {
+                                handlePingChange(index, { duration: parsed });
+                              }
+                            }}
+                            inputProps={{ min: 1, max: 600 }}
+                            sx={{ width: 110 }}
+                          />
+                          <TextField
+                            size="small"
+                            type="number"
+                            label="Interval"
+                            value={module.pingIntervalSeconds ?? readStoredPingConfig().interval}
+                            onChange={(event) => {
+                              const parsed = Number(event.target.value);
+                              if (Number.isFinite(parsed)) {
+                                handlePingChange(index, { interval: parsed });
+                              }
+                            }}
+                            inputProps={{ min: 0.1, step: 0.1 }}
+                            sx={{ width: 110 }}
+                          />
+                        </>
+                      )}
+                      {module.id === 'wrong_apn_configuration' && (
+                        <TextField
+                          size="small"
+                          label="APN"
+                          value={module.wrongApnValue ?? readStoredWrongApnValue()}
+                          onChange={(event) => handleWrongApnChange(index, event.target.value)}
+                          sx={{ width: 160 }}
+                        />
+                      )}
+                      {(module.id === 'pull_device_logs' || module.id === 'pull_rf_logs') && (
+                        <TextField
+                          size="small"
+                          label="Destination"
+                          value={module.logPullDestination ?? readStoredLogPullDestination()}
+                          onChange={(event) => handleLogPullDestinationChange(index, event.target.value)}
+                          sx={{ width: 220 }}
+                        />
+                      )}
                       <IconButton
                         size="small"
                         onClick={() => moveModule(index, -1)}

@@ -99,6 +99,14 @@ interface WorkflowBuilderDraftModule {
   id: string;
   waitDurationSeconds?: number;
   callTestParams?: CallTestValues;
+  secretCode?: string;
+  appLaunchTarget?: string;
+  appLaunchDurationSeconds?: number;
+  pingTarget?: string;
+  pingDurationSeconds?: number;
+  pingIntervalSeconds?: number;
+  wrongApnValue?: string;
+  logPullDestination?: string;
 }
 
 interface WorkflowBuilderDraft {
@@ -457,6 +465,9 @@ const persistCustomCode = (value: string) => {
   }
 };
 
+const sanitizeSecretCode = (value: string): string =>
+  value.replace(/[^0-9*#]/g, '').trim();
+
 const validatePingTarget = (raw: string): string | null => {
   const value = raw.trim();
   if (!value) {
@@ -719,6 +730,45 @@ const cloneModuleForBuilderDraft = (module: ModuleMetadata): ModuleMetadata => {
       callTestParams: { ...params },
     };
   }
+  if (module.id === 'dial_secret_code') {
+    const code = typeof module.secretCode === 'string' ? module.secretCode : readStoredCustomCode();
+    cloned = {
+      ...cloned,
+      secretCode: code,
+    };
+  }
+  if (module.id === 'launch_app') {
+    cloned = {
+      ...cloned,
+      appLaunchTarget: typeof module.appLaunchTarget === 'string' ? module.appLaunchTarget : readAppLauncherSelection(),
+      appLaunchDurationSeconds:
+        typeof module.appLaunchDurationSeconds === 'number' ? module.appLaunchDurationSeconds : 15,
+    };
+  }
+  if (module.id === 'ping') {
+    const config = readStoredPingConfig();
+    cloned = {
+      ...cloned,
+      pingTarget: typeof module.pingTarget === 'string' ? module.pingTarget : config.target,
+      pingDurationSeconds:
+        typeof module.pingDurationSeconds === 'number' ? module.pingDurationSeconds : config.duration,
+      pingIntervalSeconds:
+        typeof module.pingIntervalSeconds === 'number' ? module.pingIntervalSeconds : config.interval,
+    };
+  }
+  if (module.id === 'wrong_apn_configuration') {
+    cloned = {
+      ...cloned,
+      wrongApnValue: typeof module.wrongApnValue === 'string' ? module.wrongApnValue : readStoredWrongApnValue(),
+    };
+  }
+  if (module.id === 'pull_device_logs' || module.id === 'pull_rf_logs') {
+    cloned = {
+      ...cloned,
+      logPullDestination:
+        typeof module.logPullDestination === 'string' ? module.logPullDestination : readStoredLogDestination(),
+    };
+  }
   return cloned;
 };
 
@@ -752,6 +802,30 @@ const readWorkflowBuilderDraft = (): WorkflowBuilderDraft | null => {
             }
             if (isStoredCallTestValues((entry as any).callTestParams)) {
               draftModule.callTestParams = sanitizeCallTestValues((entry as any).callTestParams);
+            }
+            if (typeof (entry as any).secretCode === 'string') {
+              draftModule.secretCode = (entry as any).secretCode;
+            }
+            if (typeof (entry as any).appLaunchTarget === 'string') {
+              draftModule.appLaunchTarget = (entry as any).appLaunchTarget;
+            }
+            if (typeof (entry as any).appLaunchDurationSeconds === 'number') {
+              draftModule.appLaunchDurationSeconds = (entry as any).appLaunchDurationSeconds;
+            }
+            if (typeof (entry as any).pingTarget === 'string') {
+              draftModule.pingTarget = (entry as any).pingTarget;
+            }
+            if (typeof (entry as any).pingDurationSeconds === 'number') {
+              draftModule.pingDurationSeconds = (entry as any).pingDurationSeconds;
+            }
+            if (typeof (entry as any).pingIntervalSeconds === 'number') {
+              draftModule.pingIntervalSeconds = (entry as any).pingIntervalSeconds;
+            }
+            if (typeof (entry as any).wrongApnValue === 'string') {
+              draftModule.wrongApnValue = (entry as any).wrongApnValue;
+            }
+            if (typeof (entry as any).logPullDestination === 'string') {
+              draftModule.logPullDestination = (entry as any).logPullDestination;
             }
             return draftModule;
           })
@@ -804,6 +878,30 @@ const hydrateWorkflowBuilderDraft = (draft: WorkflowBuilderDraft): WorkflowModul
           ...hydrated,
           callTestParams: sanitizeCallTestValues(entry.callTestParams),
         };
+      }
+      if (typeof entry.secretCode === 'string') {
+        hydrated = { ...hydrated, secretCode: entry.secretCode };
+      }
+      if (typeof entry.appLaunchTarget === 'string') {
+        hydrated = { ...hydrated, appLaunchTarget: entry.appLaunchTarget };
+      }
+      if (typeof entry.appLaunchDurationSeconds === 'number') {
+        hydrated = { ...hydrated, appLaunchDurationSeconds: entry.appLaunchDurationSeconds };
+      }
+      if (typeof entry.pingTarget === 'string') {
+        hydrated = { ...hydrated, pingTarget: entry.pingTarget };
+      }
+      if (typeof entry.pingDurationSeconds === 'number') {
+        hydrated = { ...hydrated, pingDurationSeconds: entry.pingDurationSeconds };
+      }
+      if (typeof entry.pingIntervalSeconds === 'number') {
+        hydrated = { ...hydrated, pingIntervalSeconds: entry.pingIntervalSeconds };
+      }
+      if (typeof entry.wrongApnValue === 'string') {
+        hydrated = { ...hydrated, wrongApnValue: entry.wrongApnValue };
+      }
+      if (typeof entry.logPullDestination === 'string') {
+        hydrated = { ...hydrated, logPullDestination: entry.logPullDestination };
       }
       return {
         instanceId: `draft-${entry.id}-${timestamp}-${index}-${Math.random().toString(36).slice(2, 6)}`,
@@ -1003,6 +1101,30 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         }
         if (entry.module.callTestParams) {
           serialized.callTestParams = { ...entry.module.callTestParams };
+        }
+        if (typeof entry.module.secretCode === 'string') {
+          serialized.secretCode = entry.module.secretCode;
+        }
+        if (typeof entry.module.appLaunchTarget === 'string') {
+          serialized.appLaunchTarget = entry.module.appLaunchTarget;
+        }
+        if (typeof entry.module.appLaunchDurationSeconds === 'number') {
+          serialized.appLaunchDurationSeconds = entry.module.appLaunchDurationSeconds;
+        }
+        if (typeof entry.module.pingTarget === 'string') {
+          serialized.pingTarget = entry.module.pingTarget;
+        }
+        if (typeof entry.module.pingDurationSeconds === 'number') {
+          serialized.pingDurationSeconds = entry.module.pingDurationSeconds;
+        }
+        if (typeof entry.module.pingIntervalSeconds === 'number') {
+          serialized.pingIntervalSeconds = entry.module.pingIntervalSeconds;
+        }
+        if (typeof entry.module.wrongApnValue === 'string') {
+          serialized.wrongApnValue = entry.module.wrongApnValue;
+        }
+        if (typeof entry.module.logPullDestination === 'string') {
+          serialized.logPullDestination = entry.module.logPullDestination;
         }
         return serialized;
       }),
@@ -1862,25 +1984,61 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         });
 
         if (!silent) {
-          const alreadyDevices = deviceResults
-            .filter((item) => {
-              const payload = (item.response as any)?.result ?? (item.response as any);
-              return payload && (payload.already_active || payload.already_configured || payload.already_on || payload.already_off);
-            })
-            .map((item) => item.deviceId);
+          const alreadyActiveDevices: string[] = [];
+          const alreadyDesiredDevices: string[] = [];
+
+          deviceResults.forEach((item) => {
+            const payload = (item.response as any)?.result ?? (item.response as any);
+            if (!payload) {
+              return;
+            }
+            const alreadyActive = Boolean(payload.already_active || payload.already_on || payload.already_enabled);
+            const alreadyDesired = Boolean(
+              payload.already_off || payload.already_disabled || payload.already_configured || payload.already_in_state
+            );
+            if (alreadyActive) {
+              alreadyActiveDevices.push(item.deviceId);
+            } else if (alreadyDesired) {
+              alreadyDesiredDevices.push(item.deviceId);
+            }
+          });
 
           if (failures.length === 0) {
-            if (alreadyDevices.length > 0) {
+            if (alreadyActiveDevices.length === deviceResults.length) {
               setSnackbar({
                 severity: 'info',
-                message: `${module.name}: device already in desired state (${alreadyDevices.join(', ')}).${detailSuffix}`,
+                message: `${module.name}: already active/running on ${alreadyActiveDevices.join(', ')}.${detailSuffix}`,
               });
-            } else {
+              return;
+            }
+            if (alreadyDesiredDevices.length === deviceResults.length) {
+              setSnackbar({
+                severity: 'info',
+                message: `${module.name}: device already in desired state (${alreadyDesiredDevices.join(', ')}).${detailSuffix}`,
+              });
+              return;
+            }
+            if (alreadyActiveDevices.length > 0 || alreadyDesiredDevices.length > 0) {
+              const activeNote =
+                alreadyActiveDevices.length > 0
+                  ? ` Already active: ${alreadyActiveDevices.join(', ')}.`
+                  : '';
+              const desiredNote =
+                alreadyDesiredDevices.length > 0
+                  ? ` Already in desired state: ${alreadyDesiredDevices.join(', ')}.`
+                  : '';
               setSnackbar({
                 severity: 'success',
-                message: `${module.name} executed successfully on ${successes.length} device${successes.length === 1 ? '' : 's'}.${detailSuffix}`,
+                message: `${module.name} executed successfully on ${successes.length} device${
+                  successes.length === 1 ? '' : 's'
+                }.${activeNote}${desiredNote}${detailSuffix}`,
               });
+              return;
             }
+            setSnackbar({
+              severity: 'success',
+              message: `${module.name} executed successfully on ${successes.length} device${successes.length === 1 ? '' : 's'}.${detailSuffix}`,
+            });
           }
         } else if (successes.length > 0) {
           const alreadyOnStatuses = deviceResults.filter((result) => result.success).filter((result) => {
@@ -2002,13 +2160,20 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
         setSnackbar({
           severity: 'error',
           message: 'Select at least one device on the dashboard before running the Call Test.',
-      });
+        });
+        return;
+      }
+      runResultsRef.current = { success: [], failure: [] };
+      void runCallTestBatch(targets);
       return;
     }
-    runResultsRef.current = { success: [], failure: [] };
-    void runCallTestBatch(targets);
-    return;
-  }
+
+    if (module.id === 'ping') {
+      setSnackbar({
+        severity: 'warning',
+        message: 'Ping requires mobile data. Enable data first if this test fails.',
+      });
+    }
 
     if (DEVICE_MODULE_IDS.has(module.id)) {
       runDeviceModule(module, { silent: module.id === 'ping' });
@@ -2157,6 +2322,39 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
       hydratedModule = {
         ...hydratedModule,
         callTestParams: snapshot,
+      };
+    }
+    if (module.id === 'dial_secret_code') {
+      hydratedModule = {
+        ...hydratedModule,
+        secretCode: customCode.trim() || DEFAULT_DIAL_SECRET_CODE,
+      };
+    }
+    if (module.id === 'launch_app') {
+      hydratedModule = {
+        ...hydratedModule,
+        appLaunchTarget: appLauncherSelection,
+        appLaunchDurationSeconds: appLauncherDuration,
+      };
+    }
+    if (module.id === 'ping') {
+      hydratedModule = {
+        ...hydratedModule,
+        pingTarget: pingConfig.target,
+        pingDurationSeconds: pingConfig.duration,
+        pingIntervalSeconds: pingConfig.interval,
+      };
+    }
+    if (module.id === 'wrong_apn_configuration') {
+      hydratedModule = {
+        ...hydratedModule,
+        wrongApnValue,
+      };
+    }
+    if (module.id === 'pull_device_logs' || module.id === 'pull_rf_logs') {
+      hydratedModule = {
+        ...hydratedModule,
+        logPullDestination,
       };
     }
     insertModuleInstance(hydratedModule, null);
@@ -3194,7 +3392,7 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
             label="Code to dial (e.g., *#9900#)"
             fullWidth
             value={customScriptDraft}
-            onChange={(event) => setCustomScriptDraft(event.target.value)}
+            onChange={(event) => setCustomScriptDraft(sanitizeSecretCode(event.target.value))}
             error={Boolean(customScriptDialogError)}
             helperText={
               customScriptDialogError ||
@@ -3207,13 +3405,20 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
           <Button
             variant="contained"
             onClick={() => {
-              const trimmed = (customScriptDraft || '').trim();
+              const trimmed = sanitizeSecretCode(customScriptDraft || '');
               if (!trimmed) {
                 setCustomScriptDialogError('Enter a code to dial.');
                 return;
               }
               setCustomCode(trimmed);
               persistCustomCode(trimmed);
+              setSelectedModules((prev) =>
+                prev.map((entry) =>
+                  entry.module.id === 'dial_secret_code'
+                    ? { ...entry, module: { ...entry.module, secretCode: trimmed } }
+                    : entry
+                )
+              );
               setCustomScriptDialogError(null);
               setCustomScriptDialogOpen(false);
               setSnackbar({ severity: 'success', message: 'Code saved.' });
@@ -3250,16 +3455,19 @@ const TestModules: React.FC<TestModulesProps> = ({ backendUrl }) => {
 
       <Snackbar
         open={Boolean(snackbar)}
-        autoHideDuration={3500}
+        autoHideDuration={8000}
         onClose={() => setSnackbar(undefined)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         {snackbar ? (
-          <Alert 
-            severity={snackbar.severity} 
-            onClose={() => setSnackbar(undefined)} 
-            sx={{ 
-              borderRadius: '8px'
+          <Alert
+            severity={snackbar.severity}
+            variant="filled"
+            onClose={() => setSnackbar(undefined)}
+            sx={{
+              borderRadius: '10px',
+              fontWeight: 600,
+              boxShadow: '0 10px 24px rgba(0, 0, 0, 0.25)',
             }}
           >
             {snackbar.message}

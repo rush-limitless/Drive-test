@@ -16,6 +16,14 @@ export interface ModuleMetadata {
   prerequisites?: string[];
   hiddenInModulesPage?: boolean;
   callTestParams?: CallTestValues;
+  secretCode?: string;
+  appLaunchTarget?: string;
+  appLaunchDurationSeconds?: number;
+  pingTarget?: string;
+  pingDurationSeconds?: number;
+  pingIntervalSeconds?: number;
+  wrongApnValue?: string;
+  logPullDestination?: string;
 }
 
 export const MODULE_CATALOG: ModuleMetadata[] = [
@@ -26,6 +34,7 @@ export const MODULE_CATALOG: ModuleMetadata[] = [
     description: 'Runs a voice call scenario to validate audio quality and connectivity',
     category: 'Voice & Messaging',
     editable: true,
+    hiddenInModulesPage: true,
     avg_duration: '2-4 min',
     impact: 'high',
     prerequisites: ['SIM ready', 'Microphone', 'Speaker'],
@@ -103,6 +112,7 @@ export const MODULE_CATALOG: ModuleMetadata[] = [
     description: 'Applies a deliberately wrong APN value to validate failure scenarios.',
     category: 'Network',
     editable: true,
+    hiddenInModulesPage: true,
     avg_duration: '1-2 min',
     impact: 'high',
     prerequisites: ['APN access'],

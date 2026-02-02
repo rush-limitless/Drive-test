@@ -33,10 +33,21 @@ def stub_device_manager(monkeypatch):
                 "status": "connected",
             }
 
-        async def get_device_logs(self, device_id: str, limit: int = 1000):
+        async def get_device_logs(self, device_id: str, limit: int = 1000, offset: int = 0):
             return [
                 {"created_at": (now - timedelta(hours=1)).isoformat(), "message": "Log 1"},
                 {"created_at": (now - timedelta(days=2)).isoformat(), "message": "Old log"},
+            ]
+
+        async def get_device_logs_in_range(
+            self,
+            device_id: str,
+            start: datetime,
+            end: datetime,
+            limit: int = 1000
+        ):
+            return [
+                {"created_at": (now - timedelta(hours=1)).isoformat(), "message": "Log 1"},
             ]
 
     monkeypatch.setattr(devices_api, "device_manager", StubManager())

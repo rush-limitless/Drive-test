@@ -3,6 +3,7 @@
 from fastapi import APIRouter, HTTPException, Query, Depends
 from fastapi.responses import StreamingResponse
 from typing import List, Dict, Optional
+import asyncio
 import logging
 from datetime import datetime, timedelta, timezone
 import io
@@ -16,6 +17,10 @@ from services.adb_manager import adb_manager
 from api.security import require_api_key, enforce_rate_limit
 
 logger = logging.getLogger(__name__)
+
+LIVE_INFO_CONCURRENCY = 5
+LIVE_INFO_TIMEOUT_SEC = 3.0
+OPERATOR_TIMEOUT_SEC = 1.0
 
 router = APIRouter(
     prefix="/devices",
@@ -35,19 +40,50 @@ async def list_devices(
             devices = await device_manager.get_connected_devices()
         else:
             devices = await device_manager.get_all_devices()
-            
-        for device in devices:
+
+        async def enrich_device(device: Dict, semaphore: asyncio.Semaphore) -> None:
             status_value = (device.get("status") or "").lower()
-            if status_value in {"connected", "busy"}:
-                live_info = await adb_manager.get_device_info(device.get("id"), force_refresh=True)
+            if status_value not in {"connected", "busy"}:
+                return
+            device_id = device.get("id")
+            if not device_id:
+                return
+
+            async with semaphore:
+                try:
+                    live_info = await asyncio.wait_for(
+                        adb_manager.get_device_info(device_id, force_refresh=True),
+                        timeout=LIVE_INFO_TIMEOUT_SEC,
+                    )
+                except asyncio.TimeoutError:
+                    live_info = None
+                except Exception as exc:
+                    logger.debug("Live device info failed for %s: %s", device_id, exc)
+                    live_info = None
+
                 if live_info:
-                    for key in ("battery_level", "network_technology", "connection_type"):
+                    for key in ("battery_level", "network_technology", "connection_type", "airplane_mode"):
                         value = live_info.get(key)
                         if value is not None:
                             device[key] = value
-                live_operator = await adb_manager.get_network_operator_live(device.get("id"))
+
+                try:
+                    live_operator = await asyncio.wait_for(
+                        adb_manager.get_network_operator_live(device_id),
+                        timeout=OPERATOR_TIMEOUT_SEC,
+                    )
+                except asyncio.TimeoutError:
+                    live_operator = None
+                except Exception as exc:
+                    logger.debug("Live operator lookup failed for %s: %s", device_id, exc)
+                    live_operator = None
+
                 if live_operator:
                     device["network_operator_live"] = live_operator
+
+        if devices:
+            semaphore = asyncio.Semaphore(LIVE_INFO_CONCURRENCY)
+            await asyncio.gather(*(enrich_device(device, semaphore) for device in devices))
 
         # Filter by status if specified
         if status:
@@ -102,11 +138,12 @@ async def refresh_device(device_id: str):
 @router.get("/{device_id}/logs", response_model=List[Dict])
 async def get_device_logs(
     device_id: str,
-    limit: int = Query(100, ge=1, le=1000, description="Maximum number of logs to return")
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of logs to return"),
+    offset: int = Query(0, ge=0, description="Number of logs to skip")
 ):
     """Get recent logs for a device."""
     try:
-        logs = await device_manager.get_device_logs(device_id, limit)
+        logs = await device_manager.get_device_logs(device_id, limit, offset)
         return logs
         
     except Exception as e:
@@ -475,18 +512,10 @@ async def download_device_report(
     if not device:
         raise HTTPException(status_code=404, detail="Device not found")
 
-    logs = await device_manager.get_device_logs(device_id, limit=1000)
-    filtered_logs = []
-    for log in logs:
-        ts_raw = log.get("created_at") or log.get("timestamp")
-        ts_dt = _parse_iso_datetime(ts_raw)
-        if ts_dt is None:
-            continue
-        if start_dt <= ts_dt <= end_dt:
-            filtered_logs.append(log)
+    logs = await device_manager.get_device_logs_in_range(device_id, start_dt, end_dt, limit=1000)
 
     # Common metadata
-    log_count = len(filtered_logs)
+    log_count = len(logs)
     meta = {
         "device_id": device_id,
         "from": start_dt.isoformat(),
@@ -497,7 +526,7 @@ async def download_device_report(
     if format == "csv":
         output = io.StringIO()
         output.write("timestamp,message\n")
-        for log in filtered_logs:
+        for log in logs:
             ts = log.get("created_at") or log.get("timestamp") or ""
             msg = (log.get("message") or log.get("event") or "").replace("\n", " ").replace(",", " ")
             output.write(f"{ts},{msg}\n")
@@ -507,7 +536,7 @@ async def download_device_report(
         logger.info("device_report_generated_csv", extra=meta)
         return StreamingResponse(io.BytesIO(payload), media_type="text/csv", headers=headers)
 
-    payload = _build_device_pdf(device, filtered_logs, start_dt, end_dt)
+    payload = _build_device_pdf(device, logs, start_dt, end_dt)
     filename = f"device_report_{device_id}_{start_dt.strftime('%Y%m%d')}_{end_dt.strftime('%Y%m%d')}.pdf"
     logger.info("device_report_generated", extra=meta)
     headers = {"Content-Disposition": f'attachment; filename="{filename}"'}

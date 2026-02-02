@@ -86,7 +86,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # Metadata
-    APP_VERSION: str = "2.3.0"
+    APP_VERSION: str = "2.3.7"
     
     # Logging configuration
     LOG_LEVEL: str = "INFO"

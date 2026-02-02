@@ -1,7 +1,7 @@
 """Tests for RF/APN modules mapped in TelcoModules and FlowExecutor."""
 import pytest
 
-from src.backend.modules.telco_modules import TelcoModules
+from src.backend.modules.telco_modules import TelcoModules, ADB_EXECUTABLE
 from src.backend.modules.flow_executor import FlowExecutor
 from src.backend.modules.adb_executor import ExecutionResult
 
@@ -56,3 +56,33 @@ def test_flow_executor_routes_new_modules(monkeypatch):
     assert res_stop["module"] == "stop_rf_logging"
     assert res_test["target"] == "1.1.1.1"
     assert res_pull["destination"] == "/tmp/rf"
+
+
+def test_change_apn_uses_selected_value_and_verifies(monkeypatch):
+    tm = TelcoModules()
+    commands = []
+
+    def fake_execute(cmd, timeout=30):
+        commands.append(cmd)
+        if cmd[:5] == [ADB_EXECUTABLE, "shell", "settings", "get", "global"]:
+            # Verification reads should return the APN value to confirm success.
+            return ExecutionResult(success=True, output="mtnapn", error="", duration=0.1)
+        return ExecutionResult(success=True, output="ok", error="", duration=0.1)
+
+    # Avoid UI side effects while still allowing the path to run.
+    monkeypatch.setattr(tm, "_apply_apn_via_settings_ui", lambda apn: True)
+    monkeypatch.setattr(tm, "execute_command", fake_execute)
+
+    result = tm.configure_wrong_apn("mtnapn", use_ui_flow=True)
+    assert result["module"] == "wrong_apn_configuration"
+    assert result["apn"] == "mtnapn"
+    assert result["success"] is True
+    assert result["state_confirmed"] is True
+
+    # Ensure the APN was written to both settings keys.
+    put_cmds = [
+        cmd for cmd in commands
+        if cmd[:5] == [ADB_EXECUTABLE, "shell", "settings", "put", "global"]
+    ]
+    assert any(cmd[5:] == ["tether_dun_apn", "mtnapn"] for cmd in put_cmds)
+    assert any(cmd[5:] == ["preferred_apn", "mtnapn"] for cmd in put_cmds)

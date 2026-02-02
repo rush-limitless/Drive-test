@@ -8,7 +8,14 @@ param(
 $ErrorActionPreference = "Stop"
 $ProjectDir = "C:\Users\rush\Pictures\ADB Tool\ADB-automation-tool\mon-projet"
 
-Write-Host "=== BUILD MOBIQ v2.2.0 - AVEC ADB FORCÉ ===" -ForegroundColor Green
+# Synchronize + bump version once per build
+$env:MOBIQ_BUILD_BUMP = "1"
+$env:MOBIQ_BUILD_ID = (Get-Date -Format "yyyyMMddHHmmss")
+& node (Join-Path $ProjectDir "scripts\sync-version.js") | Write-Host
+$Version = (Get-Content (Join-Path $ProjectDir "package.json") | ConvertFrom-Json).version
+
+Write-Host ("=== BUILD MOBIQ v{0} - AVEC ADB FORC? ===" -f $Version) -ForegroundColor Green
+
 # Toujours se placer dans le répertoire projet pour les chemins relatifs
 Set-Location $ProjectDir
 
@@ -118,7 +125,7 @@ Write-Host "5. Création de l'installeur Windows..." -ForegroundColor Yellow
 & "$env:ComSpec" /c "npx electron-builder --win nsis"
 
 # 6. Vérifier le résultat final
-$InstallerPath = "$ProjectDir\build\electron\MOBIQ-Setup-2.2.0.exe"
+$InstallerPath = "$ProjectDir\build\electron\MOBIQ-Setup-$Version.exe"
 if (Test-Path $InstallerPath) {
     Write-Host "=== BUILD RÉUSSI ===" -ForegroundColor Green
     Write-Host "Installeur créé: $InstallerPath" -ForegroundColor Cyan

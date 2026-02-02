@@ -14,12 +14,27 @@ from pathlib import Path
 from uuid import uuid4
 import io
 
+def _ensure_backend_import_path() -> None:
+    import sys
+    backend_root = Path(__file__).resolve().parents[1]
+    repo_root = backend_root.parent
+    for candidate in (backend_root, repo_root):
+        candidate_str = str(candidate)
+        if candidate_str not in sys.path:
+            sys.path.insert(0, candidate_str)
+
+
 try:
     from modules.telco_modules import TelcoModules
     from modules.flow_executor import FlowExecutor
 except ImportError:  # pragma: no cover
-    from src.backend.modules.telco_modules import TelcoModules  # type: ignore
-    from src.backend.modules.flow_executor import FlowExecutor  # type: ignore
+    _ensure_backend_import_path()
+    try:
+        from modules.telco_modules import TelcoModules
+        from modules.flow_executor import FlowExecutor
+    except ImportError:
+        from src.backend.modules.telco_modules import TelcoModules  # type: ignore
+        from src.backend.modules.flow_executor import FlowExecutor  # type: ignore
 
 try:
     from fpdf import FPDF

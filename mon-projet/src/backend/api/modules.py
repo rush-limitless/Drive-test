@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import time
+import inspect
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
@@ -11,6 +12,16 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+
+
+def _ensure_backend_import_path() -> None:
+    import sys
+    backend_root = Path(__file__).resolve().parents[1]
+    repo_root = backend_root.parent
+    for candidate in (backend_root, repo_root):
+        candidate_str = str(candidate)
+        if candidate_str not in sys.path:
+            sys.path.insert(0, candidate_str)
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -18,7 +29,11 @@ from sqlalchemy.orm import Session
 try:
     from modules.telco_modules import TelcoModules, DEFAULT_WRONG_APN
 except ImportError:  # pragma: no cover
-    from src.backend.modules.telco_modules import TelcoModules, DEFAULT_WRONG_APN  # type: ignore
+    _ensure_backend_import_path()
+    try:
+        from modules.telco_modules import TelcoModules, DEFAULT_WRONG_APN
+    except ImportError:
+        from src.backend.modules.telco_modules import TelcoModules, DEFAULT_WRONG_APN  # type: ignore
 
 try:
     from services.module_catalog import (
@@ -28,12 +43,21 @@ try:
         module_catalog,
     )
 except ImportError:  # pragma: no cover
-    from src.backend.services.module_catalog import (  # type: ignore
-        ModuleDefinition,
-        ModuleExecutionError,
-        ModuleNotFoundError,
-        module_catalog,
-    )
+    _ensure_backend_import_path()
+    try:
+        from services.module_catalog import (
+            ModuleDefinition,
+            ModuleExecutionError,
+            ModuleNotFoundError,
+            module_catalog,
+        )
+    except ImportError:
+        from src.backend.services.module_catalog import (  # type: ignore
+            ModuleDefinition,
+            ModuleExecutionError,
+            ModuleNotFoundError,
+            module_catalog,
+        )
 
 from api.websocket import connection_manager
 from core.database import get_db
@@ -954,7 +978,14 @@ def _run_worker_for_device_with_params(
     if cancel_event and cancel_event.is_set():
         return {"success": False, "cancelled": True, "error": "Execution cancelled"}
     executor = TelcoModules(device_id)
-    result = worker(executor, params)
+    try:
+        signature = inspect.signature(worker)
+        if len(signature.parameters) >= 3:
+            result = worker(executor, params, cancel_event)
+        else:
+            result = worker(executor, params)
+    except (TypeError, ValueError):
+        result = worker(executor, params)
     if not isinstance(result, dict):
         result = {"result": result}
     result.setdefault("success", True)
@@ -1295,10 +1326,10 @@ def _execute_legacy_module(module_id: str, execution: ModuleExecute, schedule_re
 
     if module_id in {"start_rf_logging", "stop_rf_logging"}:
         message = "RF logging started" if module_id == "start_rf_logging" else "RF logging stopped"
+        def rf_logging_worker(executor: TelcoModules, cancel_event: Optional[threading.Event] = None) -> Dict[str, Any]:
+            return executor.start_rf_logging(cancel_event=cancel_event) if module_id == "start_rf_logging" else executor.stop_rf_logging(cancel_event=cancel_event)
         return run_for_devices(
-            lambda executor: executor.start_rf_logging()
-            if module_id == "start_rf_logging"
-            else executor.stop_rf_logging(),
+            rf_logging_worker,
             params={},
             stage_message=message,
         )

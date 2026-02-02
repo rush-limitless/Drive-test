@@ -1,7 +1,7 @@
 """Device manager service for handling device operations."""
 
 import asyncio
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 import logging
@@ -22,6 +22,8 @@ class DeviceManager:
         self.scan_interval = 5  # seconds
         self.scan_task = None
         self.is_scanning = False
+        self._device_logs_cache: Dict[Tuple[str, int, int], Dict[str, object]] = {}
+        self._device_logs_cache_ttl = timedelta(seconds=5)
         
     async def start_monitoring(self):
         """Start continuous device monitoring."""
@@ -74,7 +76,7 @@ class DeviceManager:
                 updated_devices = []
                 
                 for device_id in connected_device_ids:
-                    device_info = await adb_manager.get_device_info(device_id)
+                    device_info = await adb_manager.get_device_info(device_id, force_refresh=True)
                     
                     # Find existing device or create new one
                     device = db.query(Device).filter(Device.id == device_id).first()
@@ -85,6 +87,15 @@ class DeviceManager:
                         device.model = device_info.get('model', device.model)
                         device.os_version = device_info.get('os_version', device.os_version)
                         device.update_status(DeviceStatus.CONNECTED)
+                        sim_present = device_info.get('sim_present')
+                        if sim_present is False:
+                            device.sim_info = {}
+                        elif 'mcc' in device_info and 'mnc' in device_info:
+                            device.sim_info = {
+                                'mcc': device_info['mcc'],
+                                'mnc': device_info['mnc'],
+                                'carrier': device_info.get('carrier', 'Unknown')
+                            }
                         capabilities = device.capabilities or {}
                         capabilities.update({
                             "battery_level": device_info.get('battery_level'),
@@ -93,6 +104,8 @@ class DeviceManager:
                             "connection_type": device_info.get('connection_type'),
                             "carrier": device_info.get('carrier'),
                         })
+                        if 'airplane_mode' in device_info:
+                            capabilities["airplane_mode"] = device_info.get('airplane_mode')
                         device.capabilities = {k: v for k, v in capabilities.items() if v is not None}
                         
                         # Log status change if needed
@@ -110,7 +123,10 @@ class DeviceManager:
                         )
                         
                         # Add SIM info if available
-                        if 'mcc' in device_info and 'mnc' in device_info:
+                        sim_present = device_info.get('sim_present')
+                        if sim_present is False:
+                            device.sim_info = {}
+                        elif 'mcc' in device_info and 'mnc' in device_info:
                             device.sim_info = {
                                 'mcc': device_info['mcc'],
                                 'mnc': device_info['mnc'],
@@ -134,6 +150,8 @@ class DeviceManager:
                             "connection_type": device_info.get('connection_type'),
                             "carrier": device_info.get('carrier'),
                         }
+                        if 'airplane_mode' in device_info:
+                            device.capabilities["airplane_mode"] = device_info.get('airplane_mode')
                         device.capabilities = {k: v for k, v in (device.capabilities or {}).items() if v is not None}
                         
                     updated_devices.append(device.to_dict())
@@ -183,7 +201,7 @@ class DeviceManager:
         """Get all devices from database."""
         db = next(get_db())
         try:
-            devices = db.query(Device).all()
+            devices = db.query(Device).order_by(Device.last_seen.desc(), Device.id.asc()).all()
             return [device.to_dict() for device in devices]
         finally:
             db.close()
@@ -201,7 +219,12 @@ class DeviceManager:
         """Get only connected devices."""
         db = next(get_db())
         try:
-            devices = db.query(Device).filter(Device.status == DeviceStatus.CONNECTED).all()
+            devices = (
+                db.query(Device)
+                .filter(Device.status == DeviceStatus.CONNECTED)
+                .order_by(Device.last_seen.desc(), Device.id.asc())
+                .all()
+            )
             return [device.to_dict() for device in devices]
         finally:
             db.close()
@@ -244,13 +267,54 @@ class DeviceManager:
         finally:
             db.close()
             
-    async def get_device_logs(self, device_id: str, limit: int = 100) -> List[Dict]:
+    async def get_device_logs(self, device_id: str, limit: int = 100, offset: int = 0) -> List[Dict]:
         """Get recent logs for a device."""
+        cache_key = (device_id, limit, offset)
+        now = datetime.utcnow()
+        cached = self._device_logs_cache.get(cache_key)
+        if cached and cached["expires_at"] > now:
+            return cached["logs"]
+
         db = next(get_db())
         try:
             logs = (db.query(DeviceLog)
                    .filter(DeviceLog.device_id == device_id)
                    .order_by(DeviceLog.created_at.desc())
+                   .limit(limit)
+                   .offset(offset)
+                   .all())
+            payload = [log.to_dict() for log in logs]
+            self._device_logs_cache[cache_key] = {
+                "expires_at": now + self._device_logs_cache_ttl,
+                "logs": payload,
+            }
+            if len(self._device_logs_cache) > 512:
+                self._device_logs_cache = {
+                    key: value
+                    for key, value in self._device_logs_cache.items()
+                    if value["expires_at"] > now
+                }
+                if len(self._device_logs_cache) > 512:
+                    self._device_logs_cache.clear()
+            return payload
+        finally:
+            db.close()
+
+    async def get_device_logs_in_range(
+        self,
+        device_id: str,
+        start: datetime,
+        end: datetime,
+        limit: int = 1000
+    ) -> List[Dict]:
+        """Get logs for a device within a datetime range."""
+        db = next(get_db())
+        try:
+            logs = (db.query(DeviceLog)
+                   .filter(DeviceLog.device_id == device_id)
+                   .filter(DeviceLog.created_at >= start)
+                   .filter(DeviceLog.created_at <= end)
+                   .order_by(DeviceLog.created_at.asc())
                    .limit(limit)
                    .all())
             return [log.to_dict() for log in logs]

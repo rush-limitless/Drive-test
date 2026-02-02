@@ -55,6 +55,7 @@ import {
 import Layout from '../components/Layout';
 import { useDevices } from '../hooks/useDevices';
 import { Device } from '@types';
+import { deviceApi } from '../services/deviceApi';
 import {
   readDeviceRegistry,
   syncDevicesToRegistry,
@@ -91,6 +92,14 @@ type ManagedDevice = Device & {
 const normalizeStatusValue = (status?: string | null): string =>
   status ? status.toLowerCase() : 'unknown';
 
+const isDeviceInactive = (device: ManagedDevice): boolean => {
+  if (device.__historical === true) {
+    return true;
+  }
+  const normalized = normalizeStatusValue(device.status);
+  return ['disconnected', 'offline', 'unknown'].includes(normalized);
+};
+
 const formatTimestamp = (value?: string | null) => {
   if (!value) {
     return 'Unknown';
@@ -126,6 +135,7 @@ const isWithinRange = (timestamp: string | null | undefined, range: 'any' | '24h
 
 const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
   const { devices, status, refresh, applyDevicePatch } = useDevices({ backendUrl, pollMs: 5000 });
+  const [refreshingDevices, setRefreshingDevices] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [metadata, setMetadata] = useState<DeviceMetadataMap>(() => readDeviceMetadata());
   const [tagInputs, setTagInputs] = useState<Record<string, string>>({});
@@ -299,7 +309,11 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
     if (checked) {
       setSelectedDeviceIds((prev) => {
         const next = new Set(prev);
-        devicesSubset.forEach((device) => next.add(device.id));
+        devicesSubset.forEach((device) => {
+          if (!isDeviceInactive(device)) {
+            next.add(device.id);
+          }
+        });
         return next;
       });
     } else {
@@ -312,6 +326,23 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
   };
 
   const clearSelection = () => setSelectedDeviceIds(new Set());
+
+  const handleScanDevices = async () => {
+    if (refreshingDevices) {
+      return;
+    }
+    setRefreshingDevices(true);
+    try {
+      if (backendUrl) {
+        await deviceApi.scanDevices(backendUrl);
+      }
+      await refresh();
+    } catch (error) {
+      console.error('Device scan failed', error);
+    } finally {
+      setRefreshingDevices(false);
+    }
+  };
 
   const handleBulkAction = async (action: 'disconnect' | 'reboot' | 'logs' | 'pin' | 'unpin') => {
     const ids = Array.from(selectedDeviceIds);
@@ -573,6 +604,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
   const renderDeviceCard = (device: ManagedDevice) => {
     const registryMeta = device.__registry;
     const isHistorical = device.__historical === true;
+    const isInactive = isDeviceInactive(device);
     const deviceMeta = metadata[device.id] ?? DEFAULT_DEVICE_METADATA;
     const alias = deviceMeta.alias?.trim();
     const displayName = alias || device.model || registryMeta?.model || 'Unknown Device';
@@ -608,6 +640,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
                 <Checkbox
                   checked={selectedDeviceIds.has(device.id)}
                   onChange={(event) => toggleManagedDeviceSelection(device.id, event.target.checked)}
+                  disabled={isInactive}
                 />
                 <Chip
                   label={isHistorical ? 'History' : device.status || 'Unknown'}
@@ -625,11 +658,13 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
                   <IconButton
                     size="small"
                     onClick={() => togglePin(device.id)}
+                    disabled={isInactive}
                     sx={{
                       backgroundColor: isPinned ? '#FFE4E6' : '#F1F5F9',
                       color: isPinned ? '#BE123C' : '#475569',
                       width: 32,
                       height: 32,
+                      opacity: isInactive ? 0.5 : 1,
                     }}
                   >
                     {isPinned ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
@@ -640,7 +675,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
                     <IconButton
                       size="small"
                       onClick={() => openActivityDialog(device)}
-                      disabled={!hasActivity}
+                      disabled={!hasActivity || isInactive}
                       sx={{ width: 32, height: 32 }}
                     >
                       <NotebookPen size={16} />
@@ -682,6 +717,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
               fullWidth
               value={deviceMeta.alias ?? ''}
               onChange={(e) => handleAliasChange(device.id, e.target.value)}
+              disabled={isInactive}
               sx={{ mb: 1.5 }}
             />
             <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1 }}>
@@ -712,10 +748,11 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
                   handleAddTag(device.id);
                 }
               }}
+              disabled={isInactive}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton size="small" onClick={() => handleAddTag(device.id)}>
+                    <IconButton size="small" onClick={() => handleAddTag(device.id)} disabled={isInactive}>
                       <Tag size={14} />
                     </IconButton>
                   </InputAdornment>
@@ -733,6 +770,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
               value={notesValue}
               onChange={(event) => handleNotesChange(device.id, event.target.value)}
               onBlur={() => persistNotes(device.id)}
+              disabled={isInactive}
               sx={{ mb: 2 }}
             />
             <Typography variant="caption" sx={{ color: '#6B7280', fontSize: '12px' }}>
@@ -749,13 +787,13 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
                     <IconButton
                       size="small"
                       onClick={() => handleDeviceAction(device.id, 'disconnect')}
-                      disabled={isHistorical}
+                      disabled={isInactive}
                       sx={{
                         backgroundColor: '#FFF7ED',
                         color: '#C2410C',
                         width: 32,
                         height: 32,
-                        opacity: isHistorical ? 0.5 : 1,
+                        opacity: isInactive ? 0.5 : 1,
                       }}
                     >
                       <Power size={16} />
@@ -767,13 +805,13 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
                     <IconButton
                       size="small"
                       onClick={() => handleDeviceAction(device.id, 'reboot')}
-                      disabled={isHistorical}
+                      disabled={isInactive}
                       sx={{
                         backgroundColor: '#E0F2FE',
                         color: '#0369A1',
                         width: 32,
                         height: 32,
-                        opacity: isHistorical ? 0.5 : 1,
+                        opacity: isInactive ? 0.5 : 1,
                       }}
                     >
                       <RotateCcw size={16} />
@@ -785,13 +823,13 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
                     <IconButton
                       size="small"
                       onClick={() => handleDeviceAction(device.id, 'logs')}
-                      disabled={isHistorical}
+                      disabled={isInactive}
                       sx={{
                         backgroundColor: '#EEF2FF',
                         color: '#4338CA',
                         width: 32,
                         height: 32,
-                        opacity: isHistorical ? 0.5 : 1,
+                        opacity: isInactive ? 0.5 : 1,
                       }}
                     >
                       <FileText size={16} />
@@ -803,11 +841,13 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
                 <Tooltip title="Device Info">
                   <IconButton
                     size="small"
+                    disabled={isInactive}
                     sx={{
                       backgroundColor: '#F1F5F9',
                       color: '#475569',
                       width: 32,
                       height: 32,
+                      opacity: isInactive ? 0.5 : 1,
                     }}
                   >
                     <Info size={16} />
@@ -818,13 +858,13 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
                     <IconButton
                       size="small"
                       onClick={() => handleDeviceAction(device.id, 'test')}
-                      disabled={isHistorical}
+                      disabled={isInactive}
                       sx={{
                         backgroundColor: '#2563EB',
                         color: 'white',
                         width: 32,
                         height: 32,
-                        opacity: isHistorical ? 0.5 : 1,
+                        opacity: isInactive ? 0.5 : 1,
                       }}
                     >
                       <Play size={16} />
@@ -867,6 +907,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
             const managedDevice = device as ManagedDevice;
             const registryMeta = managedDevice.__registry;
             const isHistorical = managedDevice.__historical === true;
+            const isInactive = isDeviceInactive(managedDevice);
             const deviceMeta = metadata[device.id] ?? DEFAULT_DEVICE_METADATA;
             const alias = deviceMeta.alias?.trim();
             const displayName = alias || device.model || registryMeta?.model || device.id;
@@ -881,6 +922,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
                   <Checkbox
                     checked={selectedDeviceIds.has(device.id)}
                     onChange={(event) => toggleManagedDeviceSelection(device.id, event.target.checked)}
+                    disabled={isInactive}
                   />
                 </TableCell>
                 <TableCell>
@@ -964,7 +1006,8 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
           <Button
             variant="contained"
             startIcon={<RefreshCw size={20} />}
-            onClick={refresh}
+            onClick={handleScanDevices}
+            disabled={refreshingDevices}
             sx={{
               height: 40,
               borderRadius: '10px',
@@ -973,7 +1016,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
               fontWeight: 600,
             }}
           >
-            Scan Devices
+            {refreshingDevices ? 'Scanning...' : 'Scan Devices'}
           </Button>
         </Box>
       </Box>
@@ -1092,7 +1135,8 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
               <Button
                 variant="contained"
                 startIcon={<RefreshCw size={16} />}
-                onClick={refresh}
+                onClick={handleScanDevices}
+                disabled={refreshingDevices}
                 sx={{
                   height: 44,
                   borderRadius: '12px',
@@ -1101,7 +1145,7 @@ const DeviceManager: React.FC<DeviceManagerProps> = ({ backendUrl }) => {
                   fontWeight: 600,
                 }}
               >
-                Scan Again
+                {refreshingDevices ? 'Scanning...' : 'Scan Again'}
               </Button>
             </Box>
           ) : viewMode === 'table' ? (

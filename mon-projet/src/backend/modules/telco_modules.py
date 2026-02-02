@@ -8,6 +8,7 @@ import time
 import math
 import random
 import threading
+import inspect
 import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -869,10 +870,34 @@ class TelcoModules(ADBExecutor):
     def configure_wrong_apn(self, apn_value: Optional[str] = None, use_ui_flow: bool = True) -> Dict[str, Any]:
         apn = re.sub(r'[^A-Za-z0-9._-]', '', (apn_value or DEFAULT_WRONG_APN).strip()) or DEFAULT_WRONG_APN
 
+        def _parse_carriers_row(output: Optional[str]) -> Dict[str, Optional[str]]:
+            if not output:
+                return {'name': None, 'apn': None, 'id': None}
+            # Example: Row: 0 _id=23 name=MTN CM apn=mtnwap ...
+            name_match = re.search(r'\bname=([^\s]+)', output)
+            apn_match = re.search(r'\bapn=([^\s]+)', output)
+            id_match = re.search(r'\b_id=([0-9]+)', output)
+            return {
+                'name': name_match.group(1) if name_match else None,
+                'apn': apn_match.group(1) if apn_match else None,
+                'id': id_match.group(1) if id_match else None,
+            }
+
+        # Best-effort read of current selected APN from content provider (may require root)
+        current_preferapn_cmd = [ADB_EXECUTABLE, 'shell', 'content', 'query', '--uri', 'content://telephony/carriers/preferapn']
+        current_preferapn = self.execute_command(current_preferapn_cmd)
+        current_preferapn_parsed = _parse_carriers_row(current_preferapn.output if current_preferapn.success else None)
+
         # Check current APN settings
         current_tether = self.execute_command([ADB_EXECUTABLE, 'shell', 'settings', 'get', 'global', 'tether_dun_apn'])
         current_preferred = self.execute_command([ADB_EXECUTABLE, 'shell', 'settings', 'get', 'global', 'preferred_apn'])
-        logger.debug("Current APN values | tether_dun_apn=%s | preferred_apn=%s", current_tether.output, current_preferred.output)
+        logger.debug(
+            "Current APN values | tether_dun_apn=%s | preferred_apn=%s | preferapn_name=%s | preferapn_apn=%s",
+            current_tether.output,
+            current_preferred.output,
+            current_preferapn_parsed.get('name'),
+            current_preferapn_parsed.get('apn'),
+        )
 
         was_already_set = (
             current_tether.success
@@ -890,6 +915,24 @@ class TelcoModules(ADBExecutor):
 
         ui_flow_attempted = False
         ui_flow_note: Optional[str] = None
+        ui_ok: Optional[bool] = None
+
+        verify_commands = [
+            [ADB_EXECUTABLE, 'shell', 'settings', 'get', 'global', 'tether_dun_apn'],
+            [ADB_EXECUTABLE, 'shell', 'settings', 'get', 'global', 'preferred_apn'],
+        ]
+
+        def verify_apn() -> Tuple[bool, List[ExecutionResult]]:
+            verify_results = [self.execute_command(cmd) for cmd in verify_commands]
+            confirmed = all(apn in (res.output or '') for res in verify_results if res.success)
+            logger.debug("Verification results | tether_dun_apn=%s | preferred_apn=%s | confirmed=%s",
+                         verify_results[0].output if verify_results else None,
+                         verify_results[1].output if len(verify_results) > 1 else None,
+                         confirmed)
+            return confirmed, verify_results
+
+        confirmed, verify_results = verify_apn()
+
         if use_ui_flow:
             ui_flow_attempted = True
             ui_ok = self._apply_apn_via_settings_ui(apn)
@@ -898,17 +941,9 @@ class TelcoModules(ADBExecutor):
                 logger.info("APN UI flow executed (best effort) for value: %s", apn)
             else:
                 logger.warning("APN UI flow could not confirm UI interactions; falling back to settings.put only")
-
-        verify_commands = [
-            [ADB_EXECUTABLE, 'shell', 'settings', 'get', 'global', 'tether_dun_apn'],
-            [ADB_EXECUTABLE, 'shell', 'settings', 'get', 'global', 'preferred_apn'],
-        ]
-        verify_results = [self.execute_command(cmd) for cmd in verify_commands]
-        confirmed = all(apn in (res.output or '') for res in verify_results if res.success)
-        logger.debug("Verification results | tether_dun_apn=%s | preferred_apn=%s | confirmed=%s",
-                     verify_results[0].output if verify_results else None,
-                     verify_results[1].output if len(verify_results) > 1 else None,
-                     confirmed)
+            confirmed, verify_results = verify_apn()
+            if not ui_ok:
+                confirmed = False
 
         step_failure = next((res for res in results if not res.success), None)
         error_msg = None
@@ -918,7 +953,7 @@ class TelcoModules(ADBExecutor):
             error_msg = "APN not confirmed on device (best-effort)"
             logger.warning("APN verification failed for value '%s' (device may not accept settings.put)", apn)
 
-        success = all(res.success for res in results) and confirmed
+        success = all(res.success for res in results) and confirmed and (not use_ui_flow or ui_ok)
         if success:
             logger.info("Wrong APN successfully applied and confirmed: %s", apn)
         else:
@@ -929,41 +964,58 @@ class TelcoModules(ADBExecutor):
             'success': success,
             'already_configured': was_already_set,
             'state_confirmed': confirmed,
+            'current_preferapn': current_preferapn_parsed,
             'ui_flow_attempted': ui_flow_attempted,
+            'ui_verified': ui_ok,
             'ui_flow_note': ui_flow_note,
             'steps': [{'command': ' '.join(cmd), 'success': res.success, 'error': res.error} for cmd, res in zip(commands, results)],
+            'preferapn': {'command': ' '.join(current_preferapn_cmd), 'success': current_preferapn.success, 'output': current_preferapn.output, 'error': current_preferapn.error},
             'verify': [{'command': ' '.join(cmd), 'success': res.success, 'output': res.output, 'error': res.error} for cmd, res in zip(verify_commands, verify_results)],
             'warning': None if confirmed else 'APN not confirmed on device (best-effort)',
             'error': error_msg,
             'message': ("APN was already set; re-applied for verification" if was_already_set else "APN applied"),
         }
 
-    def start_rf_logging(self) -> Dict[str, Any]:
+    def start_rf_logging(self, cancel_event: Optional[threading.Event] = None) -> Dict[str, Any]:
         """Best-effort start of RF logging via SysDump/secret code (non-root, DPAD)."""
         attempts = []
+        def _cancelled() -> bool:
+            return bool(cancel_event and cancel_event.is_set())
+        if _cancelled():
+            return {'module': 'start_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled'}
 
         # 1) Open dialer
         cmd = [ADB_EXECUTABLE, 'shell', 'am', 'start', '-a', 'android.intent.action.DIAL']
         res = self.execute_command(cmd, timeout=10)
         attempts.append({'command': ' '.join(cmd), 'success': res.success, 'error': res.error.strip() if res.error else None})
         time.sleep(0.5)
+        if _cancelled():
+            return {'module': 'start_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled', 'attempts': attempts}
         # Clear any existing input
         for _ in range(12):
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DEL'])
             time.sleep(0.05)
+            if _cancelled():
+                return {'module': 'start_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled', 'attempts': attempts}
         # Enter *#9900# via keyevents for reliability
         for key in ('KEYCODE_STAR', 'KEYCODE_POUND', 'KEYCODE_9', 'KEYCODE_9', 'KEYCODE_0', 'KEYCODE_0', 'KEYCODE_POUND'):
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', key])
             time.sleep(0.1)
+            if _cancelled():
+                return {'module': 'start_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled', 'attempts': attempts}
         # Alternate validation: ENTER then broadcast secret code (avoids voice calls)
         enter_cmd = [ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_ENTER']
         res_enter = self.execute_command(enter_cmd, timeout=5)
         attempts.append({'command': ' '.join(enter_cmd), 'success': res_enter.success, 'error': res_enter.error.strip() if res_enter.error else None})
         time.sleep(0.8)
+        if _cancelled():
+            return {'module': 'start_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled', 'attempts': attempts}
         broadcast_cmd = [ADB_EXECUTABLE, 'shell', 'am', 'broadcast', '-a', 'android.provider.Telephony.SECRET_CODE', '-d', 'android_secret_code://9900']
         res_bc = self.execute_command(broadcast_cmd, timeout=5)
         attempts.append({'command': ' '.join(broadcast_cmd), 'success': res_bc.success, 'error': res_bc.error.strip() if res_bc.error else None})
         time.sleep(0.8)
+        if _cancelled():
+            return {'module': 'start_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled', 'attempts': attempts}
 
         # 2) Check if the Silent log screen is present before navigating (avoid typing in the dialer otherwise)
         root = self._ui_dump()
@@ -981,9 +1033,13 @@ class TelcoModules(ADBExecutor):
         ui_success = False
         if has_silent_log:
             for _ in range(6):
+                if _cancelled():
+                    return {'module': 'start_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled', 'attempts': attempts}
                 if self._tap_by_text('Silent log') or self._tap_by_text('SilentLog') or self._tap_by_text('Silent logging'):
                     time.sleep(0.5)
                     for __ in range(6):
+                        if _cancelled():
+                            return {'module': 'start_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled', 'attempts': attempts}
                         if self._tap_by_text('RF') or self._tap_by_text('CP') or self._tap_by_text('MODEM'):
                             ui_success = True
                             break
@@ -999,6 +1055,8 @@ class TelcoModules(ADBExecutor):
             ]
             for key, count in dpad_ok:
                 for _ in range(count):
+                    if _cancelled():
+                        return {'module': 'start_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled', 'attempts': attempts}
                     self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', key])
                     time.sleep(0.3)
 
@@ -1015,31 +1073,45 @@ class TelcoModules(ADBExecutor):
             'warning': None if state_confirmed else 'Silent log screen not confirmed; open menu manually if needed, then rerun.',
         }
 
-    def stop_rf_logging(self) -> Dict[str, Any]:
+    def stop_rf_logging(self, cancel_event: Optional[threading.Event] = None) -> Dict[str, Any]:
         """Best-effort stop of RF logging, same process as start (keyevents + broadcast + DPAD)."""
         attempts = []
+        def _cancelled() -> bool:
+            return bool(cancel_event and cancel_event.is_set())
+        if _cancelled():
+            return {'module': 'stop_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled'}
         # 1) Open dialer
         cmd = [ADB_EXECUTABLE, 'shell', 'am', 'start', '-a', 'android.intent.action.DIAL']
         res = self.execute_command(cmd, timeout=10)
         attempts.append({'command': ' '.join(cmd), 'success': res.success, 'error': res.error.strip() if res.error else None})
         time.sleep(0.5)
+        if _cancelled():
+            return {'module': 'stop_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled', 'attempts': attempts}
         # Clear any existing input
         for _ in range(12):
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DEL'])
             time.sleep(0.05)
+            if _cancelled():
+                return {'module': 'stop_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled', 'attempts': attempts}
         # Enter *#9900# via keyevents
         for key in ('KEYCODE_STAR', 'KEYCODE_POUND', 'KEYCODE_9', 'KEYCODE_9', 'KEYCODE_0', 'KEYCODE_0', 'KEYCODE_POUND'):
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', key])
             time.sleep(0.1)
+            if _cancelled():
+                return {'module': 'stop_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled', 'attempts': attempts}
         # Validation: ENTER + broadcast secret code (avoids voice calls)
         enter_cmd = [ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_ENTER']
         res_enter = self.execute_command(enter_cmd, timeout=5)
         attempts.append({'command': ' '.join(enter_cmd), 'success': res_enter.success, 'error': res_enter.error.strip() if res_enter.error else None})
         time.sleep(0.8)
+        if _cancelled():
+            return {'module': 'stop_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled', 'attempts': attempts}
         broadcast_cmd = [ADB_EXECUTABLE, 'shell', 'am', 'broadcast', '-a', 'android.provider.Telephony.SECRET_CODE', '-d', 'android_secret_code://9900']
         res_bc = self.execute_command(broadcast_cmd, timeout=5)
         attempts.append({'command': ' '.join(broadcast_cmd), 'success': res_bc.success, 'error': res_bc.error.strip() if res_bc.error else None})
         time.sleep(0.8)
+        if _cancelled():
+            return {'module': 'stop_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled', 'attempts': attempts}
 
         # 2) Check for the Silent log menu
         root = self._ui_dump()
@@ -1057,10 +1129,14 @@ class TelcoModules(ADBExecutor):
         ui_success = False
         if has_silent_log:
             for _ in range(6):
+                if _cancelled():
+                    return {'module': 'stop_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled', 'attempts': attempts}
                 if self._tap_by_text('Silent log') or self._tap_by_text('SilentLog') or self._tap_by_text('Silent logging'):
                     time.sleep(0.5)
                     # target RF or the active option, then DPAD to OK
                     for __ in range(6):
+                        if _cancelled():
+                            return {'module': 'stop_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled', 'attempts': attempts}
                         if self._tap_by_text('RF') or self._tap_by_text('CP') or self._tap_by_text('MODEM'):
                             ui_success = True
                             break
@@ -1073,6 +1149,8 @@ class TelcoModules(ADBExecutor):
                     ]
                     for key, count in dpad_ok:
                         for _ in range(count):
+                            if _cancelled():
+                                return {'module': 'stop_rf_logging', 'success': False, 'cancelled': True, 'error': 'Execution cancelled', 'attempts': attempts}
                             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', key])
                             time.sleep(0.3)
                     break
@@ -1153,14 +1231,6 @@ class TelcoModules(ADBExecutor):
         root = self._ui_dump()
         if root is None:
             return False
-
-        if (
-            self._tap_by_text('MTN CM')
-            or self._tap_by_text('mtnwap')
-            or self._tap_by_text('Orange')
-            or self._tap_by_text('orangecmgprs')
-        ):
-            return True
 
         entries = []
 
@@ -1278,6 +1348,264 @@ class TelcoModules(ADBExecutor):
                 return True
 
         return False
+
+    def _tap_selected_apn_entry(self) -> bool:
+        """Tap only the currently selected/checked APN entry. No name matching or fallbacks."""
+        root = self._ui_dump()
+        if root is None:
+            logger.debug("APN UI dump unavailable; cannot resolve selected APN entry.")
+            return False
+
+        entries = []
+
+        def parse_bounds(bounds: str):
+            m = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds or "")
+            if not m:
+                return None
+            left, top, right, bottom = map(int, m.groups())
+            return left, top, right, bottom
+
+        def walk(node, parent=None):
+            bounds = node.attrib.get('bounds')
+            rect = parse_bounds(bounds) if bounds else None
+            pos = None
+            if rect:
+                left, top, right, bottom = rect
+                pos = ((left + right) // 2, (top + bottom) // 2)
+            entry = {
+                'node': node,
+                'parent': parent,
+                'rect': rect,
+                'pos': pos,
+                'text': (node.attrib.get('text') or node.attrib.get('content-desc') or '').strip(),
+                'class': (node.attrib.get('class') or '').lower(),
+                'resource_id': (node.attrib.get('resource-id') or '').lower(),
+                'checked': node.attrib.get('checked') == 'true',
+                'selected': node.attrib.get('selected') == 'true',
+                'clickable': node.attrib.get('clickable') == 'true',
+            }
+            entries.append(entry)
+            for child in list(node):
+                walk(child, entry)
+
+        walk(root, None)
+
+        def is_header(label: str) -> bool:
+            lower = label.lower()
+            return any(token in lower for token in (
+                'access point names',
+                "nom des points d'acc",
+                "access point name",
+                'add',
+                'ajouter',
+            ))
+
+        def resolve_click_target(entry: dict) -> Optional[dict]:
+            current = entry
+            while current:
+                if current.get('rect') and current['clickable'] and not (current['text'] and is_header(current['text'])):
+                    return current
+                current = current.get('parent')
+            return None
+
+        def tap_entry(entry: dict) -> bool:
+            if not entry.get('pos'):
+                return False
+            self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'tap', str(entry['pos'][0]), str(entry['pos'][1])])
+            time.sleep(1)
+            return True
+
+        def tap_rect(rect: tuple, bias: float = 0.7) -> bool:
+            left, top, right, bottom = rect
+            width = right - left
+            height = bottom - top
+            if width <= 0 or height <= 0:
+                return False
+            x = int(left + max(20, min(width - 20, width * bias)))
+            y = int((top + bottom) // 2)
+            self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'tap', str(x), str(y)])
+            time.sleep(1)
+            return True
+
+        def prefer_row_text(y_center: int) -> Optional[dict]:
+            best = None
+            best_delta = None
+            for entry in entries:
+                rect = entry.get('rect')
+                if not rect:
+                    continue
+                if not entry['text'] or is_header(entry['text']):
+                    continue
+                left, top, right, bottom = rect
+                if top <= y_center <= bottom:
+                    delta = abs(((top + bottom) // 2) - y_center)
+                    if best is None or delta < best_delta:
+                        best = entry
+                        best_delta = delta
+            return best
+
+        selected_entries = [
+            e for e in entries
+            if (e['checked'] or e['selected']) and not (e['text'] and is_header(e['text']))
+        ]
+        if not selected_entries:
+            logger.debug("No checked/selected APN entries found in UI dump.")
+        for entry in selected_entries:
+            target = resolve_click_target(entry)
+            if target and tap_entry(target):
+                return True
+            # If the checked node is a radio button, tap the row instead of the tiny control.
+            if entry.get('rect'):
+                _, top, _, bottom = entry['rect']
+                row_target = prefer_row_text((top + bottom) // 2)
+                if row_target and row_target.get('rect') and tap_rect(row_target['rect'], bias=0.7):
+                    logger.debug("Tapped APN row based on selected radio button.")
+                    return True
+            if tap_entry(entry):
+                return True
+
+        return False
+
+    def _get_selected_apn_label(self) -> Optional[str]:
+        """Best-effort: return the label of the selected APN from the APN list UI."""
+        root = self._ui_dump()
+        if root is None:
+            return None
+
+        entries = []
+
+        def parse_bounds(bounds: str):
+            m = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds or "")
+            if not m:
+                return None
+            left, top, right, bottom = map(int, m.groups())
+            return left, top, right, bottom
+
+        def walk(node):
+            bounds = node.attrib.get('bounds')
+            rect = parse_bounds(bounds) if bounds else None
+            entry = {
+                'rect': rect,
+                'text': (node.attrib.get('text') or node.attrib.get('content-desc') or '').strip(),
+                'checked': node.attrib.get('checked') == 'true',
+                'selected': node.attrib.get('selected') == 'true',
+            }
+            entries.append(entry)
+            for child in list(node):
+                walk(child)
+
+        walk(root)
+
+        def is_header(label: str) -> bool:
+            lower = label.lower()
+            return any(token in lower for token in (
+                'access point names',
+                "nom des points d'acc",
+                "access point name",
+                'add',
+                'ajouter',
+            ))
+
+        checked_entries = [
+            e for e in entries
+            if (e['checked'] or e['selected'])
+        ]
+        for entry in checked_entries:
+            if entry['text'] and not is_header(entry['text']):
+                return entry['text']
+            if entry.get('rect'):
+                _, top, _, bottom = entry['rect']
+                y_center = (top + bottom) // 2
+                for candidate in entries:
+                    rect = candidate.get('rect')
+                    if not rect or not candidate['text'] or is_header(candidate['text']):
+                        continue
+                    left, top, right, bottom = rect
+                    if top <= y_center <= bottom:
+                        return candidate['text']
+        return None
+
+    def _apn_name_matches_by_letters(self, selected_name: str, target_apn: str) -> bool:
+        """Approximate match: at least one letter in common (A-Z)."""
+        if not selected_name or not target_apn:
+            return False
+        selected_letters = set(re.findall(r'[a-z]', selected_name.lower()))
+        target_letters = set(re.findall(r'[a-z]', target_apn.lower()))
+        return len(selected_letters & target_letters) > 0
+
+    def _read_apn_field_value(self) -> Optional[str]:
+        """Best-effort: read current APN field value from the APN detail screen UI."""
+        root = self._ui_dump()
+        if root is None:
+            return None
+
+        entries = []
+
+        def parse_bounds(bounds: str):
+            m = re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds or "")
+            if not m:
+                return None
+            left, top, right, bottom = map(int, m.groups())
+            return left, top, right, bottom
+
+        def walk(node, parent=None):
+            bounds = node.attrib.get('bounds')
+            rect = parse_bounds(bounds) if bounds else None
+            text = (node.attrib.get('text') or node.attrib.get('content-desc') or '').strip()
+            entry = {
+                'node': node,
+                'parent': parent,
+                'rect': rect,
+                'text': text,
+                'class': (node.attrib.get('class') or '').lower(),
+                'resource_id': (node.attrib.get('resource-id') or '').lower(),
+            }
+            entries.append(entry)
+            for child in list(node):
+                walk(child, entry)
+
+        walk(root, None)
+
+        label_tokens = {
+            'apn',
+            'access point name',
+            "nom du point d'accès",
+        }
+
+        def is_label(text: str) -> bool:
+            lower = text.lower()
+            return lower in label_tokens
+
+        # 1) Prefer editable field value
+        for entry in entries:
+            if 'edittext' in entry['class'] or 'textinput' in entry['class']:
+                if entry['text']:
+                    return entry['text']
+
+        # 2) Find row where label is "APN" and take nearest value on same row
+        for entry in entries:
+            if not entry['text'] or not is_label(entry['text']):
+                continue
+            rect = entry.get('rect')
+            if not rect:
+                continue
+            _, top, _, bottom = rect
+            y_center = (top + bottom) // 2
+            candidates = []
+            for other in entries:
+                if not other['text'] or is_label(other['text']):
+                    continue
+                orect = other.get('rect')
+                if not orect:
+                    continue
+                oleft, otop, oright, obottom = orect
+                if otop <= y_center <= obottom:
+                    candidates.append(other)
+            if candidates:
+                candidates.sort(key=lambda e: (e['rect'][0] if e['rect'] else 0), reverse=True)
+                return candidates[0]['text']
+
+        return None
         candidates = []
         for node in root.iter():
             bounds = node.attrib.get('bounds')
@@ -1347,38 +1675,47 @@ class TelcoModules(ADBExecutor):
     def _apply_apn_via_settings_ui(self, apn: str) -> bool:
         """Strict sequence: Settings -> Connections -> Mobile networks -> APN list -> edit APN -> menu/save."""
         try:
-            # 1) Settings root
+            # 1) Reset settings app to avoid landing on stale sub-screens (2nd run issue).
+            self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_HOME'])
+            time.sleep(0.3)
+            self.execute_command([ADB_EXECUTABLE, 'shell', 'am', 'force-stop', 'com.android.settings'])
+            time.sleep(0.5)
+            # 2) Settings root
             self.execute_command([ADB_EXECUTABLE, 'shell', 'am', 'start', '-a', 'android.settings.SETTINGS'])
             time.sleep(1)
-            # 2) Connections
+            # 3) Connections
             if not (self._tap_by_text('Connections') or self._tap_by_text('Connexions')):
                 self._scroll_down()
                 if not (self._tap_by_text('Connections') or self._tap_by_text('Connexions')):
                     return False
             time.sleep(1)
-            # 3) Mobile networks (move down 6 times, then confirm)
+            # 4) Mobile networks (move down 6 times, then confirm)
             for _ in range(6):
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_DOWN'])
                 time.sleep(0.2)
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_CENTER'])
             time.sleep(1)
-            # 4) Access Point Names (move down 3 times, then confirm)
+            # 5) Access Point Names (move down 3 times, then confirm)
             for _ in range(3):
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_DOWN'])
                 time.sleep(0.2)
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_CENTER'])
             time.sleep(1)
-            # Place focus on the first APN in the list and open details
-            self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_DOWN'])
-            time.sleep(0.2)
-            self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_CENTER'])
-            time.sleep(1)
-            # 5) Selection APN (prefer active APN, then first tappable entry)
-            selected = self._tap_best_apn_entry()
+            # 6) Ensure the APN to change is the currently selected one and matches MTN CM / Orange,
+            # or fallback to any non-empty selected label.
+            selected_label = self._get_selected_apn_label()
+            if not selected_label:
+                logger.warning("Selected APN label not found; skipping change.")
+                return False
+            if selected_label not in ('MTN CM', 'Orange'):
+                logger.info("Selected APN label '%s' accepted as non-empty fallback.", selected_label)
+            # Open the selected APN entry (no name matching beyond the selected check)
+            selected = self._tap_selected_apn_entry()
             if not selected:
-                # Fallback: tap center, then DPAD into first entry
-                self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'tap', '540', '650'])
-                time.sleep(0.5)
+                selected = self._tap_best_apn_entry()
+            if not selected:
+                # Last-resort fallback: open the first item via DPAD
+                logger.debug("APN selection fallback: using DPAD to open first entry.")
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_DOWN'])
                 time.sleep(0.2)
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_CENTER'])
@@ -1386,7 +1723,7 @@ class TelcoModules(ADBExecutor):
             time.sleep(1)
             if not selected:
                 return False
-            # 6) In APN details, target the "APN" field
+            # 7) In APN details, target the "APN" field
             if not self._tap_by_text('APN') and not self._tap_by_text("Access point name"):
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_CENTER'])
             time.sleep(1)
@@ -1397,14 +1734,19 @@ class TelcoModules(ADBExecutor):
                 time.sleep(0.02)
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'text', apn])
             time.sleep(1)
-            # 6) Validate via OK button if present (dialog), otherwise ENTER
+            # 8) Validate via OK button if present (dialog), otherwise ENTER
             if not self._tap_by_text('OK'):
                 # approximate tap bottom-right (avoid Cancel)
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'tap', '950', '1650'])
                 time.sleep(0.5)
                 self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_ENTER'])
             time.sleep(1)
-            # Puis menu -> down 2x -> Save
+            # Best-effort: verify APN field value before saving
+            current_apn_value = self._read_apn_field_value()
+            if current_apn_value and current_apn_value.strip() != apn:
+                logger.warning("APN field mismatch after input | expected=%s | actual=%s", apn, current_apn_value)
+                return False
+            # 9) Puis menu -> down 2x -> Save
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', '82'])
             time.sleep(1)
             self.execute_command([ADB_EXECUTABLE, 'shell', 'input', 'keyevent', 'KEYCODE_DPAD_DOWN'])
@@ -1629,13 +1971,9 @@ class TelcoModules(ADBExecutor):
                 'package': normalized,
                 'duration': 0.0,
             }
+        chrome_installed = True
         if normalized == 'chrome_news' and not self._is_app_installed(package):
-            return {
-                'success': False,
-                'error': 'Chrome package not installed on device',
-                'package': package,
-                'duration': 0.0,
-            }
+            chrome_installed = False
 
         already_running = self._is_app_running(package)
         if normalized == 'youtube':
@@ -1677,8 +2015,18 @@ class TelcoModules(ADBExecutor):
                 'android.intent.action.VIEW',
                 '-d',
                 target_url,
-                '-n',
-                'com.android.chrome/com.google.android.apps.chrome.Main',
+                '-p',
+                package,
+            ]
+            fallback_cmd = [
+                ADB_EXECUTABLE,
+                'shell',
+                'am',
+                'start',
+                '-a',
+                'android.intent.action.VIEW',
+                '-d',
+                target_url,
             ]
         elif normalized == 'maps_traffic':
             location = random.choice(APP_LAUNCHER_MAP_TRAFFIC_QUERY_LOCATIONS)
@@ -1715,9 +2063,18 @@ class TelcoModules(ADBExecutor):
 
         cmd_result = self.execute_command(cmd)
         success = bool(cmd_result.success)
-        verification = self._verify_app_front(package) if success else False
+        warning = None
+        used_package = package
+        if normalized == 'chrome_news' and (not chrome_installed or not success):
+            fallback_result = self.execute_command(fallback_cmd)
+            if fallback_result.success:
+                cmd_result = fallback_result
+                success = True
+                used_package = 'browser'
+                warning = 'Chrome not available; opened default browser.'
+        verification = self._verify_app_front(used_package) if success and used_package != 'browser' else False
         return {
-            'package': package,
+            'package': used_package,
             'success': success,
             'duration': cmd_result.duration,
             'target': target_url,
@@ -1725,6 +2082,7 @@ class TelcoModules(ADBExecutor):
             'already_off': not already_running,
             'command_error': cmd_result.error,
             'foreground_verified': verification,
+            'warning': warning,
         }
 
     def launch_app(
@@ -2283,7 +2641,14 @@ class TelcoModules(ADBExecutor):
         if cancel_event and cancel_event.is_set():
             return {'success': False, 'cancelled': True, 'error': 'Execution cancelled'}
         executor = TelcoModules(device_id)
-        result = worker(executor)
+        try:
+            signature = inspect.signature(worker)
+            if len(signature.parameters) >= 2:
+                result = worker(executor, cancel_event)
+            else:
+                result = worker(executor)
+        except (TypeError, ValueError):
+            result = worker(executor)
         if not isinstance(result, dict):
             result = {'result': result}
         result.setdefault('success', True)

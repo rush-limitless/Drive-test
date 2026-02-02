@@ -1,6 +1,6 @@
 {
   "name": "telco-frontend",
-  "version": "2.3.0",
+  "version": "2.3.7",
   "private": true,
   "type": "module",
   "homepage": ".",
@@ -20,6 +20,7 @@
   },
   "scripts": {
     "start": "vite",
+    "prebuild": "node ../../scripts/sync-version.js",
     "build": "vite build",
     "test": "vitest run",
     "preview": "vite preview"

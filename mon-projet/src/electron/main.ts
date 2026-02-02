@@ -2,7 +2,7 @@
  * Electron main process with backend integration.
  */
 
-import { app, BrowserWindow, BrowserWindowConstructorOptions, ipcMain } from 'electron';
+import { app, BrowserWindow, BrowserWindowConstructorOptions, ipcMain, dialog, shell } from 'electron';
 import * as path from 'path';
 import { spawn, ChildProcess } from 'child_process';
 import * as fs from 'fs';
@@ -27,6 +27,61 @@ app.setPath('cache', customCache);
 app.setPath('temp', customTemp);
 app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
 
+type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+const LOG_DIR = path.join(app.getPath('userData'), 'logs');
+const MAIN_LOG_FILE = path.join(LOG_DIR, 'electron-main.log');
+const MAX_LOG_BYTES = 5 * 1024 * 1024;
+
+const ensureLogDir = (): void => {
+  if (!fs.existsSync(LOG_DIR)) {
+    fs.mkdirSync(LOG_DIR, { recursive: true });
+  }
+};
+
+const serializeMeta = (meta: unknown): string => {
+  if (meta instanceof Error) {
+    return meta.stack || meta.message;
+  }
+  if (typeof meta === 'string') {
+    return meta;
+  }
+  try {
+    return JSON.stringify(meta);
+  } catch {
+    return String(meta);
+  }
+};
+
+const rotateLogIfNeeded = (): void => {
+  if (!fs.existsSync(MAIN_LOG_FILE)) {
+    return;
+  }
+  try {
+    const stats = fs.statSync(MAIN_LOG_FILE);
+    if (stats.size < MAX_LOG_BYTES) {
+      return;
+    }
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const rotated = MAIN_LOG_FILE.replace('.log', `-${stamp}.log`);
+    fs.renameSync(MAIN_LOG_FILE, rotated);
+  } catch {
+    // Ignore rotation errors to avoid breaking startup.
+  }
+};
+
+const writeLog = (level: LogLevel, message: string, meta?: unknown): void => {
+  try {
+    ensureLogDir();
+    rotateLogIfNeeded();
+    const ts = new Date().toISOString();
+    const metaText = meta === undefined ? '' : ` | ${serializeMeta(meta)}`;
+    const line = `${ts} [${level}] ${message}${metaText}\n`;
+    fs.appendFileSync(MAIN_LOG_FILE, line, { encoding: 'utf-8' });
+  } catch {
+    // Intentionally ignore file logging errors.
+  }
+};
+
 let mainWindow: BrowserWindow;
 let backendProcess: ChildProcess | null = null;
 let backendManagedExternally = false;
@@ -40,6 +95,8 @@ const safeLog = (level: 'log' | 'warn' | 'error', message: string, meta?: unknow
     } else {
       console[level](message);
     }
+    const fileLevel: LogLevel = level === 'log' ? 'info' : level;
+    writeLog(fileLevel, message, meta);
   } catch (error) {
     const err = error as NodeJS.ErrnoException;
     const code = err?.code;
@@ -68,6 +125,69 @@ const guardStdIo = (): void => {
 };
 
 guardStdIo();
+writeLog('info', '[electron] Logging initialized', { file: MAIN_LOG_FILE });
+
+const resolveBackendLogsDir = (): string => {
+  if (app.isPackaged) {
+    const baseDir = process.env.LOCALAPPDATA || process.env.APPDATA || app.getPath('home');
+    return path.join(baseDir, 'TelcoADB', 'artifacts', 'logs');
+  }
+  const projectRoot = path.join(__dirname, '..', '..', '..');
+  return path.join(projectRoot, 'artifacts', 'logs');
+};
+
+const buildReportText = (payload: Record<string, unknown>): string => {
+  const lines: string[] = [];
+  const push = (label: string, value: unknown) => {
+    if (value === undefined || value === null) {
+      return;
+    }
+    lines.push(`${label}: ${typeof value === 'string' ? value : JSON.stringify(value)}`);
+  };
+
+  push('timestamp', new Date().toISOString());
+  push('app_version', app.getVersion());
+  push('platform', process.platform);
+  push('arch', process.arch);
+  push('electron', process.versions.electron);
+  push('node', process.versions.node);
+  push('is_packaged', app.isPackaged);
+  push('user_data', app.getPath('userData'));
+  push('route', payload.route);
+  push('backend_url', payload.backendUrl);
+  push('selected_devices', payload.selectedDeviceIds);
+  push('workflow_id', payload.workflowId);
+  push('notes', payload.notes);
+
+  return `${lines.join('\n')}\n`;
+};
+
+const copyLogDirectory = (sourceDir: string, targetDir: string): string[] => {
+  if (!fs.existsSync(sourceDir)) {
+    return [];
+  }
+  fs.mkdirSync(targetDir, { recursive: true });
+  const entries = fs.readdirSync(sourceDir, { withFileTypes: true });
+  const copied: string[] = [];
+  for (const entry of entries) {
+    if (!entry.isFile()) {
+      continue;
+    }
+    const from = path.join(sourceDir, entry.name);
+    const to = path.join(targetDir, entry.name);
+    fs.copyFileSync(from, to);
+    copied.push(entry.name);
+  }
+  return copied;
+};
+
+process.on('uncaughtException', (error) => {
+  safeLog('error', '[electron] Uncaught exception', error);
+});
+
+process.on('unhandledRejection', (reason) => {
+  safeLog('error', '[electron] Unhandled rejection', reason);
+});
 
 function createWindow(): void {
   const windowOptions: BrowserWindowConstructorOptions = {
@@ -289,4 +409,97 @@ ipcMain.on('telemetry-event', (_event, data: { name?: string; payload?: Record<s
   const name = data?.name ?? 'unknown';
   const payload = data?.payload ?? {};
   safeLog('log', `[telemetry] ${name}`, payload);
+});
+
+ipcMain.on('renderer-log', (_event, payload: { level?: string; message?: string; meta?: unknown }) => {
+  const level = payload?.level === 'error' || payload?.level === 'warn' || payload?.level === 'debug'
+    ? payload.level
+    : 'info';
+  const message = payload?.message ? `[renderer] ${payload.message}` : '[renderer] log';
+  writeLog(level as LogLevel, message, payload?.meta);
+});
+
+ipcMain.handle('export-logs', async () => {
+  try {
+    const result = await dialog.showOpenDialog({
+      title: 'Export Logs',
+      properties: ['openDirectory', 'createDirectory'],
+    });
+    if (result.canceled || result.filePaths.length === 0) {
+      return { success: false, cancelled: true };
+    }
+
+    const baseDir = result.filePaths[0];
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const exportDir = path.join(baseDir, `mobiq-logs-${stamp}`);
+    fs.mkdirSync(exportDir, { recursive: true });
+
+    const electronTarget = path.join(exportDir, 'electron');
+    const backendTarget = path.join(exportDir, 'backend');
+
+    const electronFiles = copyLogDirectory(LOG_DIR, electronTarget);
+    const backendFiles = copyLogDirectory(resolveBackendLogsDir(), backendTarget);
+
+    safeLog('log', '[electron] Logs exported', { exportDir, electronFiles, backendFiles });
+    return {
+      success: true,
+      path: exportDir,
+      counts: { electron: electronFiles.length, backend: backendFiles.length },
+    };
+  } catch (error) {
+    safeLog('error', '[electron] Failed to export logs', error);
+    return { success: false, error: (error as Error).message || 'Failed to export logs' };
+  }
+});
+
+ipcMain.handle('create-bug-report', async (_event, payload: { notes?: string; route?: string; selectedDeviceIds?: string[]; workflowId?: string; backendUrl?: string }) => {
+  try {
+    const result = await dialog.showOpenDialog({
+      title: 'Create Bug Report',
+      properties: ['openDirectory', 'createDirectory'],
+    });
+    if (result.canceled || result.filePaths.length === 0) {
+      return { success: false, cancelled: true };
+    }
+
+    const baseDir = result.filePaths[0];
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const reportDir = path.join(baseDir, `mobiq-bugreport-${stamp}`);
+    fs.mkdirSync(reportDir, { recursive: true });
+
+    const reportText = buildReportText(payload || {});
+    fs.writeFileSync(path.join(reportDir, 'report.txt'), reportText, { encoding: 'utf-8' });
+    fs.writeFileSync(path.join(reportDir, 'report.json'), JSON.stringify(payload || {}, null, 2), { encoding: 'utf-8' });
+
+    const electronTarget = path.join(reportDir, 'electron');
+    const backendTarget = path.join(reportDir, 'backend');
+
+    const electronFiles = copyLogDirectory(LOG_DIR, electronTarget);
+    const backendFiles = copyLogDirectory(resolveBackendLogsDir(), backendTarget);
+
+    safeLog('log', '[electron] Bug report created', { reportDir, electronFiles, backendFiles });
+    return {
+      success: true,
+      path: reportDir,
+      counts: { electron: electronFiles.length, backend: backendFiles.length },
+    };
+  } catch (error) {
+    safeLog('error', '[electron] Failed to create bug report', error);
+    return { success: false, error: (error as Error).message || 'Failed to create bug report' };
+  }
+});
+
+ipcMain.handle('open-path', async (_event, targetPath: string) => {
+  if (!targetPath || typeof targetPath !== 'string') {
+    return { success: false, error: 'No path provided.' };
+  }
+  try {
+    const result = await shell.openPath(targetPath);
+    if (result) {
+      return { success: false, error: result };
+    }
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: (error as Error).message || 'Failed to open path.' };
+  }
 });

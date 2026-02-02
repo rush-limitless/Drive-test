@@ -76,6 +76,7 @@ import {
 import { syncDevicesToRegistry } from '../utils/deviceRegistry';
 import { dashboardTheme } from '../styles/dashboardTheme';
 import { telemetry } from '../utils/telemetry';
+import { APP_VERSION } from '../version';
 
 const SEARCH_DEBOUNCE_MS = 350;
 const ACTIVITY_PAGE_SIZE = 4;
@@ -299,7 +300,7 @@ const DEFAULT_VERSION_LABEL =
   (import.meta as any).env?.VITE_APP_VERSION ||
   (import.meta as any).env?.VITE_REACT_APP_APP_VERSION ||
   (typeof process !== 'undefined' ? process.env.REACT_APP_APP_VERSION : undefined) ||
-  '';
+  APP_VERSION;
 
 const buildLocalSearchResults = (
   query: string,
@@ -372,6 +373,9 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
   );
   const [setupDialogOpen, setSetupDialogOpen] = useState(false);
   const [aboutDialogOpen, setAboutDialogOpen] = useState(false);
+  const [bugReportOpen, setBugReportOpen] = useState(false);
+  const [bugReportNotes, setBugReportNotes] = useState('');
+  const [bugReportSubmitting, setBugReportSubmitting] = useState(false);
   const [deviceSetupLoading, setDeviceSetupLoading] = useState<string | null>(null);
   const [snackbar, setSnackbar] = useState<{ message: string; severity: 'success' | 'error' | 'info' | 'warning' } | null>(null);
   const [refreshingDevices, setRefreshingDevices] = useState(false);
@@ -383,6 +387,73 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
   const [activityLastUpdated, setActivityLastUpdated] = useState<number | null>(null);
   const [activityError, setActivityError] = useState<string | null>(null);
   const [healthSnapshot, setHealthSnapshot] = useState<HealthSnapshot | null>(null);
+  const normalizedBackendUrl = useMemo(() => (backendUrl ? resolveBaseUrl(backendUrl) : null), [backendUrl]);
+
+  const handleExportLogs = useCallback(async () => {
+    const electronAPI = (window as typeof window & { electronAPI?: { exportLogs?: () => Promise<any>; openPath?: (targetPath: string) => Promise<any> } }).electronAPI;
+    if (!electronAPI?.exportLogs) {
+      setSnackbar({ severity: 'warning', message: 'Log export is only available in the desktop app.' });
+      return;
+    }
+    try {
+      const result = await electronAPI.exportLogs();
+      if (result?.cancelled) {
+        return;
+      }
+      if (result?.success && result?.path) {
+        if (electronAPI.openPath) {
+          await electronAPI.openPath(result.path);
+        }
+        setSnackbar({ severity: 'success', message: `Logs exported to ${result.path}` });
+      } else {
+        setSnackbar({ severity: 'error', message: result?.error || 'Failed to export logs.' });
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to export logs.';
+      setSnackbar({ severity: 'error', message });
+    }
+  }, []);
+
+  const handleOpenBugReport = useCallback(() => {
+    setBugReportNotes('');
+    setBugReportOpen(true);
+  }, []);
+
+  const handleSubmitBugReport = useCallback(async () => {
+    const electronAPI = (window as typeof window & { electronAPI?: { createBugReport?: (payload: any) => Promise<any>; openPath?: (targetPath: string) => Promise<any> } }).electronAPI;
+    if (!electronAPI?.createBugReport) {
+      setSnackbar({ severity: 'warning', message: 'Bug report is only available in the desktop app.' });
+      return;
+    }
+    setBugReportSubmitting(true);
+    try {
+      const payload = {
+        notes: bugReportNotes.trim(),
+        route: location.pathname,
+        selectedDeviceIds,
+        backendUrl: normalizedBackendUrl ?? undefined,
+      };
+      const result = await electronAPI.createBugReport(payload);
+      if (result?.cancelled) {
+        setBugReportOpen(false);
+        return;
+      }
+      if (result?.success && result?.path) {
+        if (electronAPI.openPath) {
+          await electronAPI.openPath(result.path);
+        }
+        setSnackbar({ severity: 'success', message: `Bug report created at ${result.path}` });
+      } else {
+        setSnackbar({ severity: 'error', message: result?.error || 'Failed to create bug report.' });
+      }
+      setBugReportOpen(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to create bug report.';
+      setSnackbar({ severity: 'error', message });
+    } finally {
+      setBugReportSubmitting(false);
+    }
+  }, [bugReportNotes, location.pathname, normalizedBackendUrl, selectedDeviceIds]);
 
   useEffect(() => {
     syncDevicesToRegistry(devices);
@@ -435,8 +506,6 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
   const lastSearchTrackedRef = useRef<string | null>(null);
   const activityLoadingRef = useRef(false);
   const activityHasLoadedRef = useRef(false);
-
-  const normalizedBackendUrl = useMemo(() => (backendUrl ? resolveBaseUrl(backendUrl) : null), [backendUrl]);
   const deviceWorkflowHistories = useMemo(() => getAllDeviceWorkflowHistories(), [historyVersion]);
 
   const resolveApiKey = useCallback((): string | null => {
@@ -1061,7 +1130,10 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
     [orderedDevices]
   );
 
-  const setupCandidates = useMemo<Device[]>(() => [], []);
+  const setupCandidates = useMemo<Device[]>(
+    () => devices.filter((device) => device.requires_setup === true),
+    [devices]
+  );
 
   const handleAddDevicesClick = () => {
     telemetry.track('add_devices_clicked', {
@@ -2947,8 +3019,47 @@ const Dashboard: React.FC<DashboardProps> = ({ backendUrl }) => {
           </Stack>
         </DialogContent>
         <DialogActions>
+          <Button onClick={handleOpenBugReport} sx={{ textTransform: 'none' }}>
+            Create Bug Report
+          </Button>
+          <Button onClick={handleExportLogs} sx={{ textTransform: 'none' }}>
+            Export Logs
+          </Button>
           <Button onClick={() => setAboutDialogOpen(false)} sx={{ textTransform: 'none' }}>
             Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={bugReportOpen} onClose={() => setBugReportOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Create Bug Report</DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2}>
+            <Typography variant="body2" sx={{ color: '#64748B' }}>
+              Add a short description of the issue. Logs and context will be bundled automatically.
+            </Typography>
+            <TextField
+              label="What happened?"
+              placeholder="Steps to reproduce, expected vs actual behavior..."
+              multiline
+              minRows={4}
+              value={bugReportNotes}
+              onChange={(event) => setBugReportNotes(event.target.value)}
+              fullWidth
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setBugReportOpen(false)} disabled={bugReportSubmitting} sx={{ textTransform: 'none' }}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmitBugReport}
+            disabled={bugReportSubmitting}
+            variant="contained"
+            sx={{ textTransform: 'none' }}
+          >
+            {bugReportSubmitting ? 'Creating...' : 'Create'}
           </Button>
         </DialogActions>
       </Dialog>

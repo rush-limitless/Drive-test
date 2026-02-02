@@ -18,6 +18,11 @@ $backendStaticPath = Join-Path $repoRoot 'src/backend/static'
 $electronFrontendPath = Join-Path $repoRoot 'src/electron/resources/frontend/build'
 $buildPath = Join-Path $frontendPath 'build'
 
+Write-Host "[version] Synchronizing versions..." -ForegroundColor Cyan
+$env:MOBIQ_BUILD_BUMP = "1"
+$env:MOBIQ_BUILD_ID = (Get-Date -Format "yyyyMMddHHmmss")
+& node (Join-Path $repoRoot 'scripts/sync-version.js') | Write-Host
+
 Write-Host "[build] Building frontend (npm run build)..." -ForegroundColor Cyan
 Push-Location $frontendPath
 try {

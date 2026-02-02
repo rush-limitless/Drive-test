@@ -69,6 +69,7 @@ class Device(Base, TimestampMixin):
             "network_technology": capabilities.get("network_technology"),
             "connection_type": capabilities.get("connection_type"),
             "carrier": capabilities.get("carrier") or (self.sim_info or {}).get("carrier"),
+            "airplane_mode": capabilities.get("airplane_mode"),
         }
     
     def update_status(self, new_status: DeviceStatus):
