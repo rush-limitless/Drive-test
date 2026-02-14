@@ -13,6 +13,7 @@ const FlowComposer = React.lazy(() => import('./pages/FlowComposer'));
 const Reports = React.lazy(() => import('./pages/Reports'));
 const TestModules = React.lazy(() => import('./pages/TestModules'));
 const DeviceManager = React.lazy(() => import('./pages/DeviceManager'));
+const Presentation = React.lazy(() => import('./pages/Presentation'));
 
 const theme = createTheme({
   palette: {
@@ -69,7 +70,8 @@ function App() {
           }
           >
             <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<Navigate to="/presentation" replace />} />
+              <Route path="/presentation" element={<Presentation />} />
               <Route path="/dashboard" element={<Dashboard backendUrl={backendUrl} />} />
               <Route path="/modules" element={<TestModules backendUrl={backendUrl} />} />
               <Route path="/workflows" element={<FlowComposer backendUrl={backendUrl} />} />
